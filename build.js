@@ -74,6 +74,18 @@ function render(name, fm, body) {
   return { html, urlPath, noindex: /noindex/.test(fm.robots || '') };
 }
 
+// Make the business phone number tap-to-call everywhere it appears as plain text
+// (skips text already inside a link, and anything inside <head>, <script>, <style> or <title>).
+const PHONE = '(786) 479-8856';
+function linkPhone(html) {
+  const out = []; let skip = 0; const SKIP = /^<(\/?)(a|script|style|title|head|textarea)\b/i;
+  for (const part of html.split(/(<[^>]+>)/)) {
+    if (part.startsWith('<')) { const m = part.match(SKIP); if (m) skip += m[1] ? -1 : 1; out.push(part); continue; }
+    out.push(skip > 0 ? part : part.split(PHONE).join(`<a class="tel" href="tel:+17864798856">${PHONE}</a>`));
+  }
+  return out.join('');
+}
+
 function copyDir(from, to) {
   fs.mkdirSync(to, { recursive: true });
   for (const f of fs.readdirSync(from)) {
@@ -92,7 +104,7 @@ for (const f of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith
   const name = f.slice(0, -5);
   const { fm, body } = parse(path.join(SRC, 'pages', f));
   const { html, urlPath, noindex } = render(name, fm, body);
-  fs.writeFileSync(path.join(OUT, name + '.html'), html);
+  fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(html));
   if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
 }
 // Any address that doesn't exist sends the visitor to the homepage. Vercel serves dist/404.html for unknown

@@ -34,7 +34,7 @@ img{display:block;max-width:100%}
 .wm small{font:700 10px/1 var(--font);text-transform:uppercase;letter-spacing:.3em;opacity:.85;white-space:nowrap}
 .links{display:flex;gap:28px;margin-left:auto;font-weight:600;font-size:14.5px}
 .links a{opacity:.88}.links a:hover{opacity:1}
-.nav-phone{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;user-select:all}
+.nav-phone{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
 .nav-phone svg{width:18px;height:18px;color:var(--accent)}
 .nav .btn{padding:12px 20px;font-size:14px}
 
@@ -295,3 +295,7 @@ body{font-size:15.5px;padding-bottom:76px}
 .nav .links .bb-tr::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.8px 1.8px 0;transform:translateY(-2px) rotate(45deg);margin-left:3px;opacity:.8}
 .nav.open .links .bb-tr{padding:13px 2px;border-top:1px solid rgba(255,255,255,.12);width:100%;text-align:left}
 .nav .links .bb-ddm a[aria-current="page"]{background:#f3f5f8;color:#0b2440}
+
+/* Tap-to-call phone numbers */
+.tel{white-space:nowrap}
+p .tel,li .tel{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:3px}
