@@ -301,3 +301,10 @@ body{font-size:15.5px;padding-bottom:76px}
 p .tel,li .tel{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:3px}
 /* Cards on grey sections need a white background to stand out */
 .block.alt .tp-card{background:var(--card)}
+/* Homepage trade cards are links to each trade page */
+a.trade{display:block;transition:transform .15s}
+a.trade:hover{transform:translateY(-2px)}
+.more a{color:var(--fg)}
+/* Footer city links */
+footer .areas{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 14px;opacity:.85}
+footer .areas b{font-weight:700}

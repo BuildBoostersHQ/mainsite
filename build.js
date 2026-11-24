@@ -35,6 +35,40 @@ function parse(file) {
   return { fm, body: m ? raw.slice(m[0].length) : raw };
 }
 
+
+// Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
+const ORG = { '@type': 'Organization', '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/',
+  logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-479-8856',
+  address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
+const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
+const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+function schema(name, fm, body) {
+  const out = [];
+  if (name === 'about' || name === 'contact') out.push({ '@context': 'https://schema.org', ...ORG });
+  if (name === 'index') {
+    out.push({ '@context': 'https://schema.org', ...ORG });
+    out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Build Boosters', url: SITE + '/', publisher: { '@id': SITE + '/#org' } });
+  }
+  if (name === 'pricing') {
+    out.push({ '@context': 'https://schema.org', '@type': 'Service', serviceType: 'Websites and marketing systems for contractors', provider: { '@id': SITE + '/#org', ...ORG },
+      offers: PLANS.map(([n, p]) => ({ '@type': 'Offer', name: n, price: String(p), priceCurrency: 'USD', url: SITE + '/pricing' })) });
+  }
+  const city = name.match(/^contractor-website-design-(.+)$/);
+  if (city) {
+    const c = city[1].split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+    out.push({ '@context': 'https://schema.org', '@type': 'Service', serviceType: 'Contractor website design', name: `Contractor websites in ${c}`,
+      provider: { '@id': SITE + '/#org', ...ORG }, areaServed: { '@type': 'City', name: `${c}, FL` } });
+  }
+  // FAQ blocks become FAQPage data, unless the page already has its own.
+  if (!/"@type":\s*"FAQPage"/.test(body)) {
+    const f = body.match(/<div class="faqs">([\s\S]*?)<\/div>\s*<\/div>\s*<\/section>/);
+    const qa = f ? [...f[1].matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>/g)] : [];
+    if (qa.length) out.push({ '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: qa.map((m) => ({ '@type': 'Question', name: textOf(m[1]), acceptedAnswer: { '@type': 'Answer', text: textOf(m[2]) } })) });
+  }
+  return out.map((o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>\n`).join('');
+}
+
 function render(name, fm, body) {
   const urlPath = name === 'index' ? '/' : '/' + name;
   const layout = fm.layout || 'site';
@@ -51,6 +85,7 @@ function render(name, fm, body) {
   // Chat widget on every page except the client demo sites (and any page that sets chat: false).
   const chat = layout !== 'demo' && fm.chat !== 'false';
   if (chat) html += CHAT;
+  html += schema(name, fm, body);
   html += partial.tracking + '</head>\n<body>\n';
   if (chat) html += CHAT_SCRIPT;
 
@@ -59,7 +94,7 @@ function render(name, fm, body) {
     if (fm.nav) header = header.replace(`data-nav="${fm.nav}"`, `data-nav="${fm.nav}" class="on" aria-current="page"`);
     header = header.replace(`<a href="${urlPath}">`, `<a href="${urlPath}" aria-current="page">`);
     let footer = partial.footer.replace('{{year}}', year);
-    if (name === 'index') { header = header.replace(/href="\/#build"/g, 'href="#build"'); footer = footer.replace(/href="\/#build"/g, 'href="#build"'); }
+  if (name === 'index') { header = header.replace(/href="\/#build"/g, 'href="#build"'); footer = footer.replace(/href="\/#build"/g, 'href="#build"'); }
     html += header + '\n' + body + '\n' + footer + '\n';
   } else {
     html += body + '\n';
