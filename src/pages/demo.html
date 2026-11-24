@@ -572,7 +572,7 @@ function render(){
     .map(([n,d,q],i)=>`<div class="rev"><div class="who"><i style="background:${cols[i]}">${n[0]}</i><div><b>${esc(n)}</b><small>${d}</small></div></div><span class="stars" aria-label="5 stars">★★★★★</span><p>${esc(q)}</p></div>`).join("");
   const faq=[["Are you licensed and insured?",`Yes. We'll send proof of license and insurance before any work starts.`],
     ["Do you charge for estimates?",`No. Every estimate is free and in writing.`],
-    ["How soon can you start?","Most jobs are on the calendar within a few days of approving the estimate. Urgent repairs often get same-week service."],
+    ["How soon can you start?","Jobs are usually on the calendar within a few days of approving the estimate. Urgent repairs often get same-week service."],
     ["Do you work in my area?",`We cover ${areaTxt}. If you're nearby, text us and we'll let you know.`],
     ["Can I just send a photo?",`Yes. Text a photo to ${fmtPhone(S.phone)} and we can often give you a ballpark right away.`],
     ["How do I pay?","Card, check or bank transfer once the job is done and you're happy with it."]];

@@ -1,0 +1,122 @@
+---
+layout: site
+title: Contractor Missed Call Cost Calculator | Build Boosters
+description: Free contractor missed call calculator. Move three sliders to see how much revenue and how many jobs missed calls could cost your business each year.
+nav: blog
+---
+<style>
+.mcc{max-width:880px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:stretch}
+.mcc-in,.mcc-out{border-radius:22px;padding:28px 26px}
+.mcc-in{background:var(--card);border:1px solid var(--line);color:var(--fg)}
+.mcc-in h2,.mcc-out h2{margin:0 0 10px;font:700 14px/1.25 var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mcc-in .sub{margin:0 0 8px;color:var(--muted);font-size:15px;line-height:1.5}
+.mcc-f{margin-top:24px}
+.mcc-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}
+.mcc-row label{font:700 16px/1.35 var(--font);color:var(--fg)}
+.mcc-row output{font:800 26px/1 var(--cond);color:var(--fg);white-space:nowrap;min-width:4ch;text-align:right}
+.mcc-scale{display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--muted)}
+.mcc input[type=range]{--p:50%;-webkit-appearance:none;appearance:none;width:100%;height:32px;margin:0;background:transparent;cursor:pointer;accent-color:var(--accent)}
+.mcc input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(to right,var(--accent) 0 var(--p),var(--line) var(--p) 100%)}
+.mcc input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:var(--line)}
+.mcc input[type=range]::-moz-range-progress{height:8px;border-radius:999px;background:var(--accent)}
+.mcc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;background:#fff;border:4px solid var(--accent);box-shadow:0 2px 8px rgba(11,36,64,.3)}
+.mcc input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--accent);box-shadow:0 2px 8px rgba(11,36,64,.3)}
+.mcc input[type=range]:focus{outline:none}
+.mcc input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(242,162,12,.45)}
+.mcc input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 4px rgba(242,162,12,.45)}
+.mcc input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:8px}
+.mcc-out{background:var(--main);color:#fff;display:flex;flex-direction:column;gap:18px}
+.mcc-big .k{font-size:15px;font-weight:600;color:rgba(255,255,255,.75)}
+.mcc-big .v{font:800 clamp(48px,8vw,72px)/1 var(--cond);letter-spacing:-.01em;color:var(--accent);margin:8px 0 0}
+.mcc-jobs{border-top:1px solid rgba(255,255,255,.16);padding-top:16px}
+.mcc-jobs .k{font-size:15px;font-weight:600;color:rgba(255,255,255,.75)}
+.mcc-jobs .v{font:800 36px/1.1 var(--cond);color:#fff;margin-top:4px}
+.mcc-math{background:rgba(255,255,255,.07);border-radius:14px;padding:14px 16px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.88)}
+.mcc-math b{display:block;font:700 13px/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:8px}
+.mcc-math p{margin:0}
+.mcc-math p+p{margin-top:6px}
+.mcc-math strong{color:var(--accent)}
+.mcc-out .btn{margin-top:auto;align-self:flex-start}
+.mcc-note{max-width:880px;margin:18px auto 0;font-size:14px;line-height:1.6;color:var(--muted)}
+@media (max-width:760px){.mcc{grid-template-columns:1fr}.mcc-in,.mcc-out{padding:22px 18px}.mcc-out .btn{align-self:stretch}}
+</style>
+<section class="phero" style="--pimg:url('https://files.leadconnectorhq.com/file/6af51a6f1dee4a7aa11b9b66/bb-t-roofing.webp')"><div class="wrap"><span class="crumb">Free tool</span><h1>Contractor Missed Call Cost Calculator</h1><p>Every call you can&#x27;t pick up from a roof, a crawl space or a customer&#x27;s kitchen has a dollar amount attached to it, so move the three sliders below and you&#x27;ll see what missed calls could be costing your business in a year.</p></div></section>
+<section class="block"><div class="wrap">
+<div class="mcc" id="mcc">
+<form class="mcc-in" aria-labelledby="mcc-h" onsubmit="return false">
+<h2 id="mcc-h">Your numbers</h2>
+<p class="sub">Rough guesses are fine, and the results update as you move each slider.</p>
+<div class="mcc-f">
+<div class="mcc-row"><label for="mcc-calls">Missed calls per week</label><output id="mcc-calls-o" for="mcc-calls">3</output></div>
+<input type="range" id="mcc-calls" min="1" max="20" step="1" value="3" aria-describedby="mcc-calls-s">
+<div class="mcc-scale" id="mcc-calls-s" aria-hidden="true"><span>1</span><span>20</span></div>
+</div>
+<div class="mcc-f">
+<div class="mcc-row"><label for="mcc-job">Average job value</label><output id="mcc-job-o" for="mcc-job">$1,500</output></div>
+<input type="range" id="mcc-job" min="500" max="10000" step="100" value="1500" aria-describedby="mcc-job-s">
+<div class="mcc-scale" id="mcc-job-s" aria-hidden="true"><span>$500</span><span>$10,000</span></div>
+</div>
+<div class="mcc-f">
+<div class="mcc-row"><label for="mcc-rate">Close rate</label><output id="mcc-rate-o" for="mcc-rate">20%</output></div>
+<input type="range" id="mcc-rate" min="10" max="50" step="1" value="20" aria-describedby="mcc-rate-s">
+<div class="mcc-scale" id="mcc-rate-s" aria-hidden="true"><span>10%</span><span>50%</span></div>
+</div>
+</form>
+<div class="mcc-out" aria-labelledby="mcc-oh">
+<h2 id="mcc-oh">What missed calls could cost you</h2>
+<div class="mcc-big" aria-live="polite" aria-atomic="true"><div class="k">Estimated revenue lost per year</div><div class="v" id="mcc-rev">$46,800</div></div>
+<div class="mcc-jobs" aria-live="polite" aria-atomic="true"><div class="k">Estimated jobs lost per year</div><div class="v" id="mcc-jobs">About 31 jobs</div></div>
+<div class="mcc-math"><b>The math with your numbers</b><p id="mcc-f1">3 calls &times; 52 weeks &times; 20% &times; $1,500 = <strong>$46,800</strong></p><p id="mcc-f2">3 calls &times; 52 weeks &times; 20% = about 31 jobs</p></div>
+<a class="btn" href="/#build">See your free demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</div>
+</div>
+<p class="mcc-note">This is an estimate, not a promise. It assumes every missed call is a real customer who would have closed at your usual rate, so if some of your missed calls are spam, vendors or existing customers, count only the ones that could have turned into work.</p>
+</div></section>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var calls=$('mcc-calls'),job=$('mcc-job'),rate=$('mcc-rate');
+ function money(n){return '$'+Math.round(n).toLocaleString('en-US')}
+ function jobsText(j){var r=j<10?Math.round(j*10)/10:Math.round(j);return 'about '+r.toLocaleString('en-US')+' job'+(r===1?'':'s')}
+ function fill(el){var p=(el.value-el.min)/(el.max-el.min)*100;el.style.setProperty('--p',p+'%')}
+ function calc(){
+  var c=+calls.value,v=+job.value,r=+rate.value;
+  var jobs=c*52*r/100,rev=jobs*v;
+  $('mcc-calls-o').textContent=c;
+  $('mcc-job-o').textContent=money(v);
+  $('mcc-rate-o').textContent=r+'%';
+  calls.setAttribute('aria-valuetext',c+' missed call'+(c===1?'':'s')+' per week');
+  job.setAttribute('aria-valuetext',money(v)+' average job');
+  rate.setAttribute('aria-valuetext',r+' percent close rate');
+  [calls,job,rate].forEach(fill);
+  $('mcc-rev').textContent=money(rev);
+  var jt=jobsText(jobs);
+  $('mcc-jobs').textContent=jt.charAt(0).toUpperCase()+jt.slice(1);
+  var base=c+' call'+(c===1?'':'s')+' × 52 weeks × '+r+'%';
+  $('mcc-f1').innerHTML=base+' × '+money(v)+' = <strong>'+money(rev)+'</strong>';
+  $('mcc-f2').textContent=base+' = '+jt;
+ }
+ [calls,job,rate].forEach(function(el){el.addEventListener('input',calc);el.addEventListener('change',calc)});
+ calc();
+})();
+</script>
+<section class="block alt"><div class="wrap"><article class="bb-post">
+<h2>How the missed call math works</h2>
+<p>The calculator uses one simple formula, which is your missed calls per week times 52 weeks, times your close rate, times your average job value. With the default numbers, that&#x27;s 3 &times; 52 &times; 20% &times; $1,500, which comes out to $46,800 a year.</p>
+<div class="pull"><b>Missed calls per week &times; 52 &times; close rate &times; average job = estimated revenue lost per year.</b></div>
+<p>The jobs number is the same math without the dollar amount at the end, so 3 missed calls a week at a 20% close rate works out to about 31 jobs a year that may have gone to somebody else. Your close rate here means the share of real callers who usually end up hiring you, so if you win about 1 out of every 5 people who call for a quote, that&#x27;s 20%.</p>
+<p>The number is an estimate, and it leans on two assumptions you should keep in mind. It assumes each missed call was a real customer, and it assumes none of them would have called you back. Some people do leave a voicemail or try again, but when <a href="https://www.quo.com/blog/why-callers-dont-leave-voicemail/" target="_blank" rel="noopener">Quo looked at its call data</a>, only about 15% of callers left a voicemail when nobody picked up. In a <a href="https://www.callrail.com/blog/missed-calls-cost-businesses-more-than-ever" target="_blank" rel="noopener">2025 CallRail survey of 1,000 U.S. consumers</a>, 78% said they had given up on a business after an unanswered call and 21% said they immediately call another business instead.</p>
+<p>The calculator also leaves out repeat work and referrals, so for a lot of contractors the real cost of a lost customer is higher than the first job.</p>
+
+<h2>What you can do about it</h2>
+<p>You&#x27;re never going to answer every call, and you shouldn&#x27;t have to stop working to try. What matters is that every caller hears from you fast, before they move on to the next name on the list.</p>
+<ul class="chk">
+<li>Set up <a href="/what-is-missed-call-text-back">missed-call text-back</a>, which sends an automatic text from your business number a few seconds after any call you can&#x27;t pick up, so the customer knows you got it and can tell you about the job by text.</li>
+<li>Read <a href="/missed-calls-cost-contractors">how much missed calls really cost contractors</a> for the full breakdown, a table of example numbers and other ways to catch more calls.</li>
+<li>Give people who would rather type a quote form and online booking on your website, so a customer can reach you without waiting for you to get off the ladder.</li>
+<li>Type your business name into our <a href="/#build">free demo builder</a> to see what your own website could look like in about 10 seconds.</li>
+</ul>
+<p>If you want to see missed-call text-back from the customer&#x27;s side, call our test line at <a href="tel:+17869338832">(786) 933-8832</a> and hang up, and you&#x27;ll get a text back a few seconds later.</p>
+</article><div class="bb-cta"><span class="eyebrow" style="margin:0">See it on your business</span><h2>Want to see what your website could look like?</h2><p>Type your business name and trade, and we&#x27;ll build a free preview of your site in about 10 seconds, and you don&#x27;t need to give us a phone number.</p><a class="btn" href="/#build">Build my free demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></section>
+<section class="block" id="faq"><div class="wrap"><div class="intro"><div><span class="eyebrow">FAQ</span><h2 class="h2">Common questions</h2></div><p>Have a question that isn't here? Call or text us at (786) 479-8856 and we'll get back to you the same day.</p></div><div class="faqs"><div><h3>What&#x27;s a typical missed call rate for contractors?</h3><p>There isn&#x27;t one reliable industry number, because it depends on your trade, your crew size and how busy you are, so the best number to use is your own. Scroll back through your phone&#x27;s call log for the last two weeks, count the calls you didn&#x27;t answer from numbers you didn&#x27;t know, and divide by two to get your missed calls per week.</p></div><div><h3>How does missed-call text-back work?</h3><p>When a call to your business number goes unanswered, the system sends the caller an automatic text from that same number a few seconds later, saying you got the call and asking what they need. The customer can reply by text, and you can answer between jobs from one inbox. Our guide to <a href="/what-is-missed-call-text-back">what missed-call text-back is</a> walks through it step by step.</p></div><div><h3>How much does missed-call text-back cost?</h3><p>Pricing varies a lot across the market, since some phone and software companies sell it as a feature in a bigger package and others charge for it on its own. At Build Boosters, missed-call text-back is included in the All-In-One plan at $197 a month, along with automated follow-up, review requests, online booking and one inbox for your texts, email and social messages, with no long contract and setup included. You can see everything in each plan on our <a href="/pricing">pricing page</a>.</p></div></div></div></section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Contractor Missed Call Cost Calculator", "url": "https://buildboosters.com/missed-call-calculator", "description": "Free contractor missed call calculator that estimates how much revenue and how many jobs missed calls cost a contracting business each year.", "applicationCategory": "BusinessApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Build Boosters", "url": "https://buildboosters.com"}}</script>

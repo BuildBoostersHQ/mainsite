@@ -37,7 +37,7 @@ function parse(file) {
 
 
 // Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
-const ORG = { '@type': 'Organization', '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/',
+const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Websites and lead systems for contractors and home service businesses.', image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
   logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-479-8856',
   address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
 const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
@@ -45,7 +45,7 @@ const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/
 function schema(name, fm, body) {
   const out = [];
   if (name === 'about' || name === 'contact') out.push({ '@context': 'https://schema.org', ...ORG });
-  if (name === 'madeleine-jolie') out.push({ '@context': 'https://schema.org', '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', jobTitle: 'Founder', worksFor: { '@id': SITE + '/#org', ...ORG } });
+  if (name === 'madeleine-jolie') out.push({ '@context': 'https://schema.org', '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', jobTitle: 'Founder and CEO', worksFor: { '@id': SITE + '/#org', ...ORG } });
   if (name === 'index') {
     out.push({ '@context': 'https://schema.org', ...ORG });
     out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Build Boosters', url: SITE + '/', publisher: { '@id': SITE + '/#org' } });
@@ -59,6 +59,18 @@ function schema(name, fm, body) {
     const c = city[1].split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
     out.push({ '@context': 'https://schema.org', '@type': 'Service', serviceType: 'Contractor website design', name: `Contractor websites in ${c}`,
       provider: { '@id': SITE + '/#org', ...ORG }, areaServed: { '@type': 'City', name: `${c}, FL` } });
+  }
+  // Breadcrumbs: Home > Blog > Post, Home > Trades > Trade, Home > Areas > City, Home > Page.
+  if (name !== 'index' && fm.layout !== 'demo' && !/noindex/.test(fm.robots || '')) {
+    const label = (fm.title || name).replace(/\s*\|\s*Build Boosters\s*$/, '').trim();
+    const h1 = ((body.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').trim();
+    const trail = [['Home', SITE + '/']];
+    if (/^contractor-website-design-/.test(name)) trail.push(['Areas we serve', SITE + '/blog#areas']);
+    else if (/^websites-for-/.test(name)) trail.push(['Trades', SITE + '/#trades']);
+    else if (/<span class="crumb"><a href="\/blog"/.test(body)) trail.push(['Blog', SITE + '/blog']);
+    trail.push([label || h1, SITE + '/' + name]);
+    out.push({ '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      itemListElement: trail.map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: textOf(n), item: u })) });
   }
   // FAQ blocks become FAQPage data, unless the page already has its own.
   if (!/"@type":\s*"FAQPage"/.test(body)) {
@@ -160,19 +172,33 @@ const card = (p) => {
   const k = (p.image.match(/bb-t-([a-z0-9]+)\./) || [])[1];
   return `<a class="bb-card" href="${p.href}"><img src="${p.image}" alt="${ALT[k] || ''}" loading="lazy"><div><small>${p.kind === 'city' ? 'Local' : p.cat}</small><h3>${p.title}</h3><p>${p.desc}</p><span class="rd">${p.read} &#x2192;</span></div></a>`;
 };
+const CATS = [
+  ['Websites', /^websites?$/i], ['Reviews', /^reviews?$/i], ['Lead follow-up', /follow-up|follow up/i], ['Local SEO', /local seo/i],
+  ['Getting more work', /^(leads|getting leads|getting work|marketing)$/i], ['Comparisons', /comparison/i], ['Guides and tools', /guide|tool/i],
+];
 function blogIndex(body, posts) {
   const by = (k) => posts.filter((p) => p.kind === k).sort((a, b) => b.date - a.date || a.title.localeCompare(b.title));
   const list = by('post'), cities = by('city').sort((a, b) => a.title.localeCompare(b.title)), guides = by('guide');
+  const rest = list.slice(1), used = new Set();
+  let cats = '';
+  for (const [name, re] of CATS) {
+    const items = rest.filter((p) => !used.has(p) && re.test(p.category));
+    if (!items.length) continue;
+    items.forEach((p) => used.add(p));
+    const id = name.toLowerCase().replace(/[^a-z]+/g, '-');
+    cats += `<div style="margin-top:56px" id="${id}"><span class="eyebrow">${name}</span><div class="bb-cards">${items.map(card).join('')}</div></div>`;
+  }
+  const other = rest.filter((p) => !used.has(p));
+  if (other.length) cats += `<div style="margin-top:56px"><span class="eyebrow">More articles</span><div class="bb-cards">${other.map(card).join('')}</div></div>`;
   const jsonld = { '@context': 'https://schema.org', '@type': 'Blog', name: 'Build Boosters Blog', url: SITE + '/blog',
     blogPost: list.map((p) => ({ '@type': 'BlogPosting', headline: p.title, url: SITE + p.href, datePublished: p.date.toISOString().slice(0, 10) })) };
   return body
     .replace('{{blog:featured}}', list.length ? `<div class="bb-cards feat">${card(list[0])}</div>` : '')
-    .replace('{{blog:posts}}', `<div class="bb-cards">${list.slice(1).map(card).join('')}</div>`)
+    .replace('{{blog:categories}}', cats)
     .replace('{{blog:cities}}', `<div class="bb-cards">${cities.map(card).join('')}</div>`)
     .replace('{{blog:guides}}', `<div class="bb-cards two">${guides.map(card).join('')}</div>`)
     .replace('{{blog:jsonld}}', `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>`);
 }
-
 
 // Author box under every blog post, and a link from the byline to the author page.
 const AUTHOR_URL = '/madeleine-jolie';
@@ -181,7 +207,7 @@ function addAuthor(body) {
   if (!/<span class="crumb"><a href="\/blog"/.test(body) || !/class="bb-meta"/.test(body)) return body;
   body = body.replace('<span>By <b>Madeleine Jolie</b></span>', `<span>By <a href="${AUTHOR_URL}" style="color:inherit"><b>Madeleine Jolie</b></a></span>`);
   body = body.replace('</article>', '</article>' + AUTHOR_BOX);
-  return body.replace(/"author": \{"@type": "Person", "name": "Madeleine Jolie"\}/, `"author": {"@type": "Person", "name": "Madeleine Jolie", "url": "${SITE}${AUTHOR_URL}", "jobTitle": "Founder, Build Boosters"}`);
+  return body.replace(/"author": \{"@type": "Person", "name": "Madeleine Jolie"\}/, `"author": {"@type": "Person", "name": "Madeleine Jolie", "url": "${SITE}${AUTHOR_URL}", "jobTitle": "Founder and CEO, Build Boosters"}`);
 }
 
 
