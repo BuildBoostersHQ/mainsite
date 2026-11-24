@@ -4,7 +4,20 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/home", "destination": "/", "permanent": true },
-    { "source": "/multi-tier-pricing", "destination": "/pricing", "permanent": true }
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/multi-tier-pricing",
+      "destination": "/pricing",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/:slug",
+      "permanent": true
+    }
   ]
 }

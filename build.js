@@ -99,11 +99,52 @@ fs.mkdirSync(OUT, { recursive: true });
 copyDir(path.join(ROOT, 'assets'), path.join(OUT, 'assets'));
 if (fs.existsSync(path.join(ROOT, 'public'))) copyDir(path.join(ROOT, 'public'), OUT);
 
+// Blog index: every page with a "Blog ·" breadcrumb and a byline is listed on /blog automatically,
+// newest first. City pages (contractor-website-design-*) and client guides get their own rows.
+const MONTHS = 'January February March April May June July August September October November December'.split(' ');
+function postInfo(name, body) {
+  if (!/<span class="crumb"><a href="\/blog"/.test(body) || !/class="bb-meta"/.test(body)) return null;
+  const pick = (re) => { const m = body.match(re); return m ? m[1].trim() : ''; };
+  const meta = pick(/<div class="bb-meta">([\s\S]*?)<\/div>/).replace(/<[^>]+>/g, '|');
+  const dm = meta.match(/([A-Z][a-z]+) (\d{1,2}, )?(\d{4})/);
+  const date = dm ? new Date(+dm[3], MONTHS.indexOf(dm[1]), dm[2] ? parseInt(dm[2]) : 1) : new Date(0);
+  const category = pick(/<span class="crumb"><a href="\/blog"[^>]*>Blog<\/a>\s*(?:&#xb7;|·)\s*([^<]*)</);
+  const cat = category.replace('Follow-Up', 'follow-up');
+  return {
+    href: "/" + name, date, category, cat,
+    kind: name.startsWith('contractor-website-design-') ? 'city' : /client guide/i.test(category) ? 'guide' : 'post',
+    title: pick(/<h1>([\s\S]*?)<\/h1>/).replace(/<[^>]+>/g, ''),
+    desc: pick(/<section class="phero"[\s\S]*?<\/h1>\s*<p>([\s\S]*?)<\/p>/),
+    image: pick(/--pimg:url\('([^']+)'\)/),
+    read: pick(/(\d+ min read)/),
+  };
+}
+const ALT = { remodeling: 'Kitchen remodeling contractor at work', roofing: 'Roofing contractor installing shingles', plumbing: 'Plumber repairing pipes under a sink', hvac: 'HVAC technician servicing an AC unit', electrical: 'Electrician working on an electrical panel', handyman: 'Handyman doing home repairs', landscaping: 'Landscaper maintaining a lawn and garden', painting: 'House painter painting a wall', pressure: 'Pressure washing a driveway' };
+const card = (p) => {
+  const k = (p.image.match(/bb-t-([a-z0-9]+)\./) || [])[1];
+  return `<a class="bb-card" href="${p.href}"><img src="${p.image}" alt="${ALT[k] || ''}" loading="lazy"><div><small>${p.kind === 'city' ? 'Local' : p.cat}</small><h3>${p.title}</h3><p>${p.desc}</p><span class="rd">${p.read} &#x2192;</span></div></a>`;
+};
+function blogIndex(body, posts) {
+  const by = (k) => posts.filter((p) => p.kind === k).sort((a, b) => b.date - a.date || a.title.localeCompare(b.title));
+  const list = by('post'), cities = by('city').sort((a, b) => a.title.localeCompare(b.title)), guides = by('guide');
+  const jsonld = { '@context': 'https://schema.org', '@type': 'Blog', name: 'Build Boosters Blog', url: SITE + '/blog',
+    blogPost: list.map((p) => ({ '@type': 'BlogPosting', headline: p.title, url: SITE + p.href, datePublished: p.date.toISOString().slice(0, 10) })) };
+  return body
+    .replace('{{blog:featured}}', list.length ? `<div class="bb-cards feat">${card(list[0])}</div>` : '')
+    .replace('{{blog:posts}}', `<div class="bb-cards">${list.slice(1).map(card).join('')}</div>`)
+    .replace('{{blog:cities}}', `<div class="bb-cards">${cities.map(card).join('')}</div>`)
+    .replace('{{blog:guides}}', `<div class="bb-cards two">${guides.map(card).join('')}</div>`)
+    .replace('{{blog:jsonld}}', `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>`);
+}
+
+const pages = fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html')).sort()
+  .map((f) => ({ name: f.slice(0, -5), ...parse(path.join(SRC, 'pages', f)) }));
+const posts = pages.map((p) => postInfo(p.name, p.body)).filter(Boolean);
+
 const urls = [];
-for (const f of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html')).sort()) {
-  const name = f.slice(0, -5);
-  const { fm, body } = parse(path.join(SRC, 'pages', f));
-  const { html, urlPath, noindex } = render(name, fm, body);
+for (const { name, fm, body } of pages) {
+  const content = name === 'blog' ? blogIndex(body, posts) : body;
+  const { html, urlPath, noindex } = render(name, fm, content);
   fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(html));
   if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
 }
@@ -118,4 +159,4 @@ fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map((u) => `  <url><loc>${SITE}${u === '/' ? '/' : u}</loc></url>`).join('\n') + '\n</urlset>\n');
 fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
-console.log(`Built ${fs.readdirSync(OUT).filter((f) => f.endsWith('.html')).length} pages, ${urls.length} in the sitemap.`);
+console.log(`Built ${fs.readdirSync(OUT).filter((f) => f.endsWith('.html')).length} pages, ${urls.length} in the sitemap, ${posts.length} on the blog.`);

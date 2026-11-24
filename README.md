@@ -21,6 +21,10 @@ Layouts: `site` (header + footer), `bare` (landing and thank-you pages with thei
 
 Edit `src/partials/header.html` or `footer.html`. Every page picks it up on the next deploy.
 
+## Add a blog post
+
+Copy any post in `src/pages` (for example `speed-to-lead-contractors.html`), change the front matter, the hero (crumb `Blog · Category`, H1, intro line, byline date and read time) and the article. It shows up on /blog automatically, newest first. City pages are named `contractor-website-design-<city>` and get their own row.
+
 ## Add a page
 
 Create `src/pages/my-page.html` with front matter and push. It's served at `/my-page`.
