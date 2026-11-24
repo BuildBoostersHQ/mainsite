@@ -38,6 +38,8 @@ function parse(file) {
 
 // Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
 const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Websites and lead systems for contractors and home service businesses.', image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
+  contactPoint: { '@type': 'ContactPoint', telephone: '+1-786-479-8856', contactType: 'customer service', areaServed: 'US', availableLanguage: 'English' },
+  sameAs: ['https://github.com/BuildBoostersHQ'],
   logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-479-8856',
   address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
 const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
@@ -229,12 +231,19 @@ const pages = fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('
   .map((f) => ({ name: f.slice(0, -5), ...parse(path.join(SRC, 'pages', f)) }));
 const posts = pages.map((p) => postInfo(p.name, p.body)).filter(Boolean);
 
+// Sitemap lastmod: the page's own dateModified if it has one, otherwise the last git commit that touched it.
+const { execSync } = require('child_process');
+function lastmod(name, body) {
+  const m = body.match(/"dateModified":\s*"(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  try { return execSync(`git log -1 --format=%cs -- src/pages/${name}.html`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || ''; } catch (e) { return ''; }
+}
 const urls = [];
 for (const { name, fm, body } of pages) {
   const content = name === 'blog' ? blogIndex(body, posts) : addAuthor(body);
   const { html, urlPath, noindex } = render(name, fm, content);
   fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(labelTables(html)));
-  if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
+  if (!noindex && fm.sitemap !== 'false') urls.push([urlPath, lastmod(name, body)]);
 }
 // Any address that doesn't exist sends the visitor to the homepage. Vercel serves dist/404.html for unknown
 // paths with a 404 status, so Google drops dead links instead of indexing them as copies of the homepage.
@@ -245,6 +254,6 @@ fs.writeFileSync(path.join(OUT, '404.html'), '<!doctype html>\n<html lang="en">\
   '<p>Taking you to the <a href="/" style="color:#f2a20c">Build Boosters homepage</a>.</p>\n</body>\n</html>\n');
 fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  urls.map((u) => `  <url><loc>${SITE}${u === '/' ? '/' : u}</loc></url>`).join('\n') + '\n</urlset>\n');
-fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+  urls.map(([u, d]) => `  <url><loc>${SITE}${u}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n') + '\n</urlset>\n');
+fs.writeFileSync(path.join(OUT, 'robots.txt'), fs.readFileSync(path.join(SRC, 'robots.txt'), 'utf8'));
 console.log(`Built ${fs.readdirSync(OUT).filter((f) => f.endsWith('.html')).length} pages, ${urls.length} in the sitemap, ${posts.length} on the blog.`);
