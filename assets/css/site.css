@@ -341,3 +341,7 @@ footer .areas b{font-weight:700}
 .bb-post tbody th[data-label=""],.bb-post tbody th:not([data-label]){}
 .bb-post td[data-label]::before{content:attr(data-label);display:block;font:700 11.5px/1.3 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 }
+/* Homepage 3-step process and six why-us cards */
+.howwe.three{grid-template-columns:repeat(3,1fr)}
+@media (max-width:860px){.howwe.three{grid-template-columns:1fr}}
+.values .val a{color:inherit;font-weight:700}
