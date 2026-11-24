@@ -1,0 +1,357 @@
+---
+layout: site
+title: Websites & Lead Systems for Contractors | Build Boosters
+description: Websites, missed-call text back, reviews and lead follow-up for roofers, plumbers, HVAC and home service contractors. See your free demo site today.
+---
+<style>
+.h-build .opt{font-weight:500;color:var(--muted);font-size:12px}
+.h-build select:invalid{color:var(--muted)}
+.h-build .err{margin:-4px 0 0;color:#c2410c;font-size:13px;font-weight:600;min-height:0}
+.h-build .bld{display:grid;gap:10px}.h-build .bld[hidden]{display:none}
+.h-build .bld .bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden;border:1px solid var(--line)}
+.h-build .bld .bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:inherit;transition:width .55s ease}
+.h-build .bld p{margin:0;font-weight:700;font-size:14.5px}
+.h-build.busy label,.h-build.busy .btn{opacity:.45;pointer-events:none}
+.cband{background:var(--main);color:#fff}
+.cband .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding-block:88px}
+.cband .h2{color:#fff}
+.cband .lede{color:rgba(255,255,255,.78);margin:14px 0 30px;max-width:48ch}
+.sl{display:grid;gap:26px}
+.sl label{display:grid;gap:12px;font-weight:700;font-size:15px}
+.sl label span{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.sl output{font:800 22px/1 var(--cond);letter-spacing:.02em;color:var(--accent);font-variant-numeric:tabular-nums}
+.sl input[type=range]{width:100%;accent-color:var(--accent);height:28px;cursor:pointer;margin:0}
+.c-out{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:40px 34px;text-align:center;display:grid;gap:6px;justify-items:center}
+.c-out p{margin:0;font-size:18px;color:rgba(255,255,255,.85)}
+.c-out b{font:800 clamp(52px,7vw,84px)/1 var(--cond);color:var(--accent);letter-spacing:.01em;font-variant-numeric:tabular-nums;margin:6px 0}
+.c-out small{color:rgba(255,255,255,.65);font-size:14px;margin:10px 0 22px;max-width:36ch}
+.c-out .fine{margin-top:16px;font-size:12px;color:rgba(255,255,255,.5)}
+.ph-wrap{display:grid;place-items:center}
+.ph{width:min(330px,100%);background:#0d1622;border-radius:42px;padding:12px;box-shadow:0 40px 80px -30px rgba(0,0,0,.55),inset 0 0 0 2px #26334a;margin:0}
+.ph-in{background:#f2f4f7;border-radius:32px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.ph-top{background:#fff;border-bottom:1px solid #e3e7ec;padding:16px 16px 12px;text-align:center;display:grid;gap:2px}
+.ph-top b{font-size:14.5px;color:#121a24}
+.ph-top small{font-size:11.5px;color:#6b7686}
+.ph-s{height:430px;padding:14px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;overflow:hidden}
+.ph-s{transition:opacity .6s}
+.ph-s>*:not(.on){display:none}
+.ph-s>.on{animation:pop .35s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ph-s.fade{opacity:0}
+.bub{max-width:82%;padding:9px 13px;border-radius:18px;font-size:13.5px;line-height:1.4}
+.bub.o{align-self:flex-end;background:#0b2440;color:#fff;border-bottom-right-radius:6px}
+.bub.i{align-self:flex-start;background:#e1e5ea;color:#121a24;border-bottom-left-radius:6px}
+.ev{align-self:center;font-size:12px;font-weight:700;padding:7px 12px;border-radius:99px;background:#fff;color:#334155;box-shadow:0 1px 0 #e3e7ec}
+.ev.miss{background:#fde8e1;color:#b4380d}
+.ev.book{background:#e3f4ea;color:#166534}
+.ev.star{background:#fff4d6;color:#8a5a00}
+.ev.auto{background:none;box-shadow:none;color:#6b7686;font-weight:600;font-size:11px;padding:0 4px}
+.typing{align-self:flex-start;background:#e1e5ea;border-radius:18px;padding:11px 14px;display:flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:#8a94a3;animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{opacity:.35}30%{opacity:1}}
+.peek{margin-top:12px;background:none;border:0;padding:0;font:700 14px var(--font);color:var(--fg);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:4px;cursor:pointer}
+.trycall{margin-top:36px;border-radius:22px;background:var(--main);color:#fff;padding:32px 34px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center}
+.trycall .ring{width:62px;height:62px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;position:relative}
+.trycall .ring svg{width:28px;height:28px}
+.trycall .ring::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);opacity:.6;animation:rg 1.8s ease-out infinite}
+@keyframes rg{from{transform:scale(.9);opacity:.7}to{transform:scale(1.35);opacity:0}}
+.trycall h3{font-size:clamp(20px,2.4vw,26px);font-weight:800;margin:4px 0 6px;color:#fff}
+.trycall h3 a{color:var(--accent);white-space:nowrap}
+.trycall p{margin:0;color:rgba(255,255,255,.78);font-size:15.5px;max-width:58ch}
+.trycall .eyebrow{margin:0}
+.sheet{position:fixed;inset:0;z-index:2147482000;background:rgba(6,12,20,.6);display:grid;place-items:end center;padding:16px;opacity:0;transition:opacity .25s}
+.sheet.on{opacity:1}
+.sheet .ph{transform:translateY(40px);transition:transform .3s ease;margin-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+.sheet.on .ph{transform:none}
+.sheet .ph-s{height:auto;min-height:300px}
+.sheet .ph-s>.on{animation:none}
+.sheet .x{position:absolute;top:max(16px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#121a24;font-size:22px;cursor:pointer}
+.rv{align-self:flex-start;max-width:82%;background:#fff;border:1px solid #e1e5ea;border-radius:14px;padding:12px 14px;display:grid;gap:4px;font-size:13px;color:#121a24}
+.rv .st{color:#f2a20c;font-size:20px;letter-spacing:2px}
+.rv small{color:#6b7686}
+@media (max-width:860px){.cband .wrap{grid-template-columns:1fr;gap:36px;padding-block:64px}.trycall{grid-template-columns:1fr;text-align:left;padding:26px 22px}.trycall .btn{justify-self:start}}
+@media (prefers-reduced-motion:reduce){.ph-s>.on{animation:none}.trycall .ring::after{animation:none}}
+.handsoff{background:var(--main);color:#fff}
+.handsoff .wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:center;padding-block:56px}
+.handsoff .h2{color:#fff}
+.handsoff p{margin:12px 0 0;color:rgba(255,255,255,.8);max-width:46ch}
+.handsoff ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:ho}
+.handsoff li{counter-increment:ho;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:18px;display:grid;gap:6px;align-content:start}
+.handsoff li::before{content:counter(ho);font:800 26px/1 var(--cond);color:var(--accent)}
+.handsoff li b{font-size:16px}
+.handsoff li span{font-size:14px;color:rgba(255,255,255,.75);line-height:1.5}
+@media (max-width:860px){.handsoff .wrap{grid-template-columns:1fr;gap:28px;padding-block:48px}}
+@media (max-width:600px){.handsoff ol{grid-template-columns:1fr}}
+</style>
+
+
+<section class="hero" id="top">
+<div class="hero-img"></div>
+<div class="wrap">
+<div>
+<div class="pill"><i>Free.</i> 10 seconds. No phone number.</div>
+<h1>You don't need more marketing. <em>You need a system that works as hard as you do.</em></h1>
+<p class="lead">Type your business name and trade. We'll build a live preview of your site with your name on it, plus the missed-call text-back and review requests that come with it.</p>
+<div class="ctas">
+<a class="btn" href="#build" data-go>Build my free demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+<a class="btn line" href="#system">See how it works</a>
+</div>
+<div class="checks">
+<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Built for local trades</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>No long contracts</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>We set it up and run it</span>
+</div>
+</div>
+<form class="quote h-build" id="build" data-bb="1" novalidate>
+<h2>Build your demo site</h2>
+<p class="sub">Your preview opens right away. No phone number needed.</p>
+<label for="b-biz">Business name<input id="b-biz" placeholder="Ruiz Roofing" autocomplete="organization" maxlength="60"></label>
+<label for="b-trade">Your trade<select id="b-trade" required>
+<option value="" disabled selected>Pick your trade</option><option value="roofing">Roofing</option><option value="plumbing">Plumbing</option><option value="hvac">HVAC</option><option value="electrical">Electrical</option><option value="remodeling">Remodeling / General Contractor</option><option value="landscaping">Landscaping</option><option value="painting">Painting</option><option value="pressure">Pressure Washing</option><option value="handyman">Handyman</option><option value="handyman">Something else</option>
+</select></label>
+<label for="b-city"><span>Main city you work in <span class="opt">(optional)</span></span><input id="b-city" placeholder="Miami" autocomplete="address-level2" maxlength="40"></label>
+<p class="err" id="b-err" aria-live="polite"></p>
+<button class="btn" type="submit">Build my site <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+<div class="bld" id="b-bld" hidden aria-live="polite"><div class="bar"><i></i></div><p></p></div>
+<small>Like what you see? You can ask for it live on the next page.</small>
+</form>
+</div>
+</section>
+
+<div class="facts"><div class="wrap">
+<span><b>Website + automations in one plan</b></span>
+<span>Missed-call text-back</span>
+<span>Automated review requests</span>
+<span>No long-term contracts</span>
+</div></div>
+
+<section class="handsoff"><div class="wrap">
+<div><span class="eyebrow">The hands-off promise</span><h2 class="h2">You run the jobs. We run the system.</h2><p>We build your website, set up every automation, and keep it all running. Your part: approve your site once, then answer the leads.</p></div>
+<ol><li><b>We build it</b><span>Your site, your pages, your photos, done for you.</span></li><li><b>We set it up</b><span>Text-back, review requests and follow-up, connected and tested.</span></li><li><b>We keep it running</b><span>Changes, updates and fixes. Just text us.</span></li></ol>
+</div></section>
+<section class="block"><div class="wrap gap">
+<div class="lede">
+<span class="eyebrow">The problem</span>
+<h2 class="h2">Getting found is only half the battle.</h2>
+<p>A potential customer finds your business on Google. They read your reviews, visit your website, and decide whether they trust you enough to call. Then what happens next?</p>
+</div>
+<div>
+<div class="steps">
+<div class="step"><b>1</b><p>They find you on Google and like your reviews.</p></div>
+<div class="step miss"><b>2</b><p>They call while you're on a roof. You miss it.</p></div>
+<div class="step miss"><b>3</b><p>They send a quote request and never hear back.</p></div>
+<div class="step miss"><b>4</b><p>You finish the job, and they never leave a review.</p></div>
+</div>
+<div class="money"><h3>Every gap is a mi<span>$$</span>ed opportunity</h3><p>Build Boosters fills those gaps, from the first Google search to your next 5-star review.</p></div>
+</div>
+</div></section>
+
+<section class="cband" id="calc"><div class="wrap">
+<div>
+<span class="eyebrow">Lost-jobs calculator</span>
+<h2 class="h2">What are missed calls costing you?</h2>
+<p class="lede">Move the sliders to match your business. It's rough math, but it's your math.</p>
+<div class="sl">
+<label><span>Missed calls per week <output id="o1">3</output></span><input type="range" id="r1" min="0" max="30" step="1" value="3"></label>
+<label><span>Average job value <output id="o2">$1,500</output></span><input type="range" id="r2" min="100" max="25000" step="100" value="1500"></label>
+<label><span>How many calls you turn into jobs <output id="o3">20%</output></span><input type="range" id="r3" min="5" max="80" step="5" value="20"></label>
+</div>
+</div>
+<div class="c-out">
+<p>You're leaving about</p>
+<b id="lost">$46,800</b>
+<p>a year on the table.</p>
+<small id="lostj">That's about 31 jobs a year that went to someone else.</small>
+<a class="btn" href="#build" data-go>Build my free demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+<span class="fine">Missed calls &#xd7; 52 weeks &#xd7; close rate &#xd7; job value.</span>
+</div>
+</div></section>
+
+<section class="block alt" id="system"><div class="wrap loop">
+<div class="ph-wrap"><div class="ph" id="ph" role="img" aria-label="Example: a missed call turns into a booked job and a 5-star review, automatically">
+<div class="ph-in">
+<div class="ph-top"><b data-biz>Ruiz Roofing</b><small>Messages with Mike R.</small></div>
+<div class="ph-s" id="phs">
+<div class="ev miss">&#x1f4de; Missed call &#xb7; Mike R. &#xb7; 2:14 PM</div>
+<div class="bub o">Hey Mike, this is <span data-biz>Ruiz Roofing</span>. Sorry we missed you! How can we help?</div>
+<div class="ev auto">Sent automatically &#xb7; 2:14 PM</div>
+<div class="typing" data-t><i></i><i></i><i></i></div>
+<div class="bub i">Got a leak in the kitchen ceiling. Can someone take a look?</div>
+<div class="bub o">We can come out Tuesday at 10am. Does that work?</div>
+<div class="typing" data-t><i></i><i></i><i></i></div>
+<div class="bub i">yes Tuesday works &#x1f44d;</div>
+<div class="ev book">&#x1f4c5; Booked &#xb7; Tue 10:00 AM &#xb7; Mike R.</div>
+<div class="ev auto">Tuesday &#xb7; job done &#x2713;</div>
+<div class="bub o">Thanks for choosing us, Mike! Mind leaving a quick Google review? It takes 30 seconds.</div>
+<div class="ev star">&#x2b50;&#x2b50;&#x2b50;&#x2b50;&#x2b50; New Google review from Mike R.</div>
+</div>
+</div>
+</div></div>
+<div>
+<span class="eyebrow">The system</span>
+<h2 class="h2">One loop that keeps feeding itself.</h2>
+<p style="color:var(--muted);margin:16px 0 0;max-width:52ch">Each step hands the customer to the next one automatically. More reviews mean you show up higher and get chosen more, which brings in the next round of calls.</p>
+<ol>
+<li><div><b>Get found</b><span>Google search leads them to your business and your site.</span></div></li>
+<li><div><b>Get chosen</b><span>Your website and reviews give them a reason to reach out.</span></div></li>
+<li><div><b>Get booked</b><span>Instant follow-up turns the call, text or form into a job on the calendar.</span></div></li>
+<li><div><b>Get reviewed</b><span>A review request goes out after the job, and the cycle starts again.</span></div></li>
+</ol>
+</div>
+</div></section>
+
+<section class="block" id="included"><div class="wrap">
+<div class="intro">
+<div><span class="eyebrow">What's included</span><h2 class="h2">Everything you need to turn more leads into jobs.</h2></div>
+<p>A professional website, plus the tools that capture, follow up with, and convert the customers who are already looking for your services. We set it all up for you.</p>
+</div>
+<div class="menu">
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><div><h3>Get Found</h3><p>A fast, mobile-friendly website and online presence built around your services and the towns you work in.</p><ul><li>Service pages</li><li>Service area pages</li><li>Google Business Profile</li></ul></div></div>
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.5 6 .8-4.4 4.2 1.1 6L12 16.6 6.7 19.5l1.1-6L3.4 9.3l6-.8z"/></svg></span><div><h3>Build Trust</h3><p>Your reviews, project photos, credentials and proof of work, front and center where customers decide.</p><ul><li>Live review feed</li><li>Project gallery</li></ul></div></div>
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/></svg></span><div><h3>Capture Leads</h3><p>Easy ways to call, request a quote, or start a chat, so a visitor becomes a lead at 9pm on a Sunday too.</p><ul><li>Quote forms</li><li>Live chat</li><li>Click-to-call</li></ul></div></div>
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6V20A17 17 0 0 1 4 3h4c0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/><path d="M15 3h6v5"/><path d="M21 3l-6 6"/></svg></span><div><h3>Never Miss a Lead</h3><p>Can't pick up? The customer gets a text back right away, and follow-up keeps the conversation going until they book.</p><ul><li>Missed-call text-back</li><li>Text &amp; email follow-up</li><li>One inbox</li></ul></div></div>
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v9H4v-9zM7 11l4-8c1.7 0 2.5 1.2 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.8a2 2 0 0 1-2 1.9H7"/></svg></span><div><h3>Get More Reviews</h3><p>Automated review requests go out after each job, turning happy customers into new 5-star Google reviews.</p><ul><li>Review requests by text</li><li>Reminders</li></ul><button class="peek" type="button" data-peek>See what your customer gets &#x2192;</button></div></div>
+<div class="item"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg></span><div><h3>Put Your Reviews to Work</h3><p>Customer feedback turned into social posts that keep building your credibility without you lifting a finger.</p><ul><li>Review-to-social posts</li><li>Remarketing</li></ul></div></div>
+</div>
+<div class="trycall">
+<span class="ring" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></span>
+<div><span class="eyebrow">Demo line: try it on your own phone</span><h3>Call <a href="tel:+17869338832">(786) 933-8832</a> and hang up.</h3><p>Watch your phone. A few seconds later you'll get a text back, the same way your customers would hear from you. This number is just for the demo. To reach Build Boosters, call or text (786) 479-8856.</p></div>
+<a class="btn" href="tel:+17869338832">Call the test line</a>
+</div>
+</div></section>
+
+<section class="block alt"><div class="wrap site">
+<img src="https://files.leadconnectorhq.com/file/6af51a70421749dec7daf768/bb-client-mockup.webp" alt="A contractor website built by Build Boosters, shown on desktop, laptop, tablet and phone" loading="lazy">
+<div>
+<span class="eyebrow">Websites</span>
+<h2 class="h2">We build your website to convert.</h2>
+<p style="color:var(--muted);margin:16px 0 0;max-width:48ch">A professional site that gives customers the information, proof and easy next step they need to choose you over the next contractor on the list.</p>
+<ul class="ticks">
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Showcase your work</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Display your 5-star reviews</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Make your services clear</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Make it easy to call or request a quote</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Capture leads 24/7</li>
+</ul>
+<a class="btn" href="#build" data-go>Build my free demo</a>
+</div>
+</div></section>
+
+<section class="block" id="trades"><div class="wrap">
+<div class="intro">
+<div><span class="eyebrow">Who we help</span><h2 class="h2">Built for local contractors and home service pros.</h2></div>
+<p>Whether you're remodeling homes, handling repairs, or running an ongoing local service, the same problems show up: customers need to find you, trust you, reach you easily, and hear back before they call someone else.</p>
+</div>
+<div class="trades">
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6fa0f7dd9c0a8fd828/bb-t-remodeling.webp" alt="Kitchen remodeling contractor at work" loading="lazy"><div><h3>General Contractors</h3><small>Bid follow-up and project photos that win bigger jobs.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6fddcd97ce5ae49105/bb-t-remodel2.webp" alt="Home remodeling project in progress" loading="lazy"><div><h3>Remodeling</h3><small>Project galleries, trust, and estimate follow-up.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6f1dee4a7aa11b9b66/bb-t-roofing.webp" alt="Roofing contractor installing shingles" loading="lazy"><div><h3>Roofing</h3><small>Urgent leak calls and storm-related inquiries.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a70421749dec7daf732/bb-t-plumbing.webp" alt="Plumber repairing pipes under a sink" loading="lazy"><div><h3>Plumbing</h3><small>Missed emergency calls and after-hours contact.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6fddcd97ce5ae49119/bb-t-hvac.webp" alt="HVAC technician servicing an AC unit" loading="lazy"><div><h3>HVAC</h3><small>No-cool emergencies and seasonal tune-up reminders.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a70fbdd54a827cff62a/bb-t-electrical.webp" alt="Electrician working on an electrical panel" loading="lazy"><div><h3>Electricians</h3><small>Same-day service calls and panel upgrade quotes.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a70421749dec7daf740/bb-t-handyman.webp" alt="Handyman doing home repairs" loading="lazy"><div><h3>Handyman</h3><small>Quick small-job requests and repeat customers.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6fddcd97ce5ae4911a/bb-t-landscaping.webp" alt="Landscaper maintaining a lawn and garden" loading="lazy"><div><h3>Landscaping</h3><small>Seasonal cleanups and recurring maintenance plans.</small></div></div>
+<div class="trade"><img src="https://files.leadconnectorhq.com/file/6af51a6ffbdd54a827cff606/bb-t-painting.webp" alt="House painter painting a wall" loading="lazy" style="object-position:center 20%"><div><h3>Painters</h3><small>Project photos and fast estimate follow-up.</small></div></div>
+</div>
+<p class="more"><b>Also:</b> home builders, commercial, decks &amp; patios, pool construction, siding, paving, hardscaping, windows &amp; doors, and pressure washing. Don't see your trade? We can still help.</p>
+</div></section>
+
+<section class="block alt" id="about"><div class="wrap note-wrap">
+<div class="letter">
+<span class="eyebrow">About Build Boosters</span>
+<h2 class="h2" style="margin-bottom:22px">Precise in business. Purposeful in everything we do.</h2>
+<p>Build Boosters exists so contractors can spend less time chasing leads and more time doing the work they're great at. We set up the website, the follow-up and the reviews, then keep it all running for you.</p>
+<blockquote>"The only way to grow a business is to be able to constantly be working ON your business, not IN your business, and that's what we want to help you with here at Build Boosters."</blockquote>
+<div class="sig"><span class="hand">Madeleine Jolie</span><small>CEO, Build Boosters</small></div>
+</div>
+<div class="values">
+<div class="val"><h3>Transparent &amp; Passionate</h3><p>We genuinely care about our partners and our work. We're committed to your success.</p></div>
+<div class="val"><h3>Integrity</h3><p>We hold standards that reflect only the best for your business and our own.</p></div>
+<div class="val"><h3>Partnership</h3><p>You're not a client, you're a partner. Our model only works when you win, so we only succeed when you do.</p></div>
+<div class="val"><h3>Adaptive</h3><p>We learn your niche and work with you on it. Markets change, and we help your business change with them.</p></div>
+</div>
+</div></section>
+
+<section class="block" id="faq"><div class="wrap">
+<div class="intro"><div><span class="eyebrow">FAQ</span><h2 class="h2">Frequently asked questions</h2></div><p>Have a question that isn't here? Call or text us and we'll get back to you the same day.</p></div>
+<div class="faqs">
+<div><h3>How much does it cost?</h3><p>Plans start at $79/month for your website and hosting. The website plus all the automations (missed-call text-back, review requests, follow-up) is $197/month. No long-term contract. <a href="/pricing" style="text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px">See all plans</a>.</p></div>
+<div><h3>Do you work with all kinds of contractors?</h3><p>Yes. We work with general contractors, remodelers and home service trades of all sizes, from solo operators to growing crews. If your customers find you locally, the system fits.</p></div>
+<div><h3>What timeframe can I expect for a new site?</h3><p>Most sites go live within about two weeks once we have your logo, photos and business details. We handle the build and send it to you for review before launch.</p></div>
+<div><h3>Will my site be mobile-friendly?</h3><p>Yes. Most homeowners find contractors on their phone, so every site is designed for mobile first, with tap-to-call and a quote form right at the top.</p></div>
+<div><h3>What should a contractor's website include?</h3><p>Clear service pages, the areas you cover, real photos of your work, your reviews, and an easy way to call or request a quote. Ours include all of that, plus automatic follow-up when someone reaches out.</p></div>
+<div><h3>Do I need to know anything technical?</h3><p>No. We set everything up and keep it running. You'll get leads, texts and review notifications in one place, and you can reach us whenever you need a change.</p></div>
+</div>
+</div></section>
+
+<section class="block alt" id="contact"><div class="wrap contact">
+<div class="info">
+<span class="eyebrow">Let's talk</span>
+<h2 class="h2">Book a call to see how we can help.</h2>
+<p style="color:var(--muted);margin:14px 0 0;max-width:46ch">Fill out the form and we'll set up a quick call. Worst case, you walk away with a free demo of your new website.</p>
+<dl>
+<dt>Our office (call or text)</dt><dd><span class="big">(786) 479-8856</span></dd>
+<dt>Who we serve</dt><dd>Contractors and home service businesses</dd>
+</dl>
+</div>
+<form class="quote" id="call">
+<h2>Schedule a call</h2>
+<label for="c-name">Your name<input id="c-name" name="full_name" placeholder="Danny Ruiz" autocomplete="off" required></label>
+<label for="c-phone">Mobile number<input type="tel" id="c-phone" name="phone" inputmode="tel" placeholder="(786) 555-0142" autocomplete="off" required></label>
+<label for="c-msg">What would you like help with?<textarea id="c-msg" name="message" placeholder="New website, more reviews, missed calls&#x2026;"></textarea></label>
+<button class="btn" type="submit">Request a Call</button>
+<div class="note" id="c-note" hidden></div>
+<label class="bb-sms"><input type="checkbox" name="sms_consent" value="yes"><span>Optional: I agree to receive customer care text messages from Build Boosters about my inquiry, scheduled calls and appointments. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of purchase.</span></label><label class="bb-sms"><input type="checkbox" name="sms_marketing_consent" value="yes"><span>Optional: I agree to receive marketing text messages from Build Boosters about our services and offers. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of purchase.</span></label><small class="bb-sms-links"><a href="/privacy-policy">Privacy Policy</a> &middot; <a href="/terms">Terms &amp; Conditions</a></small>
+</form>
+</div></section>
+
+
+
+
+
+<script>
+
+
+(function(){
+const $=s=>document.querySelector(s),RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* demo builder */
+const f=$("#build"),bz=$("#b-biz"),tr=$("#b-trade"),ct=$("#b-city"),er=$("#b-err"),bl=$("#b-bld");
+const nameNow=()=>bz.value.trim()||"Ruiz Roofing";
+bz.addEventListener("input",()=>{document.querySelectorAll("[data-biz]").forEach(e=>e.textContent=nameNow())});
+document.querySelectorAll("[data-go]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();f.scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});setTimeout(()=>bz.focus({preventScroll:true}),RM?0:450)}));
+f.addEventListener("submit",e=>{e.preventDefault();e.stopImmediatePropagation();
+const biz=bz.value.trim(),t=tr.value,city=ct.value.trim();
+if(!biz){er.textContent="Type your business name first.";bz.focus();return}
+if(!t){er.textContent="Pick your trade so we can use the right photos.";tr.focus();return}
+er.textContent="";const q=new URLSearchParams({biz:biz,trade:t});if(city)q.set("city",city);q.set("src","home");
+const url="/demo?"+q.toString(),steps=["Putting "+biz+" on the page…","Setting up missed-call text-back…","Adding your review section…","Done! Opening your preview…"];
+f.classList.add("busy");bl.hidden=false;let k=0;
+const go=()=>{bl.querySelector("p").textContent=steps[k];bl.querySelector("i").style.width=((k+1)/steps.length*100)+"%";if(++k<steps.length)setTimeout(go,RM?150:650);else setTimeout(()=>{location.href=url},RM?100:500)};go()},true);
+/* calculator */
+const r1=$("#r1"),r2=$("#r2"),r3=$("#r3"),lost=$("#lost"),lj=$("#lostj");let shown=46800,raf=0;
+const money=n=>"$"+Math.round(n).toLocaleString("en-US");
+function calc(){const c=+r1.value,v=+r2.value,p=+r3.value/100,target=c*52*p*v,jobs=Math.round(c*52*p);
+$("#o1").textContent=c;$("#o2").textContent=money(v);$("#o3").textContent=r3.value+"%";
+lj.textContent=jobs===0?"Nice. Keep it that way.":"That's about "+jobs+" job"+(jobs===1?"":"s")+" a year that went to someone else.";
+cancelAnimationFrame(raf);const from=shown,t0=performance.now(),D=RM?0:550;
+const step=now=>{const k=D?Math.min(1,(now-t0)/D):1,e=1-Math.pow(1-k,3);shown=from+(target-from)*e;lost.textContent=money(Math.round(shown/100)*100);if(k<1)raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
+[r1,r2,r3].forEach(r=>r.addEventListener("input",calc));
+/* animated phone */
+const ps=$("#phs"),items=[...ps.children];let run=false,tm=0;
+function play(){if(RM){items.forEach(x=>{if(!x.hasAttribute("data-t"))x.classList.add("on")});return}
+let i=0;ps.classList.remove("fade");items.forEach(x=>x.classList.remove("on"));
+const next=()=>{if(i>0&&items[i-1].hasAttribute("data-t"))items[i-1].classList.remove("on");
+if(i>=items.length){tm=setTimeout(()=>{ps.classList.add("fade");tm=setTimeout(play,700)},3200);return}
+const x=items[i++];x.classList.add("on");tm=setTimeout(next,x.hasAttribute("data-t")?1100:(x.classList.contains("ev")?1300:1700))};next()}
+new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting&&!run){run=true;play()}})},{threshold:.35}).observe($("#ph"));
+/* review request peek */
+document.querySelectorAll("[data-peek]").forEach(b=>b.addEventListener("click",()=>{
+const n=nameNow(),d=document.createElement("div");d.className="sheet";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-label","Example review request text");
+d.innerHTML='<button class="x" type="button" aria-label="Close">×</button><div class="ph"><div class="ph-in"><div class="ph-top"><b></b><small>Text message · just now</small></div><div class="ph-s"><div class="ev auto on">After the job is marked done</div><div class="bub o on"></div><div class="rv on"><b>Leave a review</b><span class="st">★★★★★</span><small>Tap a star · opens Google</small></div><div class="ev auto on">Sent automatically. No awkward asking.</div></div></div></div>';
+d.querySelector(".ph-top b").textContent=n;d.querySelector(".bub").textContent="Hi Carla! Thanks for choosing "+n+" today. Would you mind leaving us a quick Google review? It only takes 30 seconds and it helps a ton 🙏";
+document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add("on"));const x=d.querySelector(".x");x.focus();
+const close=()=>{d.classList.remove("on");setTimeout(()=>d.remove(),250);b.focus();removeEventListener("keydown",esc)};
+const esc=e=>{if(e.key==="Escape")close()};addEventListener("keydown",esc);x.addEventListener("click",close);d.addEventListener("click",e=>{if(e.target===d)close()})}));
+})();
+</script>

@@ -1,0 +1,148 @@
+---
+layout: site
+title: Contractor Website & Marketing Pricing | Build Boosters
+description: Simple monthly plans for contractor websites, missed-call text back, review requests, AI chat and Google ads. Compare plans and see what is included.
+nav: pricing
+---
+<style>
+.toggle{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--soft);border:1px solid var(--line);margin-bottom:28px}
+.toggle button{font:700 14px/1 var(--font);padding:11px 18px;border-radius:999px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--main);color:var(--main-ink)}
+.toggle em{font-style:normal;color:var(--accent);margin-left:6px}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+.tier{position:relative;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 26px;display:grid;gap:14px;min-width:0}
+.tier.pick{border:2px solid var(--accent);box-shadow:0 30px 60px -36px color-mix(in srgb,var(--accent) 60%,transparent)}
+.badge{position:absolute;top:-13px;left:26px;background:var(--accent);color:var(--accent-ink);font:700 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:999px}
+.tier h2{font:800 28px/1 var(--cond);text-transform:uppercase;letter-spacing:.02em}
+.td{margin:0;color:var(--muted);font-size:15px;min-height:3.2em}
+.tp{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.tp b{font-size:52px;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.tp span{color:var(--muted);font-size:15px;font-weight:600}
+.save{margin:-4px 0 0;font-size:13.5px;font-weight:600;color:var(--muted)}
+.tier .btn{width:100%}
+.tier .feat{list-style:none;margin:6px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:11px}
+.tier .feat li{display:flex;gap:10px;align-items:flex-start;font-size:15px;font-weight:600}
+.tier .feat li.inc{color:var(--muted)}
+.tier .feat svg{width:18px;height:18px;flex:none;color:var(--accent);margin-top:3px}
+.adnote{margin:22px 0 0;color:var(--muted);font-size:14px}
+.cmpwrap{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.cmp{width:100%;border-collapse:collapse;min-width:560px;font-size:15px}
+.cmp th,.cmp td{padding:14px 18px;border-bottom:1px solid var(--line);text-align:center}
+.cmp thead th{font:800 18px/1.1 var(--cond);text-transform:uppercase;letter-spacing:.02em;background:var(--soft)}
+.cmp thead th.hl{color:var(--accent)}
+.cmp tbody th{text-align:left;font-weight:600}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+.cmp td svg{width:20px;height:20px;color:var(--accent);display:inline-block}
+.cmp .dash{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.addons{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.ap{display:flex;align-items:baseline;gap:6px}
+.ap b{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.ap span{color:var(--muted);font-size:14px;font-weight:600}
+.story-sec .wrap{max-width:900px}
+.story-intro{display:grid;gap:12px;justify-items:center;text-align:center;margin-bottom:40px}
+.story-intro p{margin:0;color:var(--muted);font-size:18px;max-width:56ch}
+.stages{display:grid;gap:0}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 30px;display:grid;gap:18px}
+.stage.hl{border:2px solid var(--accent)}
+.st-h{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.st-n{font:700 14px/1 var(--cond);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.st-h h3{font:800 30px/1 var(--cond);text-transform:uppercase;letter-spacing:.02em;flex:1 1 auto}
+.stage.hl .st-h h3{color:var(--accent)}
+.st-p{font-weight:800;font-size:15px;padding:7px 14px;border-radius:999px;background:var(--main);color:var(--main-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.st-b p{margin:0 0 14px;font-size:17px;line-height:1.7}
+.st-b p.st-k{margin:6px 0 0;font-weight:700;padding:14px 16px;border-radius:10px;background:var(--soft)}
+.turn{position:relative;text-align:center;font:800 clamp(22px,2.6vw,30px)/1.15 var(--cond);text-transform:uppercase;letter-spacing:.02em;padding:44px 0;max-width:34ch;margin:0 auto}
+.turn::before,.turn::after{content:"";position:absolute;left:50%;width:2px;height:28px;background:var(--accent)}
+.turn::before{top:0}.turn::after{bottom:0}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px}
+.sum div{background:var(--main);color:var(--main-ink);border-radius:14px;padding:22px;display:grid;gap:8px;align-content:start}
+.sum b{font:800 22px/1 var(--cond);text-transform:uppercase;letter-spacing:.02em;color:var(--accent)}
+.sum span{font-size:15px;line-height:1.5;opacity:.92}
+@media (max-width:760px){.sum{grid-template-columns:1fr}.stage{padding:22px 20px}}
+@media (max-width:960px){.tiers{grid-template-columns:1fr;max-width:520px}.td{min-height:0}}
+@media (max-width:600px){.addons{grid-template-columns:1fr}.tp b{font-size:46px}}
+</style>
+<section class="phero" style="--pimg:url('https://files.leadconnectorhq.com/file/6af51a6f1dee4a7aa11b9b66/bb-t-roofing.webp')"><div class="wrap"><span class="crumb">Plans &amp; Pricing</span><h1>Pick the plan that fits your business.</h1><p>Start with a website or get the full system. No long contracts, hosting included, and we set everything up for you.</p></div></section>
+<section class="block story-sec"><div class="wrap">
+<div class="story-intro"><span class="eyebrow" style="margin:0">How the plans work</span><h2 class="h2">Meet Melissa.</h2><p>Let's say someone in your area needs exactly what you do. Her name is Melissa. She opens Google, searches for the service she needs, and starts comparing a few local businesses.</p></div>
+<div class="stages">
+ <div class="stage"><div class="st-h"><span class="st-n">Stage 1</span><h3>Website</h3><span class="st-p">$79/month</span></div>
+  <div class="st-b"><p>When Melissa finds you, she has somewhere professional to land. She can see what you do, the areas you serve, photos of your work, your reviews, and exactly how to contact you.</p>
+  <p>If she's on her phone, she can tap to call. If she doesn't want to call, she can request a quote.</p>
+  <p class="st-k">When Melissa compares you to the other contractors on Google, you look like a real business she can trust.</p></div></div>
+ <div class="turn">But there's still one problem. What happens after she reaches out?</div>
+ <div class="stage hl"><div class="st-h"><span class="st-n">Stage 2</span><h3>All-In-One</h3><span class="st-p">$197/month</span></div>
+  <div class="st-b"><p>Melissa likes what she sees and calls you. You're halfway through a job, your hands are full, and you miss the call.</p>
+  <p>Normally, that's dangerous. Melissa didn't search for one contractor. She has three or four sitting right in front of her, and the next one is one tap away.</p>
+  <p>With All-In-One, she gets a text back right away, so the conversation keeps going instead of disappearing. If she requests a quote, your system follows up. If she has a question, your AI chat answers it. If she's ready, she books, and she gets reminders so she actually shows up.</p>
+  <p>When the job's done, the system asks her for a review. That review helps the next Melissa trust you.</p>
+  <p class="st-k">The website gets people in the door. Everything else turns more of them into actual jobs.</p></div></div>
+ <div class="turn">Now the system is working. So how do we get more Melissas into it?</div>
+ <div class="stage"><div class="st-h"><span class="st-n">Stage 3</span><h3>All-In-One + Google Ads</h3><span class="st-p">$997/month + ad spend</span></div>
+  <div class="st-b"><p>Your website looks good, calls and quote requests get followed up, and customers get asked for reviews. Instead of waiting for someone to eventually find you, we put your business in front of people who are actively searching for what you do.</p>
+  <p>Those leads come into the same system. They can call, request a quote, and get followed up with, and you can see exactly what happened to every lead you paid for.</p>
+  <p class="st-k">More people like Melissa, landing in a system that's already built to book them.</p></div></div>
+</div>
+<div class="sum">
+ <div><b>Website</b><span>When Melissa finds you, make sure she trusts you.</span></div>
+ <div><b>All-In-One</b><span>When Melissa contacts you, make sure she doesn't fall through the cracks.</span></div>
+ <div><b>All-In-One + Ads</b><span>Bring more people like Melissa into the system in the first place.</span></div>
+</div>
+</div></section>
+<section class="block alt"><div class="wrap">
+<div class="intro"><div><span class="eyebrow">Plans</span><h2 class="h2">Pick your stage.</h2></div><p>Start where you are and move up when you're ready. Your site stays the same.</p></div>
+<div class="toggle" role="group" aria-label="Billing period"><button type="button" id="bill-m" aria-pressed="true">Monthly</button><button type="button" id="bill-a" aria-pressed="false">Yearly<em>2 months free</em></button></div>
+<div class="tiers"><div class="tier">
+  
+  <h2>Website</h2><p class="td">For contractors who just need a great site.</p>
+  <div class="tp"><b data-m="$79" data-a="$790">$79</b><span data-m="/month" data-a="/year">/month</span></div>
+  <p class="save" data-m="Or pay yearly and get 2 months free" data-a="That's 2 months free ($158 saved)">Or pay yearly and get 2 months free</p>
+  <a class="btn line" href="/contact">Start with Website</a>
+  <ul class="feat"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>SEO website with service and area pages</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Hosting included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Domain name included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Working quote forms</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Mobile-friendly, tap-to-call design</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Unlimited updates within 72 hours</li></ul>
+</div><div class="tier pick">
+  <span class="badge">Most popular</span>
+  <h2>All-In-One</h2><p class="td">Your website plus everything that turns leads into booked jobs.</p>
+  <div class="tp"><b data-m="$197" data-a="$1,970">$197</b><span data-m="/month" data-a="/year">/month</span></div>
+  <p class="save" data-m="Or pay yearly and get 2 months free" data-a="That's 2 months free ($394 saved)">Or pay yearly and get 2 months free</p>
+  <a class="btn" href="https://api.buildboosters.com/payment-link/6af64c63906a8b62055d610d" data-href-m="https://api.buildboosters.com/payment-link/6af64c63906a8b62055d610d" data-href-a="https://api.buildboosters.com/payment-link/6af8a48f21a48a3872d26115">Start All-In-One</a>
+  <ul class="feat"><li class="inc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Everything in Website</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Missed-call text-back</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>AI spam call blocker</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Automated lead follow-up</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>AI chat and text that answers and books</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Online booking calendar with reminders</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Automated 5-star review requests</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>AI review replies</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>One inbox for text, email, Facebook and Instagram</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Text and email confirmations</li></ul>
+</div><div class="tier">
+  
+  <h2>All-In-One + Google Ads</h2><p class="td">Everything in All-In-One, plus ads that bring in new leads every week.</p>
+  <div class="tp"><b data-m="$997" data-a="$9,970">$997</b><span data-m="/month + ad spend" data-a="/year + ad spend">/month + ad spend</span></div>
+  <p class="save" data-m="Or pay yearly and get 2 months free" data-a="That's 2 months free ($1,994 saved)">Or pay yearly and get 2 months free</p>
+  <a class="btn line" href="/contact">Start with Ads</a>
+  <ul class="feat"><li class="inc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Everything in All-In-One</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Google Ads campaign setup</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Ongoing ad management and optimization</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Ad leads flow into your follow-up automatically</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Monthly results report</li></ul>
+</div></div>
+<div class="prepay" id="bb-prepay"><div><span class="k">90-day prepay</span><h3>3 months of All-In-One, paid once. Google Business Profile cleanup included free.</h3><p>The same system as the monthly plan, for $591 up front ($197 x 3). We also optimize your Google Business Profile at no extra cost (normally $349).</p><ul><li>GBP optimization covers categories, services, service areas, description, hours, up to 20 of your photos, and a review link.</li><li>Not included: profile verification, suspension appeals, or ranking guarantees.</li><li>No auto-renewal. After 90 days, continue monthly only if you want to.</li></ul></div><div class="pr"><s>$940 value</s><b>$591</b><small>one payment, 90 days</small><a class="btn" href="https://api.buildboosters.com/payment-link/6af8a16121a48a3872d2610c">Prepay 90 days</a></div></div>
+<p class="adnote">Ad spend is paid directly to Google from your own account. You own the account and the data.</p>
+</div></section>
+<section class="block"><div class="wrap">
+<div class="intro"><div><span class="eyebrow">Compare plans</span><h2 class="h2">What's in each plan</h2></div><p>Every plan includes setup, hosting and support. Move up or down anytime.</p></div>
+<div class="cmpwrap"><table class="cmp"><thead><tr><th scope="col" style="text-align:left">Feature</th><th scope="col">Website</th><th scope="col" class="hl">All-In-One</th><th scope="col">All-In-One + Ads</th></tr></thead><tbody><tr><th scope="row">SEO website + hosting</th><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Domain name included</th><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Quote forms and tap-to-call</th><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Unlimited updates</th><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Missed-call text-back</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">AI spam call blocker</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Automated lead follow-up</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">AI chat and text booking</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Online booking calendar</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Automated review requests</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">AI review replies</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Unified inbox</th><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Google Ads setup and management</th><td><span class="dash" aria-label="Not included">–</span></td><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr><tr><th scope="row">Monthly ads report</th><td><span class="dash" aria-label="Not included">–</span></td><td><span class="dash" aria-label="Not included">–</span></td><td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span class="sr">Included</span></td></tr></tbody></table></div>
+</div></section>
+<section class="block alt"><div class="wrap">
+<div class="intro"><div><span class="eyebrow">Add-ons</span><h2 class="h2">Extras you can add anytime.</h2></div><p>Available on any plan. Add them at signup or once your system is up and running.</p></div>
+<div class="addons"><div class="det"><h3>Google Business Profile optimization</h3><div class="ap"><b>$349</b><span>one-time</span></div><p>Full cleanup of your Google profile: categories, services, areas, photos and keywords, so you show up in local searches.</p></div><div class="det"><h3>Reputation management</h3><div class="ap"><b>$97</b><span>/month</span></div><p>We reply to your reviews, alert you to any low rating right away, and send a review report every two weeks.</p></div><div class="det"><h3>Past-customer reactivation</h3><div class="ap"><b>From $297</b><span>per campaign</span></div><p>A text and email campaign that brings past customers back with a special offer. Great for slow season.</p></div><div class="det"><h3>Lead nurture sequence</h3><div class="ap"><b>$297</b><span>one-time</span></div><p>Email and text follow-up that keeps leads who didn't book thinking about you until they're ready.</p></div></div>
+</div></section>
+<section class="block"><div class="wrap">
+<div class="intro"><div><span class="eyebrow">Pricing FAQ</span><h2 class="h2">Questions about the plans</h2></div><p>Still deciding? Call or text and we'll walk you through it.</p></div>
+<div class="faqs">
+<div><h3>Is there a contract?</h3><p>No. Every plan is month to month, so you stay because it's working.</p></div>
+<div><h3>How does yearly billing work?</h3><p>Pay for 10 months upfront and get 12. That's 2 months free on any plan.</p></div>
+<div><h3>Can I switch plans later?</h3><p>Yes. Start with Website and move up to All-In-One whenever you're ready. Your site stays the same.</p></div>
+<div><h3>Who pays for the Google Ads?</h3><p>You do, directly to Google from your own account. Our fee covers setting up and managing the ads.</p></div>
+<div><h3>What do I need to provide?</h3><p>Your logo (or we'll make one), photos of your work, your services and the areas you cover. We handle the rest.</p></div>
+<div><h3>Who owns my domain name?</h3><p>We buy your domain and cover it as part of your plan. It's registered for your business, and if you ever leave, we transfer it to you.</p></div>
+<div><h3>Can I keep my business phone number?</h3><p>Yes. Missed-call text-back and spam blocking work with the number your customers already call.</p></div>
+</div></div></section>
+<section class="band"><div class="wrap"><div><h2>Not sure which plan fits?</h2><p>Book a quick call and we'll recommend the right one for your business.</p></div><a class="btn" href="/contact">Book a Call</a></div></section>
+
+
+
+<script>
+(function(){const m=document.getElementById("bill-m"),a=document.getElementById("bill-a");
+function set(k){m.setAttribute("aria-pressed",k==="m");a.setAttribute("aria-pressed",k==="a");document.querySelectorAll("[data-m]").forEach(el=>{el.textContent=el.dataset[k]});document.querySelectorAll("[data-href-m]").forEach(el=>{el.href=el.dataset["href"+k.toUpperCase()]})}
+m.addEventListener("click",()=>set("m"));a.addEventListener("click",()=>set("a"))})();
+</script>

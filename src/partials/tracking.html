@@ -1,0 +1,29 @@
+<!-- Meta Pixel 2336762067164370 + conversion events -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2336762067164370');fbq('track','PageView');
+(function(){
+var PLANS={'6af64c63906a8b62055d610d':['All-In-One Monthly',197],'6af8a48f21a48a3872d26115':['All-In-One Yearly',1970],'6af8a16121a48a3872d2610c':['90-Day Prepay',591]};
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){}}
+/* Lead: call-request forms, demo builder, demo "text me the link" */
+document.addEventListener('submit',function(e){var f=e.target;if(!f||f.tagName!=='FORM')return;
+ var name=f.id==='build'?'Demo built':(f.classList.contains('quote')?'Call request':(f.closest('.bbl')?'Demo text-me':null));
+ if(!name)return;
+ if(name==='Call request'){var req=f.querySelectorAll('[required]');for(var i=0;i<req.length;i++){if(!req[i].value)return;}}
+ if(name==='Demo built'){var bz=f.querySelector('#b-biz'),tr=f.querySelector('#b-trade');if(!bz||!bz.value.trim()||!tr||!tr.value)return;}
+ fbq('track','Lead',{content_name:name});},true);
+/* InitiateCheckout: when a visitor actually heads to a checkout (not when the monthly upsell box opens) */
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';
+ for(var id in PLANS){if(h.indexOf(id)>=0){
+  if(id==='6af64c63906a8b62055d610d'&&!a.closest('#bb-up'))return;
+  fbq('track','InitiateCheckout',{content_name:PLANS[id][0],value:PLANS[id][1],currency:'USD'});ss('bbPlan',id);return;}}
+},true);
+/* Purchase: thank-you page after checkout */
+if(/^\/welcome\/?$/.test(location.pathname)&&ss('bbPlan')&&!ss('bbBought')){var p=PLANS[ss('bbPlan')];if(p){fbq('track','Purchase',{content_name:p[0],value:p[1],currency:'USD'});ss('bbBought','1');}}
+})();
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2336762067164370&ev=PageView&noscript=1"/></noscript>
+<!-- Microsoft Clarity (heatmaps + recordings) -->
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "zi97lr6dof");
+</script>

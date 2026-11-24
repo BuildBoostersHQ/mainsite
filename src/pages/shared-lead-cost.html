@@ -1,0 +1,140 @@
+---
+layout: bare
+title: Shared Lead Cost Calculator | Build Boosters
+description: Find out what your shared leads really cost per booked job. Enter your monthly spend, leads and booked jobs to see the real number.
+---
+<!-- Build Boosters: shared lead cost calculator (added Nov 14, 2026 by Claude) -->
+<style>
+html,body{margin:0!important;padding:0!important;background:#0b1a2e!important}
+chat-widget{display:none!important}
+
+#bbc{--deep:#0b1a2e;--acc:#f2a20c;--ink:#16191d;--mut:#b9c4d4;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fff;background:radial-gradient(900px 520px at 50% -120px,#173a63 0%,var(--deep) 70%);min-height:100vh;padding:28px max(16px,env(safe-area-inset-left)) 48px max(16px,env(safe-area-inset-right));box-sizing:border-box;-webkit-font-smoothing:antialiased}
+#bbc *{box-sizing:border-box}
+#bbc .w{max-width:760px;margin:0 auto}
+#bbc .logo{display:flex;justify-content:center;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.06em;font-size:17px}
+#bbc .logo svg{width:34px;height:34px;stroke:var(--acc);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#bbc h1{text-align:center;font-size:clamp(30px,6vw,48px);line-height:1.08;letter-spacing:-.025em;font-weight:800;margin:28px 0 12px;text-wrap:balance}
+#bbc h1 span{color:var(--acc)}
+#bbc .lead{text-align:center;color:var(--mut);font-size:clamp(16px,2.4vw,19px);line-height:1.55;margin:0 auto 28px;max-width:46ch}
+#bbc .card{background:#fff;color:#141b24;border-radius:20px;padding:24px 22px;margin-top:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.6)}
+#bbc h2{margin:0 0 6px;font-size:21px;line-height:1.25;font-weight:800;letter-spacing:-.01em;color:#0b2440}
+#bbc .sub{margin:0 0 18px;color:#5b6878;font-size:15px;line-height:1.5}
+#bbc label{display:block;font-weight:700;font-size:16px;line-height:1.35;color:#141b24;margin:18px 0 8px}
+#bbc label small{font-weight:500;color:#7a8696}
+#bbc .f{position:relative}
+#bbc .f b{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:700;color:#7a8696;pointer-events:none}
+#bbc input{width:100%;font:inherit;font-size:22px;font-weight:700;color:#0b2440;background:#f4f6f9;border:2px solid #e2e7ee;border-radius:14px;padding:16px 16px;min-height:60px;outline:none;-webkit-appearance:none;appearance:none}
+#bbc .f.money input{padding-left:36px}
+#bbc input:focus{border-color:var(--acc);background:#fff}
+#bbc input::placeholder{color:#a8b2bf;font-weight:600}
+#bbc .warn{display:none;margin-top:16px;background:#fff6e5;border:1px solid #f6d48f;color:#6b4a00;border-radius:12px;padding:12px 14px;font-size:15px;line-height:1.5}
+#bbc .big{background:var(--deep);color:#fff;border-radius:16px;padding:22px 20px;text-align:center}
+#bbc .big .k{font-size:15px;color:var(--mut);font-weight:600}
+#bbc .big .v{font-size:clamp(44px,12vw,72px);font-weight:800;letter-spacing:-.03em;line-height:1.05;color:var(--acc);margin:6px 0}
+#bbc .big .n{font-size:15px;line-height:1.5;color:#dbe3ee;max-width:40ch;margin:0 auto}
+#bbc .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+#bbc .m{background:#f4f6f9;border-radius:14px;padding:16px}
+#bbc .m .k{font-size:14px;color:#5b6878;font-weight:600;line-height:1.35}
+#bbc .m .v{font-size:28px;font-weight:800;color:#0b2440;margin-top:4px;letter-spacing:-.02em}
+#bbc .m .n{font-size:14px;color:#5b6878;line-height:1.45;margin-top:4px}
+#bbc .m.wide{grid-column:1/-1}
+#bbc .m.hot{background:#fff6e5;border:1px solid #f6d48f}
+#bbc .m.hot .v{color:#9a5b00}
+#bbc .muted{color:#a8b2bf}
+#bbc .fact{font-size:15px;line-height:1.6;color:#33404f;margin:0}
+#bbc .cta{display:block;text-align:center;background:var(--acc);color:var(--ink);font-weight:800;font-size:19px;text-decoration:none;border-radius:999px;padding:18px 20px;margin-top:18px}
+#bbc .cta:active{transform:translateY(1px)}
+#bbc p.me{font-size:16px;line-height:1.6;color:#33404f;margin:0 0 10px}
+#bbc .ft{text-align:center;margin:36px 0 0;font-size:12.5px;color:#8a97a9;line-height:1.8}
+#bbc .ft a{color:#8a97a9}
+@media (max-width:520px){#bbc .card{padding:20px 16px}#bbc .grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<div id="bbc"><div class="w">
+<a class="logo" href="/" aria-label="Build Boosters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>BUILD BOOSTERS</a>
+<h1>What are shared leads <span>really costing you?</span></h1>
+<p class="lead">The shared lead sites tell you what each lead costs, but they never show you what each booked job cost you, so put in last month's numbers and you'll see it right below.</p>
+
+<section class="card">
+<h2>Last month's numbers</h2>
+<p class="sub">Rough numbers are fine, and the results update as you type.</p>
+<label for="bbc_spend">How much did you spend on shared leads last month?</label>
+<div class="f money"><b>$</b><input id="bbc_spend" inputmode="decimal" autocomplete="off" placeholder="1,200"></div>
+<label for="bbc_leads">How many shared leads did you get?</label>
+<div class="f"><input id="bbc_leads" inputmode="numeric" autocomplete="off" placeholder="40"></div>
+<label for="bbc_booked">How many of those turned into booked jobs?</label>
+<div class="f"><input id="bbc_booked" inputmode="numeric" autocomplete="off" placeholder="4"></div>
+<label for="bbc_job">What's your average job size?</label>
+<div class="f money"><b>$</b><input id="bbc_job" inputmode="decimal" autocomplete="off" placeholder="3,500"></div>
+<label for="bbc_missed">How many did you miss or answer late? <small>(optional)</small></label>
+<div class="f"><input id="bbc_missed" inputmode="numeric" autocomplete="off" placeholder="10"></div>
+<div class="warn" id="bbc_warn" role="status"></div>
+</section>
+
+<section class="card" aria-live="polite">
+<div class="big">
+<div class="k">What each booked job really cost you</div>
+<div class="v" id="bbc_cpj">$&ndash;</div>
+<div class="n" id="bbc_cpj_n">Put in what you spent and how many jobs you booked, and this number will fill in.</div>
+</div>
+<div class="grid">
+<div class="m"><div class="k">What each shared lead cost</div><div class="v" id="bbc_cpl">&ndash;</div><div class="n" id="bbc_cpl_n"></div></div>
+<div class="m"><div class="k">Your close rate</div><div class="v" id="bbc_cr">&ndash;</div><div class="n" id="bbc_cr_n"></div></div>
+<div class="m wide"><div class="k">What one more booked job a month is worth</div><div class="v" id="bbc_job_v">&ndash;</div><div class="n" id="bbc_job_n">Put in your average job size to compare it with the $197 a month plan.</div></div>
+<div class="m wide hot" id="bbc_miss_box" style="display:none"><div class="k">Spent on shared leads you never really competed for</div><div class="v" id="bbc_miss_v">&ndash;</div><div class="n" id="bbc_miss_n"></div></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Why the real number is higher than it looks</h2>
+<p class="fact">On one well-known shared lead site, each customer request goes to as many as 5 pros, so you can be up against four other companies for the same job. A standard lead is charged whether or not you open it or respond, which means a call you miss on a roof or under a sink still comes out of your budget.</p>
+</section>
+
+<section class="card">
+<h2>What we'd do about it</h2>
+<p class="me">At Build Boosters, we set up websites and phone systems for contractors who want more of their own customers and less dependence on shared leads. Our main plan is $197 a month with no contract, and it texts every missed call back right away, follows up on every quote and asks your happy customers for Google reviews automatically.</p>
+<a class="cta" href="sms:+17864798856?&body=Hi%2C%20I%20used%20your%20shared%20lead%20calculator.">Text us at (786) 479-8856</a>
+<p class="me" style="margin:14px 0 0;text-align:center;font-size:15px;color:#5b6878">Text us your number and we'll show you what this would look like on your phone.</p>
+</section>
+
+<p class="ft">Source: <a href="https://intercom.help/angi/en/articles/6221545-leads-frequently-asked-questions" target="_blank" rel="noopener">a shared lead site's own Leads FAQ</a>, checked November 2026.<br>&copy; 2026 Build Boosters &middot; <a href="/privacy-policy">Privacy Policy</a> &middot; <a href="/terms">Terms</a></p>
+</div></div>
+<script>
+(function(){
+ function $(i){return document.getElementById(i)}
+ function num(id){var s=($(id).value||'').replace(/[^0-9.]/g,'');if(s===''||s==='.')return null;var n=parseFloat(s);return isFinite(n)?n:null}
+ function money(n){return '$'+(n>=100?Math.round(n).toLocaleString('en-US'):n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}))}
+ function set(id,t){$(id).textContent=t}
+ function calc(){
+  var spend=num('bbc_spend'),leads=num('bbc_leads'),booked=num('bbc_booked'),job=num('bbc_job'),missed=num('bbc_missed');
+  var warn=[];
+  if(leads!==null&&booked!==null&&booked>leads)warn.push('You have more booked jobs than shared leads, so the numbers below would be off. Check that booked jobs only counts jobs that came from those shared leads.');
+  if(leads!==null&&missed!==null&&missed>leads)warn.push('The missed or late number is higher than your total shared leads, so check that one too.');
+  $('bbc_warn').style.display=warn.length?'block':'none';$('bbc_warn').textContent=warn.join(' ');
+  var bad=warn.length>0;
+  // cost per booked job
+  if(spend===null||booked===null||bad){set('bbc_cpj','$–');set('bbc_cpj_n',bad?'Fix the number above and this will fill in.':'Put in what you spent and how many jobs you booked, and this number will fill in.')}
+  else if(booked===0){set('bbc_cpj','No jobs');set('bbc_cpj_n','You didn’t book a job from these last month, so all '+money(spend)+' went to calls that never turned into work.')}
+  else{var cpj=spend/booked;set('bbc_cpj',money(cpj));set('bbc_cpj_n','That’s '+money(spend)+' divided by '+booked+' booked job'+(booked===1?'':'s')+', which is the number the shared lead sites never put on your invoice.')}
+  // cost per lead
+  var cpl=null;
+  if(spend===null||leads===null){set('bbc_cpl','–');set('bbc_cpl_n','')}
+  else if(leads===0){set('bbc_cpl','–');set('bbc_cpl_n','Put in how many shared leads you got to see this.')}
+  else{cpl=spend/leads;set('bbc_cpl',money(cpl));set('bbc_cpl_n','This is the number the sites like to show you.')}
+  // close rate
+  if(leads===null||booked===null||leads===0||bad){set('bbc_cr','–');set('bbc_cr_n','')}
+  else{var cr=booked/leads*100;set('bbc_cr',(cr<10&&cr>0?cr.toFixed(1):Math.round(cr))+'%');set('bbc_cr_n',booked+' out of '+leads+' turned into jobs.')}
+  // one more job vs $197
+  if(job===null||job===0){set('bbc_job_v','–');set('bbc_job_n','Put in your average job size to compare it with the $197 a month plan.')}
+  else{set('bbc_job_v',money(job));var x=job/197;
+   if(x>=2)set('bbc_job_n','One extra job a month covers the $197 plan '+Math.floor(x)+' times over.');
+   else if(x>=1)set('bbc_job_n','One extra job a month covers the $197 plan with '+money(job-197)+' left over.');
+   else set('bbc_job_n','One extra job a month covers about '+Math.round(x*100)+'% of the $197 plan, so it would take '+Math.ceil(197/job)+' extra jobs to cover it.')}
+  // missed
+  if(missed===null||missed===0||cpl===null||bad){$('bbc_miss_box').style.display='none'}
+  else{$('bbc_miss_box').style.display='block';set('bbc_miss_v',money(missed*cpl));set('bbc_miss_n','That’s '+missed+' shared lead'+(missed===1?'':'s')+' at '+money(cpl)+' each that you paid for but didn’t get to answer in time, and that customer may well have gone with one of the other pros who got the same request.')}
+ }
+ ['bbc_spend','bbc_leads','bbc_booked','bbc_job','bbc_missed'].forEach(function(i){$(i).addEventListener('input',calc)});
+ calc();
+})();
+</script>
