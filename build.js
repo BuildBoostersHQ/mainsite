@@ -45,6 +45,7 @@ const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/
 function schema(name, fm, body) {
   const out = [];
   if (name === 'about' || name === 'contact') out.push({ '@context': 'https://schema.org', ...ORG });
+  if (name === 'madeleine-jolie') out.push({ '@context': 'https://schema.org', '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', jobTitle: 'Founder', worksFor: { '@id': SITE + '/#org', ...ORG } });
   if (name === 'index') {
     out.push({ '@context': 'https://schema.org', ...ORG });
     out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Build Boosters', url: SITE + '/', publisher: { '@id': SITE + '/#org' } });
@@ -172,13 +173,24 @@ function blogIndex(body, posts) {
     .replace('{{blog:jsonld}}', `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>`);
 }
 
+
+// Author box under every blog post, and a link from the byline to the author page.
+const AUTHOR_URL = '/madeleine-jolie';
+const AUTHOR_BOX = '<aside class="bb-author" aria-label="About the author"><span class="av"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg></span><div><h3>Written by <a href="' + AUTHOR_URL + '">Madeleine Jolie</a></h3><p>Maddie is the founder of Build Boosters, which builds websites and follow-up systems for contractors. Before starting it, she worked at GoHighLevel with the agency owners who set up these systems for small businesses.</p></div></aside>';
+function addAuthor(body) {
+  if (!/<span class="crumb"><a href="\/blog"/.test(body) || !/class="bb-meta"/.test(body)) return body;
+  body = body.replace('<span>By <b>Madeleine Jolie</b></span>', `<span>By <a href="${AUTHOR_URL}" style="color:inherit"><b>Madeleine Jolie</b></a></span>`);
+  body = body.replace('</article>', '</article>' + AUTHOR_BOX);
+  return body.replace(/"author": \{"@type": "Person", "name": "Madeleine Jolie"\}/, `"author": {"@type": "Person", "name": "Madeleine Jolie", "url": "${SITE}${AUTHOR_URL}", "jobTitle": "Founder, Build Boosters"}`);
+}
+
 const pages = fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html')).sort()
   .map((f) => ({ name: f.slice(0, -5), ...parse(path.join(SRC, 'pages', f)) }));
 const posts = pages.map((p) => postInfo(p.name, p.body)).filter(Boolean);
 
 const urls = [];
 for (const { name, fm, body } of pages) {
-  const content = name === 'blog' ? blogIndex(body, posts) : body;
+  const content = name === 'blog' ? blogIndex(body, posts) : addAuthor(body);
   const { html, urlPath, noindex } = render(name, fm, content);
   fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(html));
   if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
