@@ -19,7 +19,13 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').repl
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
   '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Dancing+Script:wght@600&family=Barlow+Condensed:wght@600;700;800&display=swap">';
 const GHL_TRACKING = '<script src="https://api.buildboosters.com/js/external-tracking.js" data-tracking-id="tk_53b0e0def7d74d778248b3245d390098" defer></script>';
-const CHAT = '<script src="https://widgets.leadconnectorhq.com/loader.js" data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js" data-widget-id="6af53870d6230b40f96f92c5" defer></script>';
+// GHL chat widget. It goes in the <head> with preconnects so it starts loading with the page instead of after it,
+// and it fades in (see the chat-widget rule below) instead of popping in.
+const CHAT = '<link rel="preconnect" href="https://widgets.leadconnectorhq.com">\n<link rel="preconnect" href="https://services.leadconnectorhq.com">\n<link rel="preconnect" href="https://stcdn.leadconnectorhq.com">\n' +
+  '<style>chat-widget{animation:bb-chat-in .35s ease-out both}@keyframes bb-chat-in{from{opacity:0}to{opacity:1}}</style>\n' +
+  '<link rel="preload" as="script" href="https://widgets.leadconnectorhq.com/loader.js">\n';
+// The loader itself goes first thing in <body>, since it attaches the widget to the body.
+const CHAT_SCRIPT = '<script src="https://widgets.leadconnectorhq.com/loader.js" data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js" data-widget-id="6af53870d6230b40f96f92c5" async></script>\n';
 
 function parse(file) {
   const raw = fs.readFileSync(file, 'utf8');
@@ -32,7 +38,6 @@ function parse(file) {
 function render(name, fm, body) {
   const urlPath = name === 'index' ? '/' : '/' + name;
   const layout = fm.layout || 'site';
-  const hasForm = /<form[\s>]/.test(body);
   const usesCheckout = /payment-link\//.test(body);
   let head = partial.head
     .replace(/{{title}}/g, esc(fm.title || 'Build Boosters'))
@@ -43,7 +48,11 @@ function render(name, fm, body) {
   const year = String(new Date().getFullYear());
   let html = '<!doctype html>\n<html lang="en">\n<head>\n' + head;
   if (layout === 'site') html += FONTS + '\n<link rel="stylesheet" href="/assets/css/site.css">\n';
+  // Chat widget on every page except the client demo sites (and any page that sets chat: false).
+  const chat = layout !== 'demo' && fm.chat !== 'false';
+  if (chat) html += CHAT;
   html += partial.tracking + '</head>\n<body>\n';
+  if (chat) html += CHAT_SCRIPT;
 
   if (layout === 'site') {
     let header = partial.header;
@@ -61,8 +70,6 @@ function render(name, fm, body) {
   else if (layout === 'bare') html += '<script src="/assets/js/site.js" defer></script>\n';
   if (layout === 'demo') html += '<script src="/assets/js/demo.js" defer></script>\n';
   if (usesCheckout) html += '<script src="/assets/js/checkout.js" defer></script>\n';
-  const chat = fm.chat ? fm.chat === 'true' : (layout === 'site' && !hasForm);
-  if (chat) html += CHAT + '\n';
   html += '</body>\n</html>\n';
   return { html, urlPath, noindex: /noindex/.test(fm.robots || '') };
 }
@@ -88,6 +95,13 @@ for (const f of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith
   fs.writeFileSync(path.join(OUT, name + '.html'), html);
   if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
 }
+// Any address that doesn't exist sends the visitor to the homepage. Vercel serves dist/404.html for unknown
+// paths with a 404 status, so Google drops dead links instead of indexing them as copies of the homepage.
+fs.writeFileSync(path.join(OUT, '404.html'), '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n' +
+  '<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Page not found | Build Boosters</title>\n<meta name="robots" content="noindex">\n' +
+  '<link rel="icon" href="/favicon.ico" sizes="any">\n<meta http-equiv="refresh" content="0; url=/">\n<script>location.replace("/")</script>\n' +
+  '</head>\n<body style="font-family:system-ui,sans-serif;background:#0b2440;color:#fff;display:grid;place-items:center;min-height:100vh;margin:0">\n' +
+  '<p>Taking you to the <a href="/" style="color:#f2a20c">Build Boosters homepage</a>.</p>\n</body>\n</html>\n');
 fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map((u) => `  <url><loc>${SITE}${u === '/' ? '/' : u}</loc></url>`).join('\n') + '\n</urlset>\n');
