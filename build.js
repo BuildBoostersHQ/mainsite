@@ -184,6 +184,21 @@ function addAuthor(body) {
   return body.replace(/"author": \{"@type": "Person", "name": "Madeleine Jolie"\}/, `"author": {"@type": "Person", "name": "Madeleine Jolie", "url": "${SITE}${AUTHOR_URL}", "jobTitle": "Founder, Build Boosters"}`);
 }
 
+
+// Article tables: label each cell with its column name, so on phones each row can stack as a card.
+function labelTables(html) {
+  return html.replace(/<table>([\s\S]*?)<\/table>/g, (t, inner) => {
+    const head = (inner.match(/<thead>([\s\S]*?)<\/thead>/) || [])[1] || '';
+    const cols = [...head.matchAll(/<th[^>]*>([\s\S]*?)<\/th>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').replace(/"/g, '&quot;'));
+    const body = inner.replace(/<tr>([\s\S]*?)<\/tr>/g, (r, cells) => {
+      if (/<thead>/.test(r)) return r;
+      let i = 0;
+      return '<tr>' + cells.replace(/<(td|th)( scope="row")?>/g, (m, tag, sc) => { const lab = cols[i++] || ''; return `<${tag}${sc || ''}${lab ? ` data-label="${lab}"` : ''}>`; }) + '</tr>';
+    });
+    return '<table>' + body.replace(/(<thead>[\s\S]*?<\/thead>)/, (h) => h.replace(/ data-label="[^"]*"/g, '')) + '</table>';
+  });
+}
+
 const pages = fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html')).sort()
   .map((f) => ({ name: f.slice(0, -5), ...parse(path.join(SRC, 'pages', f)) }));
 const posts = pages.map((p) => postInfo(p.name, p.body)).filter(Boolean);
@@ -192,7 +207,7 @@ const urls = [];
 for (const { name, fm, body } of pages) {
   const content = name === 'blog' ? blogIndex(body, posts) : addAuthor(body);
   const { html, urlPath, noindex } = render(name, fm, content);
-  fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(html));
+  fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(labelTables(html)));
   if (!noindex && fm.sitemap !== 'false') urls.push(urlPath);
 }
 // Any address that doesn't exist sends the visitor to the homepage. Vercel serves dist/404.html for unknown
