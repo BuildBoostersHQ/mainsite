@@ -299,3 +299,5 @@ body{font-size:15.5px;padding-bottom:76px}
 /* Tap-to-call phone numbers */
 .tel{white-space:nowrap}
 p .tel,li .tel{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:3px}
+/* Cards on grey sections need a white background to stand out */
+.block.alt .tp-card{background:var(--card)}
