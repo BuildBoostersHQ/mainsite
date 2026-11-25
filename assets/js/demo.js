@@ -204,12 +204,14 @@ AF+'{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:lin
 '.bb-try{animation:bbBob 1.4s ease-in-out infinite}'+
 '}'+
 '.bb-try{position:absolute;z-index:5;left:0;top:0;transform:translateX(-50%);background:#0d1117;color:#fff;font:800 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;padding:9px 12px;border-radius:999px;white-space:nowrap;pointer-events:none;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);text-transform:none;letter-spacing:0}'+
-'.bb-try::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:#0d1117;transform:translateX(-50%) rotate(45deg);border-radius:2px}';
+'.bb-try::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:#0d1117;transform:translateX(-50%) rotate(45deg);border-radius:2px}'+
+'.bb-try.lt,html[data-theme="dark"] .bb-try{background:#fff;color:#0d1117;box-shadow:0 10px 24px -8px rgba(0,0,0,.6)}.bb-try.lt::after,html[data-theme="dark"] .bb-try::after{background:#fff}'+
+'@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .bb-try{background:#fff;color:#0d1117;box-shadow:0 10px 24px -8px rgba(0,0,0,.6)}html:not([data-theme="light"]) .bb-try::after{background:#fff}}';
 var st=document.createElement('style');st.textContent=c;document.head.appendChild(st);
 /* "Try it" bubble above the first estimate button */
 function bubble(){var f=document.querySelector('form#estimate')||document.querySelector('form[data-demo]');if(!f)return;var b=f.querySelector('button[type=submit]');if(!b)return;
  if(getComputedStyle(f).position==='static')f.style.position='relative';
- var t=document.createElement('span');t.className='bb-try';t.textContent='Click me, try it \ud83d\udc46';f.appendChild(t);
+ var t=document.createElement('span');t.className='bb-try'+(/^\/demo-(fresh|bold)\/?$/.test(location.pathname)?' lt':'');t.textContent='Click me, try it \ud83d\udc46';f.appendChild(t);
  function place(){var fr=f.getBoundingClientRect(),br=b.getBoundingClientRect();t.style.left=(br.left-fr.left+br.width/2)+'px';t.style.top=(br.top-fr.top-t.offsetHeight-10)+'px'}
  place();addEventListener('resize',place);setTimeout(place,600);
  f.addEventListener('submit',function(){t.remove()},{once:true});b.addEventListener('click',function(){t.remove()},{once:true});}
