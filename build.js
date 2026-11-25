@@ -257,17 +257,14 @@ for (const file of previews) {
   const slug = (P.slug || file.slice(0, -5)).toLowerCase().replace(/[^a-z0-9-]/g, '');
   P.slug = slug;
   const qs = new URLSearchParams(Object.entries(P.basics || {}).filter(([, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])).toString();
-  // Two copies: /preview/<slug> branded Build Boosters, and /p/<slug> branded Maddie, which her own domain serves as /<slug>.
-  for (const brand of ['bb', 'maddie']) {
-  const base = brand === 'bb' ? `/preview/${slug}` : `/${slug}`;
-  const hrefMap = Object.fromEntries(Object.entries(STYLE_PAGES).map(([k, v]) => ['/' + v, `${base}/${k}`]));
+  const hrefMap = Object.fromEntries(Object.entries(STYLE_PAGES).map(([k, v]) => ['/' + v, `/preview/${slug}/${k}`]));
   const def = STYLE_PAGES[P.style] ? P.style : 'fresh';
   for (const [key, pageName] of Object.entries(STYLE_PAGES)) {
     const page = pages.find((x) => x.name === pageName);
     if (!page) continue;
     const shim = '<script>' +
       `window.BB_PROSPECT=${JSON.stringify(P).replace(/</g, '\\u003c')};window.BB_QS=${JSON.stringify(qs)};` +
-      `window.BB_BRAND=${JSON.stringify(brand)};window.BB_HREF=${JSON.stringify(hrefMap)};window.bbHref=function(f){return window.BB_HREF[f]||f};` +
+      `window.BB_HREF=${JSON.stringify(hrefMap)};window.bbHref=function(f){return window.BB_HREF[f]||f};` +
       'window.bbT=function(t){var P=window.BB_PROSPECT;if(!P)return t;var o=Object.assign({},t);if(P.headline&&P.headline.length===2)o.h=P.headline;if(P.services&&P.services.length)o.s=P.services;return o};' +
       'window.bbRev=function(){var r=window.BB_PROSPECT.reviews;return r&&r.length?r:null};' +
       'document.addEventListener("DOMContentLoaded",function(){var P=window.BB_PROSPECT,T=P.text||{};' +
@@ -285,19 +282,11 @@ for (const file of previews) {
       .replace(/const custom=list\(S\.svcs\);/, 'const custom=window.BB_PROSPECT.services&&window.BB_PROSPECT.services.length?[]:list(S.svcs);');
     const fm = { ...page.fm, robots: 'noindex, nofollow', title: (P.basics && P.basics.biz) || 'Your New Website' };
     const { html } = render(pageName, fm, body);
-    const biz = (P.basics && P.basics.biz) || 'Your business';
-    const hero = P.photos && P.photos.hero;
-    let out = linkPhone(html).replace(/<script>window\.BB_PROSPECT/, '<script>window.BB_STYLE="/' + pageName + '";window.BB_PROSPECT')
-      .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${esc(biz)}: your new website">`)
-      .replace(/<meta property="og:url" content="[^"]*">/, '');
-    if (hero) out = out.replace(/(<meta (?:property="og:image"|name="twitter:image") content=")[^"]*(">)/g, `$1${esc(hero)}$2`).replace(/<meta property="og:image:(width|height)"[^>]*>\n?/g, '');
-    if (brand === 'maddie') out = out.replace(/<meta property="og:site_name" content="[^"]*">/, '<meta property="og:site_name" content="Maddie Jolie">')
-      .replace(/<link rel="canonical"[^>]*>\n?/, '').replace(/ by Build Boosters</g, ' by Maddie<');
-    const dir = path.join(OUT, brand === 'bb' ? 'preview' : 'p', slug);
+    const out = linkPhone(html).replace(/<script>window\.BB_PROSPECT/, '<script>window.BB_STYLE="/' + pageName + '";window.BB_PROSPECT');
+    const dir = path.join(OUT, 'preview', slug);
     fs.mkdirSync(path.join(dir, key), { recursive: true });
     fs.writeFileSync(path.join(dir, key, 'index.html'), out);
     if (key === def) fs.writeFileSync(path.join(dir, 'index.html'), out);
-  }
   }
 }
 if (previews.length) console.log(`Built ${previews.length} prospect preview${previews.length === 1 ? '' : 's'}.`);
