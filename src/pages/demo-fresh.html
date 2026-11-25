@@ -11,8 +11,8 @@ title: Your New Website
 <style>
 /* Fresh: bright and clean. Crisp white, strong sky blue, sunny yellow, full-width photos. Built for HVAC, plumbing, cleaning and pressure washing. */
 :root{
-  --main:#0B5394; --main-ink:#ffffff; --accent:#FFC531; --accent-ink:#0E1B2B;
-  --bg:#F2F7FC; --sky:#E1EDF9; --card:#FFFFFF; --fg:#0E1B2B; --muted:#55657A; --line:#DCE6F0;
+  --main:#1C77C3; --main-ink:#ffffff; --accent:#F39237; --accent-ink:#16191D; --sky2:#39A9DB; --teal:#40BCD8; --red:#D63230;
+  --bg:#F1F8FC; --sky:#DDEFF8; --card:#FFFFFF; --fg:#0E1B2B; --muted:#55657A; --line:#DCE6F0;
   --head:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif; --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --r:10px; --hl:var(--main);
 }
@@ -32,7 +32,8 @@ section[id]{scroll-margin-top:76px}
 .btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px currentColor}
 .btn.blue{background:var(--main);color:var(--main-ink)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.kicker{display:block;font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--hl);margin-bottom:14px}
+.kicker{display:flex;align-items:center;gap:10px;font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--hl);margin-bottom:14px}
+.kicker::before{content:"";width:26px;height:3px;border-radius:2px;background:var(--teal)}
 .h2{font-size:clamp(34px,4.6vw,58px);font-weight:900}
 .sec{padding-block:100px}
 .sec.sky{background:var(--sky)}
@@ -130,22 +131,22 @@ textarea{min-height:96px;resize:vertical}
 
 .revs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .rev{background:var(--card);border-radius:14px;padding:30px 28px;display:grid;gap:14px;align-content:start;box-shadow:0 10px 30px -18px rgba(8,30,60,.35);position:relative}
-.rev::before{content:"\201C";font:900 72px/.6 var(--head);color:var(--accent)}
+.rev::before{content:"\201C";font:900 72px/.6 var(--head);color:var(--red)}
 .rev p{margin:0;font-size:17px;line-height:1.6}
-.rev .stars{color:#F5A400;letter-spacing:2px}
+.rev .stars{color:var(--accent);letter-spacing:2px}
 .rev b{font:800 15px/1.2 var(--body)}
 .rev small{display:block;color:var(--muted);font:500 13px/1.4 var(--body)}
 .disc{color:var(--muted);font-size:13.5px;margin-top:18px}
 
 .areas{display:flex;flex-wrap:wrap;gap:10px 26px;font:800 clamp(20px,2.4vw,28px)/1.3 var(--head);letter-spacing:-.01em}
 .areas span{display:inline-flex;align-items:center;gap:10px}
-.areas span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.areas span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--teal)}
 
 .faq{display:grid;gap:12px;max-width:880px}
 .faq details{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:0 22px}
 .faq summary{cursor:pointer;list-style:none;padding:20px 0;font:800 18px/1.3 var(--head);display:flex;justify-content:space-between;gap:16px}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";color:var(--hl);font-size:24px;line-height:1}
+.faq summary::after{content:"+";color:var(--red);font-size:24px;line-height:1}
 .faq details[open] summary::after{content:"\2212"}
 .faq details p{margin:0 0 20px;color:var(--muted)}
 
@@ -498,7 +499,7 @@ function demoForms(own){document.querySelectorAll("form[data-demo]").forEach(f=>
 
 </script>
 <script>
-const DEF={biz:"Sunshine Home Services",trade:"handyman",city:"Palm Beach",phone:"5615550142",owner:"Danny",years:"12",lic:"",color:"0B5394",color2:"FFC531",areas:"Palm Beach,West Palm Beach,Palm Beach Gardens,Jupiter,Lake Worth,Boca Raton",svcs:"",logo:""};
+const DEF={biz:"Sunshine Home Services",trade:"handyman",city:"Palm Beach",phone:"5615550142",owner:"Danny",years:"12",lic:"",color:"1C77C3",color2:"F39237",areas:"Palm Beach,West Palm Beach,Palm Beach Gardens,Jupiter,Lake Worth,Boca Raton",svcs:"",logo:""};
 const S=demoState(DEF),D=demoData(S,DEF);
 const F={wmMain:D.wmMain,wmRest:D.biz.replace(/\b(llc|inc|corp|co)\.?$/i,"").trim().split(/\s+/).slice(D.wmMain.split(" ").length).join(" "),biz:D.biz,city:D.city,phone:D.phone,own:D.own,tagline:`${D.t.n} · ${D.city}`,
   h1a:D.t.h[0],h1b:D.t.h[1],
