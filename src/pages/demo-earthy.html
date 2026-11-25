@@ -16,8 +16,8 @@ title: Your New Website
   --head:"Fraunces",Georgia,"Times New Roman",serif; --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
   --r:20px; --r-lg:28px;
 }
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1612;--tint:#211C17;--card:#231E18;--fg:#F0E8DF;--muted:#A89B8E;--line:#3A3129;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1A1612;--tint:#211C17;--card:#231E18;--fg:#F0E8DF;--muted:#A89B8E;--line:#3A3129;color-scheme:dark}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1612;--tint:#2E261F;--card:#231E18;--fg:#F0E8DF;--muted:#A89B8E;--line:#3A3129;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1A1612;--tint:#2E261F;--card:#231E18;--fg:#F0E8DF;--muted:#A89B8E;--line:#3A3129;color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--fg);font:17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
@@ -93,12 +93,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .wave.bg{fill:var(--bg)}
 .wave.top{background:var(--bg)}
 
-.facts{background:var(--tint);color:var(--fg)}
+.facts{background:var(--main);color:var(--main-ink)}
 .facts .wrap{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
-.fact{padding:28px 16px;border-left:1px solid var(--line)}
+.fact{padding:28px 16px;border-left:1px solid rgba(255,255,255,.16)}
 .fact:first-child{border-left:0}
-.fact b{display:block;font:800 32px/1 var(--head);margin-bottom:6px;color:var(--main)}
-.fact span{font:600 13px/1.3 var(--body);color:var(--muted)}
+.fact b{display:block;font:800 32px/1 var(--head);margin-bottom:6px;color:inherit}
+.fact span{font:600 13px/1.3 var(--body);opacity:.8}
 
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .svc{background:var(--card);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 4px 20px -6px rgba(42,37,32,.12);transition:transform .2s,box-shadow .2s}
@@ -222,7 +222,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   <div class="fact"><b>Free</b><span>Written estimates</span></div>
   <div class="fact"><b>30 min</b><span>Text replies</span></div>
 </div></div>
-<svg class="wave flip bg top" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="fill:var(--tint)"><path d="M0 0s240 48 720 48S1440 0 1440 0v48H0z"/></svg>
+<svg class="wave flip bg top" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="fill:var(--main)"><path d="M0 0s240 48 720 48S1440 0 1440 0v48H0z"/></svg>
 
 <section class="sec" id="services"><div class="wrap">
   <div class="head"><div><span class="eyebrow">What we do</span><h2 class="h2" data-f="svcHead"></h2></div><p data-f="svcSub"></p></div>
@@ -454,7 +454,7 @@ const ICON={
  pressure:'<path d="M3 9h8l2.5 2.5H17"/><path d="M7 9V6h3v3"/><path d="M20 8.5v.01M21.5 11.5v.01M20 14.5v.01M18 17v.01"/>'
 };
 
-const STYLES=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Luxe"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]];
+const STYLES=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Freeze"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]];
 const $=s=>document.querySelector(s);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const list=s=>s?String(s).split(",").map(x=>x.trim()).filter(Boolean):[];

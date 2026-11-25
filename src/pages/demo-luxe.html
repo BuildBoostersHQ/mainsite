@@ -173,6 +173,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   .mbar .btn{padding:14px 10px;font-size:14.5px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Freeze: colored bands behind reviews and the estimate section */
+#reviews{background:linear-gradient(160deg,var(--main),color-mix(in srgb,var(--main) 80%,var(--accent)));color:var(--main-ink)}
+#reviews .g-head small{color:inherit;opacity:.75}#reviews .g-head .stars{color:color-mix(in srgb,var(--accent) 60%,#fff)}
+#reviews .rev{color:var(--fg);border:0;box-shadow:0 24px 48px -28px rgba(0,0,0,.5)}
+#contact{background:color-mix(in srgb,var(--accent) 16%,var(--bg));background-image:radial-gradient(circle at 85% 20%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 55%)}
+#contact .quote{box-shadow:0 30px 60px -30px color-mix(in srgb,var(--main) 60%,transparent);border:0;border-top:3px solid var(--accent)}
 </style>
 
 <div class="strip"><div class="wrap"><span>Preview built for <b data-f="biz"></b> by Build Boosters</span><nav class="styles" id="styles" aria-label="Site style"></nav></div></div>
@@ -443,7 +449,7 @@ const ICON={
  pressure:'<path d="M3 9h8l2.5 2.5H17"/><path d="M7 9V6h3v3"/><path d="M20 8.5v.01M21.5 11.5v.01M20 14.5v.01M18 17v.01"/>'
 };
 
-const STYLES=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Luxe"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]];
+const STYLES=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Freeze"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]];
 const $=s=>document.querySelector(s);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const list=s=>s?String(s).split(",").map(x=>x.trim()).filter(Boolean):[];
