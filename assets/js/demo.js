@@ -143,6 +143,10 @@ var css=''+
 '.bbs .bbs-cta{margin-top:12px;display:inline-flex;align-items:center;border:0;border-radius:999px;padding:11px 18px;background:#f2a20c;color:#16191d;font:800 14px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer;text-transform:none;letter-spacing:0;box-shadow:none}.bbs .bbs-cta:hover{filter:brightness(1.07)}.bbs.min .bbs-cta{display:none}'+
 '@media (max-width:1000px){.bbs-w{grid-template-columns:1fr;gap:14px}.bbs-t{padding-right:34px}}'+
 '@media (max-width:640px){.bbs-w{padding-block:14px}.bbs .bbs-t h2{font-size:19px}.bbs-m .h em{display:none}.bbs-t p{font-size:13.5px}.bbs-c{overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:2px 20px 4px;gap:10px;scrollbar-width:none}.bbs-c::-webkit-scrollbar{display:none}.bbs-k{width:150px;scroll-snap-align:start}.bbs-m{height:86px}}'+
+'.bbs-th{position:absolute;top:8px;right:calc(max(10px,env(safe-area-inset-right,0px)) + 38px);height:30px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:0;background:rgba(255,255,255,.08);color:#fff;font:700 12.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer}'+
+'.bbs-th:hover{background:rgba(255,255,255,.16)}.bbs-th span{font-size:14px;line-height:1}.bbs-th .i-sun{display:none}.bbs-th.dark .i-sun{display:inline}.bbs-th.dark .i-moon{display:none}'+
+'.bbs.min .bbs-th{top:50%;transform:translateY(-50%);right:max(10px,env(safe-area-inset-right,0px))}'+
+'@media (max-width:1000px){.bbs-t small{display:block;padding-right:150px}}'+
 '@media (prefers-reduced-motion:reduce){.bbs-k{transition:none}}';
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
 function headline(){var h=document.querySelector('h1');var t=h?h.textContent.replace(/\s+/g,' ').trim():'';return t||'Built right the first time.'}
@@ -156,11 +160,12 @@ var keep=location.search;
 var el=document.createElement('section');el.className='bbs';el.setAttribute('aria-label','Choose your website style');
 el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><button type="button" class="bbs-cta">Want this website? →</button></div><div class="bbs-c">'+
 ST.map(function(s){var on=s===cur;return '<a class="bbs-k" href="'+s.p+esc(keep)+'"'+(on?' aria-current="page"':'')+' data-style="'+s.n+'">'+mini(s)+'<span class="l"><b>'+s.n+'</b><span>'+(on?'You’re viewing':'Tap to preview')+'</span></span><span class="s">'+s.d+'</span></a>'}).join('')+
-'</div></div><button type="button" class="bbs-x" aria-label="Hide the style picker">×</button>';
+'</div></div>'+(cur.n==='Bold'?'':'<button type="button" class="bbs-th" aria-label="Switch light or dark mode"><span class="i-moon">☾</span><span class="i-sun">☀</span><b></b></button>')+'<button type="button" class="bbs-x" aria-label="Hide the style picker">×</button>';
 strip.parentNode.insertBefore(el,strip);
 var r=strip.querySelector('.strip-r a[href="#builder"]');strip.style.display='none';
 if(r){var mk=r.cloneNode(true);mk.style.cssText='color:rgba(255,255,255,.55);font-size:12px;font-weight:600;margin-left:10px;text-decoration:underline;text-underline-offset:3px';el.querySelector('.bbs-t small').appendChild(mk);mk.addEventListener('click',function(e){e.preventDefault();r.click()})}
 try{if(sessionStorage.getItem('bbsMin')==='1')el.classList.add('min')}catch(e){}
+var th=el.querySelector('.bbs-th');if(th){var R=document.documentElement;function isDark(){var a=R.getAttribute('data-theme');return a?a==='dark':matchMedia('(prefers-color-scheme: dark)').matches}function paint(){var d=isDark();th.classList.toggle('dark',d);th.querySelector('b').textContent=d?'Light mode':'Dark mode'}th.addEventListener('click',function(){var n=isDark()?'light':'dark';R.setAttribute('data-theme',n);try{localStorage.setItem('bbTheme',n)}catch(e){}paint()});paint();}
 el.querySelector('.bbs-x').addEventListener('click',function(){el.classList.add('min');try{sessionStorage.setItem('bbsMin','1')}catch(e){}});
 el.querySelector('.open').addEventListener('click',function(){el.classList.remove('min');try{sessionStorage.removeItem('bbsMin')}catch(e){}});
 el.querySelectorAll('.bbs-k').forEach(function(a){a.addEventListener('click',function(){flush()})});

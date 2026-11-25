@@ -96,6 +96,8 @@ function render(name, fm, body) {
     .replace(/{{path}}/g, urlPath);
   const year = String(new Date().getFullYear());
   let html = '<!doctype html>\n<html lang="en">\n<head>\n' + head;
+  // Demo sites: apply the visitor's saved light/dark choice before paint (toggle lives in demo.js).
+  if (layout === 'demo') html += '<script>try{var bbT=localStorage.getItem("bbTheme");if(bbT)document.documentElement.setAttribute("data-theme",bbT)}catch(e){}</script>\n';
   if (layout === 'site') html += FONTS + '\n<link rel="stylesheet" href="/assets/css/site.css">\n';
   // Chat widget on every page except the client demo sites (and any page that sets chat: false).
   const chat = layout !== 'demo' && fm.chat !== 'false';
