@@ -78,7 +78,7 @@ function reply(){var r=(Q.get('reply')||'').trim().slice(0,30);if(!r)return;
   while((x=w.nextNode())){var t=x.nodeValue;if(t.indexOf('30 min')<0)continue;
     x.nodeValue=t.replace(/within 30 minutes/g,'within '+r).replace(/in 30 min\b/g,'in '+r).replace(/^30 min$/,r)}}
 function patch(){var a=document.querySelector('.bbx-bar .bbx-claim');
-  if(a&&!a.hasAttribute('data-live')){var b=document.createElement('button');b.type='button';b.className='bbx-claim';b.setAttribute('data-live','1');b.textContent='Want this website? \u2192';a.replaceWith(b);b.addEventListener('click',openCard)}
+  if(a&&!a.hasAttribute('data-live')){var b=document.createElement('button');b.type='button';b.className='bbx-claim';b.setAttribute('data-live','1');b.textContent='Get this site \u2192';a.replaceWith(b);b.addEventListener('click',openCard)}
   reply()}
 function init(){patch();var n=0,iv=setInterval(function(){patch();if(++n>12)clearInterval(iv)},600);
   if(Q.get('biz')&&Q.get('me')!=='1'&&location.hash!=='#builder'){var seen=false;try{seen=sessionStorage.getItem('bblTip')==='1'}catch(e){}
@@ -140,7 +140,7 @@ var css=''+
 '.bbs-x{position:absolute;top:8px;right:max(10px,env(safe-area-inset-right,0px));width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:17px;line-height:1;cursor:pointer}'+
 '.bbs.min .bbs-w{grid-template-columns:1fr;padding-block:9px}.bbs.min .bbs-t p,.bbs.min .bbs-c,.bbs.min .bbs-t small{display:none}.bbs.min .bbs-t h2{font-size:14px!important}.bbs.min .bbs-t h2 button{all:unset;cursor:pointer;color:#f2a20c;text-decoration:underline;text-underline-offset:3px;margin-left:8px;font-weight:700}'+
 '.bbs .open{display:none}.bbs.min .open{display:inline}.bbs.min .bbs-x{display:none}'+
-'.bbs .bbs-cta{margin-top:12px;display:inline-flex;align-items:center;border:0;border-radius:999px;padding:11px 18px;background:#f2a20c;color:#16191d;font:800 14px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer;text-transform:none;letter-spacing:0;box-shadow:none}.bbs .bbs-cta:hover{filter:brightness(1.07)}.bbs.min .bbs-cta{display:none}'+
+'.bbs .bbs-cta{margin-top:12px;display:inline-flex;align-items:center;border:0;border-radius:999px;padding:15px 26px;background:#f2a20c;color:#16191d;font:800 16.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer;text-transform:none;letter-spacing:0;box-shadow:none}.bbs .bbs-cta:hover{filter:brightness(1.07)}.bbs.min .bbs-cta{display:none}'+
 '@media (max-width:1000px){.bbs-w{grid-template-columns:1fr;gap:14px}.bbs-t{padding-right:34px}}'+
 '@media (max-width:640px){.bbs-w{padding-block:14px}.bbs .bbs-t h2{font-size:19px}.bbs-m .h em{display:none}.bbs-t p{font-size:13.5px}.bbs-c{overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:2px 20px 4px;gap:10px;scrollbar-width:none}.bbs-c::-webkit-scrollbar{display:none}.bbs-k{width:104px;scroll-snap-align:start}.bbs-m{height:86px}}'+
 '.bbs-row{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-top:10px}.bbs .bbs-row .bbs-cta{margin-top:0}'+
@@ -166,7 +166,7 @@ if(document.querySelector('.bbs'))return true;
 var strip=document.querySelector('.strip');if(!strip||!document.querySelector('h1'))return false;
 var keep=location.search;
 var el=document.createElement('section');el.className='bbs';el.setAttribute('aria-label','Choose your website style');
-el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><span class="bbs-row"><button type="button" class="bbs-cta">Want this website? →</button>'+(cur.n==='Bold'?'':'<button type="button" class="bbs-th" title="Toggles light and dark" aria-live="polite"><svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><mask class="moon" id="bb-moon-mask"><rect x="0" y="0" width="100%" height="100%" fill="white"/><circle cx="24" cy="10" r="6" fill="black"/></mask><circle class="sun" cx="12" cy="12" r="6" mask="url(#bb-moon-mask)" fill="currentColor"/><g class="sun-beams" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg><b></b></button>')+'</span></div><div class="bbs-c">'+
+el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><span class="bbs-row"><button type="button" class="bbs-cta">Get this site for your business →</button>'+(cur.n==='Bold'?'':'<button type="button" class="bbs-th" title="Toggles light and dark" aria-live="polite"><svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><mask class="moon" id="bb-moon-mask"><rect x="0" y="0" width="100%" height="100%" fill="white"/><circle cx="24" cy="10" r="6" fill="black"/></mask><circle class="sun" cx="12" cy="12" r="6" mask="url(#bb-moon-mask)" fill="currentColor"/><g class="sun-beams" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg><b></b></button>')+'</span></div><div class="bbs-c">'+
 ST.map(function(s){var on=s===cur;return '<a class="bbs-k" href="'+s.p+esc(keep)+'"'+(on?' aria-current="page"':'')+' data-style="'+s.n+'">'+mini(s)+'<span class="l"><b>'+s.n+'</b></span></a>'}).join('')+
 '</div></div>'+'<button type="button" class="bbs-x" aria-label="Hide the style picker">×</button>';
 strip.parentNode.insertBefore(el,strip);
@@ -188,15 +188,30 @@ try{window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q
 if(!build()){var n=0,t=setInterval(function(){if(build()||++n>40)clearInterval(t)},150)}
 })();
 
-/* ---- attention cues: ringing phone icons, pulsing call buttons, a shine across the main estimate buttons ---- */
+/* ---- attention cues: ringing phone icons, pulsing call buttons, a constant glint on everything clickable, a "Try it" bubble on the estimate button ---- */
 (function(){if(!/^\/demo/.test(location.pathname))return;
+var CL='.btn,a.btn,button.btn,.bbs-cta,.bbx-claim,.bbx-revbtn,.bbp-btn:not(.ghost),.bbx-in button';
+var AF=CL.split(',').map(function(x){return x+'::after'}).join(',');
 var c='@media (prefers-reduced-motion:no-preference){'+
 '@keyframes bbRing{0%,82%,100%{transform:rotate(0)}84%{transform:rotate(-14deg)}86%{transform:rotate(12deg)}88%{transform:rotate(-10deg)}90%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}94%{transform:rotate(0)}}'+
 'a[href^="tel:"] svg,.nav-phone svg,.phone svg{animation:bbRing 3.2s ease-in-out infinite;transform-origin:50% 50%}'+
 '@keyframes bbPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 45%,transparent)}70%{box-shadow:0 0 0 14px transparent}100%{box-shadow:0 0 0 0 transparent}}'+
 '.mbar a[href^="tel:"],.hero a.btn[href^="tel:"]{animation:bbPulse 2.4s ease-out infinite}'+
-'@keyframes bbShine{0%,70%{transform:translateX(-120%) skewX(-20deg)}100%{transform:translateX(260%) skewX(-20deg)}}'+
-'.hero a.btn[href="#estimate"],form[data-demo] button.btn,.mbar a.btn[href="#estimate"],.nav a.btn[href="#estimate"]{position:relative;overflow:hidden;isolation:isolate}'+
-'.hero a.btn[href="#estimate"]::after,form[data-demo] button.btn::after,.mbar a.btn[href="#estimate"]::after,.nav a.btn[href="#estimate"]::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-120%) skewX(-20deg);animation:bbShine 4s ease-in-out infinite;pointer-events:none;z-index:-1}'+
-'}';
-var st=document.createElement('style');st.textContent=c;document.head.appendChild(st);})();
+'@keyframes bbShine{0%{transform:translateX(-150%) skewX(-20deg)}60%,100%{transform:translateX(330%) skewX(-20deg)}}'+
+CL+'{position:relative;overflow:hidden;isolation:isolate}'+
+AF+'{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-150%) skewX(-20deg);animation:bbShine 2.2s ease-in-out infinite;pointer-events:none;z-index:-1}'+
+'@keyframes bbBob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}'+
+'.bb-try{animation:bbBob 1.4s ease-in-out infinite}'+
+'}'+
+'.bb-try{position:absolute;z-index:5;left:0;top:0;transform:translateX(-50%);background:#0d1117;color:#fff;font:800 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;padding:9px 12px;border-radius:999px;white-space:nowrap;pointer-events:none;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);text-transform:none;letter-spacing:0}'+
+'.bb-try::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:#0d1117;transform:translateX(-50%) rotate(45deg);border-radius:2px}';
+var st=document.createElement('style');st.textContent=c;document.head.appendChild(st);
+/* "Try it" bubble above the first estimate button */
+function bubble(){var f=document.querySelector('form#estimate')||document.querySelector('form[data-demo]');if(!f)return;var b=f.querySelector('button[type=submit]');if(!b)return;
+ if(getComputedStyle(f).position==='static')f.style.position='relative';
+ var t=document.createElement('span');t.className='bb-try';t.textContent='Click me, try it \ud83d\udc46';f.appendChild(t);
+ function place(){var fr=f.getBoundingClientRect(),br=b.getBoundingClientRect();t.style.left=(br.left-fr.left+br.width/2)+'px';t.style.top=(br.top-fr.top-t.offsetHeight-10)+'px'}
+ place();addEventListener('resize',place);setTimeout(place,600);
+ f.addEventListener('submit',function(){t.remove()},{once:true});b.addEventListener('click',function(){t.remove()},{once:true});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bubble);else bubble();
+})();
