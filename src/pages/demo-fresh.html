@@ -65,7 +65,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* hero: full-width photo, headline low and left, quote bar overlapping the bottom */
 .hero{position:relative;min-height:min(680px,88svh);display:flex;align-items:flex-end;color:#fff;background:var(--main)}
 .hero-img{position:absolute;inset:0;background-size:cover;background-position:center}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--main) 25%,transparent) 0%,color-mix(in srgb,var(--main) 55%,transparent) 45%,color-mix(in srgb,var(--main) 94%,#000) 100%)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--main) 88%,#000) 0%,color-mix(in srgb,var(--main) 70%,transparent) 50%,color-mix(in srgb,var(--main) 25%,transparent) 100%),linear-gradient(180deg,transparent 40%,color-mix(in srgb,var(--main) 85%,#000) 100%)}
 .hero .wrap{position:relative;z-index:1;width:100%;padding-block:120px 150px}
 .badge{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:var(--r);font:800 13.5px/1 var(--body);margin-bottom:22px}
 .hero h1{font-size:clamp(46px,7.4vw,96px);font-weight:900;max-width:14ch;margin-bottom:20px;text-transform:none}
