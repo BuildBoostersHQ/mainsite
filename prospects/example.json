@@ -1,0 +1,7 @@
+{
+  "slug": "example",
+  "style": "fresh",
+  "basics": { "biz": "Sunshine Home Services", "trade": "handyman", "city": "Palm Beach", "phone": "5615550142", "owner": "Danny", "years": "12" },
+  "headline": ["Palm Beach home repairs,", "done right the first time."],
+  "text": { "heroSub": "This is a sample preview page. Real previews fill in the prospect's own copy, photos and Google reviews." }
+}

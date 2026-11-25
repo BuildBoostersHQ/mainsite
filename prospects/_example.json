@@ -1,0 +1,42 @@
+{
+  "_readme": "One file per prospect. Files starting with _ are skipped. Saved as prospects/<slug>.json, it builds buildboosters.com/preview/<slug> plus /preview/<slug>/classic, fresh, bold, freeze, edge and earthy. Every field except basics.biz, basics.trade and basics.city is optional; anything missing falls back to the trade template. Never invent reviews, years, licenses or owner names: leave the field out instead.",
+  "slug": "cool-breeze-ac",
+  "style": "fresh",
+  "basics": {
+    "biz": "Cool Breeze AC",
+    "trade": "hvac",
+    "city": "Miami",
+    "phone": "3055550142",
+    "owner": "Carlos",
+    "years": "",
+    "lic": "",
+    "color": "1C77C3",
+    "color2": "F39237",
+    "areas": "Miami,Coral Gables,Doral,Hialeah,Kendall",
+    "logo": "https://example.com/their-logo.png"
+  },
+  "headline": ["Miami AC repair", "that actually picks up."],
+  "services": [
+    ["AC Repair", "Same-day diagnosis on most calls, with the price in writing before any work starts."],
+    ["AC Installation", "New Carrier and Trane systems sized for your home, not upsold."]
+  ],
+  "text": {
+    "heroSub": "Family-run AC service for Miami homes since the owner's first truck. Written prices, on-time crews, and a text when we're on the way.",
+    "svcSub": "Not sure what you need? Text a photo of the unit and Carlos will tell you what it takes.",
+    "note1": "Two sentences in the owner's voice, built only from facts in their listing, site or reviews.",
+    "note2": "One more sentence about how they work, again only from real facts."
+  },
+  "reviews": [
+    ["Real Reviewer Name", "2 months ago", "Copied exactly from their Google reviews, never written for them."]
+  ],
+  "faq": [
+    ["Do you service my area?", "Answer built from their real service area."]
+  ],
+  "photos": {
+    "hero": "https://lh3.googleusercontent.com/...their-gbp-photo",
+    "note": "https://...owner-or-team-photo",
+    "work1": "https://...recent-job-1",
+    "work2": "https://...recent-job-2",
+    "work3": "https://...recent-job-3"
+  }
+}

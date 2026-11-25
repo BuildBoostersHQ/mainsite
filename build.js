@@ -247,6 +247,50 @@ for (const { name, fm, body } of pages) {
   fs.writeFileSync(path.join(OUT, name + '.html'), linkPhone(labelTables(html)));
   if (!noindex && fm.sitemap !== 'false') urls.push([urlPath, lastmod(name, body)]);
 }
+// Prospect previews: prospects/<slug>.json becomes buildboosters.com/preview/<slug> (their default style)
+// plus /preview/<slug>/<style> for each look. The data is baked into the page, so the links carry no parameters.
+const STYLE_PAGES = { classic: 'demo', fresh: 'demo-fresh', bold: 'demo-bold', freeze: 'demo-luxe', edge: 'demo-edge', earthy: 'demo-earthy' };
+const PDIR = path.join(ROOT, 'prospects');
+const previews = fs.existsSync(PDIR) ? fs.readdirSync(PDIR).filter((f) => f.endsWith('.json') && !f.startsWith('_')) : [];
+for (const file of previews) {
+  const P = JSON.parse(fs.readFileSync(path.join(PDIR, file), 'utf8'));
+  const slug = (P.slug || file.slice(0, -5)).toLowerCase().replace(/[^a-z0-9-]/g, '');
+  P.slug = slug;
+  const qs = new URLSearchParams(Object.entries(P.basics || {}).filter(([, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])).toString();
+  const hrefMap = Object.fromEntries(Object.entries(STYLE_PAGES).map(([k, v]) => ['/' + v, `/preview/${slug}/${k}`]));
+  const def = STYLE_PAGES[P.style] ? P.style : 'fresh';
+  for (const [key, pageName] of Object.entries(STYLE_PAGES)) {
+    const page = pages.find((x) => x.name === pageName);
+    if (!page) continue;
+    const shim = '<script>' +
+      `window.BB_PROSPECT=${JSON.stringify(P).replace(/</g, '\\u003c')};window.BB_QS=${JSON.stringify(qs)};` +
+      `window.BB_HREF=${JSON.stringify(hrefMap)};window.bbHref=function(f){return window.BB_HREF[f]||f};` +
+      'window.bbT=function(t){var P=window.BB_PROSPECT;if(!P)return t;var o=Object.assign({},t);if(P.headline&&P.headline.length===2)o.h=P.headline;if(P.services&&P.services.length)o.s=P.services;return o};' +
+      'window.bbRev=function(){var r=window.BB_PROSPECT.reviews;return r&&r.length?r:null};' +
+      'document.addEventListener("DOMContentLoaded",function(){var P=window.BB_PROSPECT,T=P.text||{};' +
+      'Object.keys(T).forEach(function(k){document.querySelectorAll("[data-f=\\""+k+"\\"]").forEach(function(el){el.textContent=T[k]})});' +
+      'if(P.reviews&&P.reviews.length){var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var n;while(n=w.nextNode()){if(/Sample Google reviews/.test(n.nodeValue))n.nodeValue="Real reviews from Google."}}' +
+      '});</script>\n';
+    let body = shim + page.body
+      .replace(/new URLSearchParams\(location\.search\)/g, 'new URLSearchParams(window.BB_QS)')
+      .replace(/\$\{f\}\$\{location\.search\}/g, '${bbHref(f)}')
+      .replace(/t=T\[tk\],city=S\.city/g, 't=bbT(T[tk]),city=S.city')
+      .replace(/const reviews=\[\[/g, 'const reviews=bbRev()||[[')
+      .replace(/const faq=\[\[/g, 'const faq=(window.BB_PROSPECT.faq&&window.BB_PROSPECT.faq.length?window.BB_PROSPECT.faq:null)||[[')
+      .replace(/const im=\(t,k\)=>/, 'const im=(t,k)=>(window.BB_PROSPECT.photos&&window.BB_PROSPECT.photos[k])||')
+      .replace(/\$\("#revs"\)\.innerHTML=\[\[([\s\S]*?)\]\]\n(\s*)\.map\(/, (m, inner, sp) => `$("#revs").innerHTML=(bbRev()||[[${inner}]])\n${sp}.map(`)
+      .replace(/const custom=list\(S\.svcs\);/, 'const custom=window.BB_PROSPECT.services&&window.BB_PROSPECT.services.length?[]:list(S.svcs);');
+    const fm = { ...page.fm, robots: 'noindex, nofollow', title: (P.basics && P.basics.biz) || 'Your New Website' };
+    const { html } = render(pageName, fm, body);
+    const out = linkPhone(html).replace(/<script>window\.BB_PROSPECT/, '<script>window.BB_STYLE="/' + pageName + '";window.BB_PROSPECT');
+    const dir = path.join(OUT, 'preview', slug);
+    fs.mkdirSync(path.join(dir, key), { recursive: true });
+    fs.writeFileSync(path.join(dir, key, 'index.html'), out);
+    if (key === def) fs.writeFileSync(path.join(dir, 'index.html'), out);
+  }
+}
+if (previews.length) console.log(`Built ${previews.length} prospect preview${previews.length === 1 ? '' : 's'}.`);
+
 // Any address that doesn't exist sends the visitor to the homepage. Vercel serves dist/404.html for unknown
 // paths with a 404 status, so Google drops dead links instead of indexing them as copies of the homepage.
 fs.writeFileSync(path.join(OUT, '404.html'), '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n' +
