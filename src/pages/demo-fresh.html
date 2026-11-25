@@ -7,7 +7,7 @@ title: Your New Website
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
 /* Fresh: bright and clean. Crisp white, strong sky blue, sunny yellow, full-width photos. Built for HVAC, plumbing, cleaning and pressure washing. */
 :root{
@@ -47,15 +47,19 @@ section[id]{scroll-margin-top:76px}
 .styles a{padding:3px 10px;border-radius:999px;opacity:.85}
 .styles a[aria-current]{background:var(--accent);color:var(--accent-ink);opacity:1}
 
-.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 20px -14px rgba(8,30,60,.5)}
+.nav .phone{color:var(--accent-ink)}
+.nav .links a:hover{color:var(--main)}
+.nav .btn{background:var(--main);color:var(--main-ink)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--accent)}
 .nav .wrap{display:flex;align-items:center;gap:28px;padding-block:14px}
 .logo{display:flex;align-items:center;gap:12px;min-width:0}
 .logo>span:last-child{min-width:0}
-.mark{width:40px;height:40px;flex:none;display:grid;place-items:center;background:var(--main);color:var(--accent);border-radius:var(--r)}
+.mark{display:none}
 .mark svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.logo b{display:block;font:900 21px/1.05 var(--head);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.logo small{display:block;font:700 11px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.logo b{display:block;font:800 27px/.95 "Bricolage Grotesque",var(--head);font-variation-settings:"opsz" 96;letter-spacing:-.045em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo b i{font-style:normal;color:var(--main)}
+.logo small{display:block;font:800 10.5px/1.2 var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--accent-ink);opacity:.7;margin-top:4px}
 .links{display:flex;gap:26px;margin-left:auto;white-space:nowrap;font:700 15px/1 var(--body)}
 .links a:hover{color:var(--hl)}
 .phone{display:flex;align-items:center;gap:10px;font:800 17px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--hl)}
@@ -73,6 +77,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .hero .lead{font-size:19px;max-width:52ch;margin:0;opacity:.95}
 .quickbar{position:relative;z-index:2;margin-top:-84px}
 .quickbar form{background:var(--card);color:var(--fg);border-radius:14px;box-shadow:0 30px 60px -24px rgba(8,30,60,.45);padding:22px;display:grid;grid-template-columns:1.1fr 1fr 1fr auto;gap:14px;align-items:end;border-top:5px solid var(--accent)}
+.quickbar form{background:var(--accent);color:var(--accent-ink);border-top:0;box-shadow:0 30px 60px -24px rgba(8,30,60,.5)}
+.quickbar label{color:var(--accent-ink);opacity:.85}
+.quickbar form h2 small,.quickbar form .fine{color:var(--accent-ink);opacity:.75}
+.quickbar input,.quickbar select{background:#fff;border-color:transparent;color:#0E1B2B}
+.quickbar input:focus,.quickbar select:focus{border-color:var(--main)}
+.quickbar .btn{background:var(--main);color:var(--main-ink)}
+.quickbar .note{background:rgba(255,255,255,.6)}
 .quickbar h2{grid-column:1/-1;font-size:22px;font-weight:800;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
 .quickbar h2 small{font:600 14px/1.3 var(--body);color:var(--muted)}
 label{display:grid;gap:6px;font:700 13px/1 var(--body);color:var(--muted)}
@@ -170,7 +181,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
 @media(max-width:600px){
   body{font-size:16px;padding-bottom:78px}
   .nav .btn,.phone span{display:none}
-  .logo b{font-size:18px}
+  .logo b{font-size:22px}
   .sec{padding-block:68px}
   .hero .wrap{padding-block:90px 120px}
   .quickbar form{grid-template-columns:1fr}
@@ -189,7 +200,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
 <div class="strip"><div class="wrap"><span>Preview built for <b data-f="biz"></b> by Build Boosters</span><nav class="styles" id="styles" aria-label="Site style"></nav></div></div>
 
 <header class="nav"><div class="wrap">
-  <a class="logo" href="#top" aria-label="Home"><span class="mark" id="mark"></span><span><b data-f="biz"></b><small data-f="tagline"></small></span></a>
+  <a class="logo" href="#top" aria-label="Home"><span class="mark" id="mark"></span><span><b><span data-f="wmMain"></span> <i data-f="wmRest"></i></b><small data-f="tagline"></small></span></a>
   <nav class="links" aria-label="Main"><a href="#services">Services</a><a href="#about">About</a><a href="#work">Our Work</a><a href="#reviews">Reviews</a><a href="#faq">FAQ</a></nav>
   <a class="phone" data-tel><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg><span data-f="phone"></span></a>
   <a class="btn" href="#estimate">Free Estimate</a>
@@ -488,7 +499,7 @@ function demoForms(own){document.querySelectorAll("form[data-demo]").forEach(f=>
 <script>
 const DEF={biz:"Sunshine Home Services",trade:"handyman",city:"Palm Beach",phone:"5615550142",owner:"Danny",years:"12",lic:"",color:"0B5394",color2:"FFC531",areas:"Palm Beach,West Palm Beach,Palm Beach Gardens,Jupiter,Lake Worth,Boca Raton",svcs:"",logo:""};
 const S=demoState(DEF),D=demoData(S,DEF);
-const F={biz:D.biz,city:D.city,phone:D.phone,own:D.own,tagline:`${D.t.n} · ${D.city}`,
+const F={wmMain:D.wmMain,wmRest:D.biz.replace(/\b(llc|inc|corp|co)\.?$/i,"").trim().split(/\s+/).slice(D.wmMain.split(" ").length).join(" "),biz:D.biz,city:D.city,phone:D.phone,own:D.own,tagline:`${D.t.n} · ${D.city}`,
   h1a:D.t.h[0],h1b:D.t.h[1],
   heroSub:`${D.t.n} for ${D.city} homeowners who want it done right the first time. Free written estimates, clear pricing, and a crew that shows up when we say we will.`,
   licTxt:D.lic?`License #${D.lic}`:"Proof sent before we start",
