@@ -1,0 +1,521 @@
+---
+layout: demo
+robots: noindex, follow
+title: Your New Website
+---
+<style>/* demo blank fallbacks */.strip [data-f="biz"]:empty::before,footer [data-f="biz"]:empty::before{content:"Your Business Name"}[data-f="year"]:empty::before{content:"2026"}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@400;500;600;700;800&family=Dancing+Script:wght@600&display=swap">
+<style>
+/* Luxe: editorial contractor site. White background, Playfair serif headings, generous whitespace, soft shadows. */
+:root{
+  --main:#1E293B; --main-ink:#FFFFFF; --accent:#4A7CBA; --accent-ink:#FFFFFF;
+  --bg:#FFFFFF; --soft:#F0F4F8; --card:#FFFFFF; --fg:#1A1A1A; --muted:#64748B; --line:#E2E8F0;
+  --head:"Playfair Display",Georgia,"Times New Roman",serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sig:"Dancing Script",cursive;
+  --r:18px; --pad:72px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F172A;--soft:#1E293B;--card:#1E293B;--fg:#E2E8F0;--muted:#94A3B8;--line:#334155;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F172A;--soft:#1E293B;--card:#1E293B;--fg:#E2E8F0;--muted:#94A3B8;--line:#334155;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:16px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;font-family:var(--head);font-weight:500;line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+section[id]{scroll-margin-top:80px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:var(--accent-ink);font:700 15px/1 var(--body);padding:16px 28px;border-radius:999px;border:0;cursor:pointer;white-space:nowrap;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px -8px color-mix(in srgb,var(--accent) 45%,transparent)}
+.btn.line{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.line:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.hero .btn.line{color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+.btn svg{width:18px;height:18px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.eyebrow{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.eyebrow::before{content:"";width:32px;height:1.5px;background:var(--accent)}
+.sec{padding-block:var(--pad)}
+.sec.alt{background:var(--soft)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:36px}
+.sec-head h2{font-size:clamp(30px,4vw,48px);max-width:18ch;margin-top:12px}
+.sec-head p{color:var(--muted);max-width:44ch;margin:0}
+.h2{font-size:clamp(28px,3.4vw,40px)}
+
+.strip{background:var(--main);color:var(--main-ink);font-size:12.5px;font-weight:600}
+.strip .wrap{display:flex;justify-content:space-between;gap:12px;padding-block:8px;flex-wrap:wrap;align-items:center}
+.strip b{color:var(--accent)}
+.styles{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.styles::before{content:"Style:";opacity:.7;margin-right:4px}
+.styles a{padding:3px 10px;border-radius:999px;opacity:.85}
+.styles a[aria-current]{background:var(--accent);color:var(--accent-ink);opacity:1}
+
+.nav{position:absolute;left:0;right:0;z-index:20;color:#fff}
+.nav.solid{position:fixed;top:0;background:color-mix(in srgb,var(--main) 95%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 4px 24px -8px rgba(0,0,0,.2);padding-top:env(safe-area-inset-top,0px);color:var(--main-ink)}
+.nav .wrap{display:flex;align-items:center;gap:28px;padding-block:18px}
+.nav.solid .wrap{padding-block:12px}
+.logo{display:flex;align-items:center;gap:14px;min-width:0;line-height:1}
+.mark{width:36px;height:36px;flex:none;color:var(--accent)}
+.mark svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wm{display:grid;gap:4px;min-width:0}
+.wm b{font:600 24px/1 var(--head);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm small{font:600 10px/1 var(--body);letter-spacing:.22em;text-transform:uppercase;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav.solid .mark{width:30px;height:30px}
+.nav.solid .wm b{font-size:20px}
+@media (max-width:600px){.wm b{font-size:20px}.mark{width:30px;height:30px}}
+.links{display:flex;gap:28px;margin-left:auto;font-weight:600;font-size:14px}
+.links a{opacity:.85}.links a:hover{opacity:1}
+.nav-phone{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.nav-phone svg{width:18px;height:18px;color:var(--accent)}
+.nav .btn{padding:12px 22px;font-size:14px}
+
+.hero{position:relative;color:#fff;min-height:min(720px,100svh);display:flex;align-items:center;overflow:hidden;background:var(--main)}
+.hero-img{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.03);animation:kb 20s ease-out forwards}
+@keyframes kb{to{transform:scale(1)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,color-mix(in srgb,var(--main) 94%,transparent) 0%,color-mix(in srgb,var(--main) 72%,transparent) 45%,color-mix(in srgb,var(--main) 25%,transparent) 100%)}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr .8fr;gap:56px;align-items:center;padding-block:140px 90px;width:100%}
+.rating{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:22px}
+.rating .stars{color:var(--accent);letter-spacing:1px}
+.hero h1{font-size:clamp(38px,5.5vw,68px);font-weight:400;margin-bottom:22px;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:color-mix(in srgb,var(--accent) 70%,#fff)}
+.hero .lead{font-size:17px;max-width:48ch;opacity:.88;margin:0 0 30px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.checks{display:flex;gap:22px;flex-wrap:wrap;margin-top:28px;font-size:13.5px;font-weight:600;opacity:.9}
+.checks span{display:flex;align-items:center;gap:8px}
+.checks svg{width:18px;height:18px;color:color-mix(in srgb,var(--accent) 70%,#fff)}
+
+.quote{background:var(--card);color:var(--fg);border-radius:var(--r);padding:30px;display:grid;gap:14px;box-shadow:0 32px 64px -24px rgba(0,0,0,.35);border-top:3px solid var(--accent)}
+.quote h2{font-size:24px;font-weight:600}
+.quote .sub{margin:-6px 0 4px;color:var(--muted);font-size:14px}
+.quote label{display:grid;gap:6px;font-size:13px;font-weight:700}
+.quote input,.quote textarea,.quote select{width:100%;font:15px var(--body);padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);color:var(--fg);transition:border-color .15s}
+.quote input:focus,.quote textarea:focus,.quote select:focus{border-color:var(--accent);outline:none}
+.quote textarea{min-height:88px;resize:vertical}
+.quote .btn{width:100%;padding:17px}
+.quote small{color:var(--muted);font-size:12px;text-align:center}
+.quote .note{background:color-mix(in srgb,var(--accent) 14%,var(--card));border-radius:12px;padding:12px 14px;font-size:13.5px}
+
+.facts{border-bottom:1px solid var(--line);background:var(--bg)}
+.facts .wrap{display:flex;flex-wrap:wrap;gap:8px 28px;padding-block:18px;font-size:14.5px;font-weight:600;color:var(--muted)}
+.facts b{color:var(--fg)}
+.facts .wrap>span{display:flex;align-items:center;gap:8px}
+.facts .wrap>span+span::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent);margin-right:20px}
+
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.svc-card{background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);transition:transform .2s,box-shadow .2s}
+.svc-card:hover{transform:translateY(-4px);box-shadow:0 20px 48px -16px rgba(0,0,0,.12)}
+.svc-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.svc-card div{padding:20px}
+.svc-card h3{font-size:19px;font-weight:600;margin-bottom:6px}
+.svc-card p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.55}
+.svc-card a{display:inline-block;margin-top:10px;font-size:14px;font-weight:700;color:var(--accent)}
+
+.note-wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.note-wrap img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--r)}
+.letter .h2{margin-bottom:22px}
+.letter .pull{font:italic 400 clamp(24px,3vw,34px)/1.2 var(--head);color:var(--fg);margin-bottom:24px;position:relative;padding-left:28px}
+.letter .pull::before{content:"\201C";position:absolute;left:0;top:-.1em;font-size:48px;color:var(--accent);line-height:1}
+.letter p{font-size:17px;line-height:1.7;margin:0 0 16px;max-width:52ch;color:var(--muted)}
+.sig{margin-top:28px}
+.sig .hand{font-family:var(--sig);font-size:36px;line-height:1;color:var(--fg)}
+.sig small{display:block;color:var(--muted);font-size:13px}
+
+.work{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.work img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r)}
+
+.g-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+.g-score{font:600 44px/1 var(--head);letter-spacing:-.02em}
+.g-head .stars{color:var(--accent);font-size:20px;letter-spacing:2px}
+.g-head small{display:block;color:var(--muted);font-size:13.5px}
+.revs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rev{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:grid;gap:12px;align-content:start}
+.rev .who{display:flex;align-items:center;gap:10px}
+.rev .who i{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#fff;font-weight:700;font-size:15px}
+.rev .who b{display:block;font-size:14.5px}
+.rev .who small{color:var(--muted);font-size:12.5px}
+.rev .stars{color:var(--accent);font-size:14px;letter-spacing:1px}
+.rev p{margin:0;font-size:15px;line-height:1.6;font-style:italic}
+
+.faqs{display:grid;grid-template-columns:1fr 1fr;gap:32px 56px}
+.faqs h3{font-size:17px;font-weight:600;margin:0 0 8px}
+.faqs p{margin:0;color:var(--muted);font-size:15px}
+
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.contact .quote{box-shadow:none;border:1px solid var(--line);border-top:3px solid var(--accent)}
+.info>p{color:var(--muted);margin:14px 0 0;max-width:46ch}
+.info dl{display:grid;grid-template-columns:auto 1fr;gap:12px 24px;margin:28px 0 0;font-size:15px}
+.info dt{color:var(--muted)}
+.info dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.info .big{font:600 28px/1 var(--head);letter-spacing:-.01em;margin-top:6px;display:block;font-variant-numeric:tabular-nums}
+
+footer{background:var(--main);color:var(--main-ink)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:26px calc(26px + env(safe-area-inset-bottom,0px));font-size:13.5px;opacity:.8}
+
+.mbar{display:none}
+@media (max-width:1040px){.links{display:none}.nav .wrap{justify-content:space-between}}
+@media (max-width:860px){
+  .hero .wrap{grid-template-columns:1fr;padding-block:120px 80px;gap:36px}
+  .note-wrap,.contact{grid-template-columns:1fr;gap:28px}
+  .svc-grid{grid-template-columns:1fr 1fr}
+  .faqs{grid-template-columns:1fr}
+  .revs{grid-template-columns:1fr 1fr}
+  .note-wrap img{aspect-ratio:16/10}
+}
+@media (max-width:600px){
+  body{font-size:15.5px;padding-bottom:76px}
+  .nav .btn,.nav-phone span{display:none}
+  .sec{padding-block:64px}
+  .revs,.svc-grid,.work{grid-template-columns:1fr}
+  .facts .wrap>span+span::before{display:none}
+  .mbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:10px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));box-shadow:0 -8px 24px -12px rgba(0,0,0,.15)}
+  .mbar .btn{padding:14px 10px;font-size:14.5px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="strip"><div class="wrap"><span>Preview built for <b data-f="biz"></b> by Build Boosters</span><nav class="styles" id="styles" aria-label="Site style"></nav></div></div>
+
+<header class="nav" id="nav"><div class="wrap">
+  <a class="logo" href="#top" aria-label="Home"><span class="mark" id="mark"></span><span class="wm"><b data-f="wmMain"></b><small data-f="wmSub"></small></span></a>
+  <nav class="links" aria-label="Main"><a href="#services">Services</a><a href="#about">About</a><a href="#work">Our Work</a><a href="#reviews">Reviews</a><a href="#contact">Contact</a></nav>
+  <span class="nav-phone"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg><span data-f="phone"></span></span>
+  <a class="btn" href="#estimate">Free Estimate</a>
+</div></header>
+
+<section class="hero" id="top">
+  <div class="hero-img" id="heroImg"></div>
+  <div class="wrap">
+    <div>
+      <div class="rating"><span class="stars">★★★★★</span>Rated 5 stars by <span data-f="city"></span> homeowners</div>
+      <h1><span data-f="h1a"></span> <em data-f="h1b"></em></h1>
+      <p class="lead" data-f="heroSub"></p>
+      <div class="ctas">
+        <a class="btn" href="#estimate">Get My Free Estimate <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn line" data-tel>Call <span data-f="phone"></span></a>
+      </div>
+      <div class="checks">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Licensed &amp; insured</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Upfront pricing</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Text replies in 30 min</span>
+      </div>
+    </div>
+    <form class="quote" id="estimate" data-demo>
+      <h2>Get a free estimate</h2>
+      <p class="sub">Tell us about the job. We'll text you back fast.</p>
+      <label for="f-name">Full name<input id="f-name" placeholder="Jason Smith" autocomplete="off"></label>
+      <label for="f-phone">Mobile number<input id="f-phone" inputmode="tel" placeholder="(555) 555-0142" autocomplete="off"></label>
+      <label for="f-svc">What do you need?<select id="f-svc"></select></label>
+      <label for="f-msg">Details<textarea id="f-msg" placeholder="A few words about the project"></textarea></label>
+      <button class="btn" type="submit">Request My Estimate</button>
+      <div class="note" hidden></div>
+      <small>By submitting you agree to receive texts about your request. Reply STOP to opt out.</small>
+    </form>
+  </div>
+</section>
+
+<div class="facts"><div class="wrap">
+  <span><b>Licensed &amp; insured</b><span data-f="licFact"></span></span>
+  <span><b data-f="yearsFact"></b></span>
+  <span>Free written estimates</span>
+  <span data-f="areasFact"></span>
+</div></div>
+
+<section class="sec" id="services"><div class="wrap">
+  <div class="sec-head"><div><span class="eyebrow">Our Services</span><h2 data-f="svcHead"></h2></div><p data-f="svcSub"></p></div>
+  <div class="svc-grid" id="svcGrid"></div>
+</div></section>
+
+<section class="sec alt" id="about"><div class="wrap note-wrap">
+  <img id="noteImg" alt="">
+  <div class="letter">
+    <span class="eyebrow">From the owner</span>
+    <h2 class="h2" data-f="noteHead"></h2>
+    <div class="pull" data-f="pull"></div>
+    <p data-f="note1"></p>
+    <p data-f="note2"></p>
+    <div class="sig"><span class="hand" data-f="own"></span><small data-f="ownerRole"></small></div>
+  </div>
+</div></section>
+
+<section class="sec" id="work"><div class="wrap">
+  <div class="sec-head"><div><span class="eyebrow">Our Work</span><h2 data-f="workHead"></h2></div><p>Every photo on the live site comes from your own jobs. Phone pictures work fine.</p></div>
+  <div class="work" id="gallery"></div>
+</div></section>
+
+<section class="sec alt" id="reviews"><div class="wrap">
+  <div class="g-head"><span class="g-score">5.0</span><div><span class="stars">★★★★★</span><small>Sample Google reviews. Yours load here once the site is live.</small></div></div>
+  <div class="revs" id="revs"></div>
+</div></section>
+
+<section class="sec" id="faq"><div class="wrap">
+  <div class="sec-head"><div><span class="eyebrow">FAQ</span><h2>Common questions</h2></div><p>Don't see yours? Text us and we'll answer the same day.</p></div>
+  <div class="faqs" id="faqs"></div>
+</div></section>
+
+<section class="sec alt" id="contact"><div class="wrap contact">
+  <div class="info">
+    <span class="eyebrow">Get in touch</span>
+    <h2 class="h2" data-f="contactHead"></h2>
+    <p data-f="contactSub"></p>
+    <dl>
+      <dt>Call or text</dt><dd><span class="big" data-f="phone"></span></dd>
+      <dt>Hours</dt><dd>Mon to Fri 8am to 6pm, Sat 9am to 2pm</dd>
+      <dt>Service area</dt><dd data-f="areasList"></dd>
+    </dl>
+  </div>
+  <form class="quote" id="estimate2" data-demo>
+    <h2>Request an estimate</h2>
+    <label for="g-name">Full name<input id="g-name" placeholder="Jason Smith" autocomplete="off"></label>
+    <label for="g-phone">Mobile number<input id="g-phone" inputmode="tel" placeholder="(555) 555-0142" autocomplete="off"></label>
+    <label for="g-msg">What do you need done?<textarea id="g-msg" placeholder="A few words about the project"></textarea></label>
+    <button class="btn" type="submit">Request My Estimate</button>
+    <div class="note" hidden></div>
+    <small>By submitting you agree to receive texts about your request. Reply STOP to opt out.</small>
+  </form>
+</div></section>
+
+<footer><div class="wrap"><span>© <span data-f="year"></span> <span data-f="biz"></span><span data-f="licLine"></span></span><span>Terms &amp; Conditions · Privacy Policy</span></div></footer>
+
+<div class="mbar"><a class="btn line" data-tel>Call now</a><a class="btn" href="#estimate">Free Estimate</a></div>
+<script>
+/* Prospect logo support for all demo styles: show their logo in the header and pull brand colors from it. */
+const BBLogo = (() => {
+  const KEY = "bbLogo";
+  const st = document.createElement("style");
+  st.textContent = ".logo.has-logo>:not(.bb-plate){display:none!important}.bb-plate{display:inline-flex;align-items:center;background:#fff;border-radius:10px;padding:6px 10px;box-shadow:0 2px 12px -4px rgba(0,0,0,.35);flex:none}.bb-plate img{display:block;max-height:42px;max-width:190px;width:auto;height:auto;object-fit:contain}@media (max-width:600px){.bb-plate img{max-height:34px;max-width:150px}}";
+  document.head.appendChild(st);
+
+  function get(biz, param) {
+    if (param && /^https:\/\//i.test(param)) return param;
+    try { const o = JSON.parse(sessionStorage.getItem(KEY) || "null"); if (o && o.biz === biz) return o.src; } catch (e) {}
+    return "";
+  }
+  function save(biz, src) {
+    try { src ? sessionStorage.setItem(KEY, JSON.stringify({ biz, src })) : sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+  function show(anchor, src, alt) {
+    if (!anchor) return;
+    let plate = anchor.querySelector(".bb-plate");
+    if (!src) { if (plate) plate.remove(); anchor.classList.remove("has-logo"); return; }
+    if (!plate) {
+      plate = document.createElement("span"); plate.className = "bb-plate";
+      const i = document.createElement("img"); plate.appendChild(i); anchor.prepend(plate);
+    }
+    const i = plate.querySelector("img");
+    i.onerror = () => { plate.remove(); anchor.classList.remove("has-logo"); };
+    i.alt = alt; i.src = src; anchor.classList.add("has-logo");
+  }
+  function load(src) {
+    return new Promise((res, rej) => {
+      const i = new Image();
+      if (/^https?:/i.test(src)) i.crossOrigin = "anonymous";
+      i.onload = () => res(i); i.onerror = () => rej(new Error("load")); i.src = src;
+    });
+  }
+  const hx = v => Math.round(v).toString(16).padStart(2, "0");
+  const toHex = o => hx(o.r) + hx(o.g) + hx(o.b);
+  const dist = (a, b) => Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b);
+  function hsl(o) {
+    const r = o.r / 255, g = o.g / 255, b = o.b / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+    const s = mx === mn ? 0 : (l > .5 ? (mx - mn) / (2 - mx - mn) : (mx - mn) / (mx + mn));
+    return { l, s };
+  }
+  /* Most common colors in the logo, ignoring transparent and near-white pixels. Throws if the image can't be read. */
+  function palette(img) {
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, k = Math.min(1, 140 / Math.max(w, h));
+    const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+    const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0, c.width, c.height);
+    const d = x.getImageData(0, 0, c.width, c.height).data, B = new Map(); let tot = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 160) continue;
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (r > 236 && g > 236 && b > 236) continue;
+      const key = (r >> 4) << 8 | (g >> 4) << 4 | (b >> 4);
+      let o = B.get(key); if (!o) { o = { r: 0, g: 0, b: 0, n: 0 }; B.set(key, o); }
+      o.r += r; o.g += g; o.b += b; o.n++; tot++;
+    }
+    if (!tot) return [];
+    const L = [...B.values()].map(o => ({ r: o.r / o.n, g: o.g / o.n, b: o.b / o.n, n: o.n })).sort((a, b) => b.n - a.n), out = [];
+    for (const c2 of L) {
+      const m = out.find(o => dist(o, c2) < 50);
+      if (m) { const t = m.n + c2.n; m.r = (m.r * m.n + c2.r * c2.n) / t; m.g = (m.g * m.n + c2.g * c2.n) / t; m.b = (m.b * m.n + c2.b * c2.n) / t; m.n = t; }
+      else out.push({ ...c2 });
+    }
+    return out.sort((a, b) => b.n - a.n).filter(o => o.n / tot > .008).slice(0, 8)
+      .map(o => ({ ...o, share: o.n / tot, hex: toHex(o), ...hsl(o) }));
+  }
+  const darken = (o, f) => toHex({ r: o.r * f, g: o.g * f, b: o.b * f });
+  /* Main = the brand's dominant dark-enough color; button = the most vivid color that stands apart from it. */
+  function pick(pal) {
+    if (!pal.length) return null;
+    let main = pal.find(o => o.l < .5 && (o.s > .18 || o.l < .2)) || pal.find(o => o.s > .18) || pal[0];
+    const mainHex = main.l < .5 ? main.hex : darken(main, .45 / Math.max(main.l, .01));
+    let best = null, bs = 0;
+    for (const o of pal) {
+      if (o === main || o.s < .3 || o.l < .25 || o.l > .82) continue;
+      const sc = o.s * (dist(o, main) / 441) * Math.pow(o.share, .25);
+      if (sc > bs) { bs = sc; best = o; }
+    }
+    if (!best && main.s > .3 && main.l >= .35) best = main;
+    return { main: mainHex, accent: best ? best.hex : null };
+  }
+  return { get, save, show, load, palette, pick };
+})();
+
+</script>
+<script>
+const T = {
+ handyman:{n:"Handyman",h:["Home repairs,","done right."],s:[
+  ["General Repairs","Everyday fixes and maintenance that keep your home in good shape."],
+  ["Drywall Repair","Holes, cracks and water damage patched and finished so you can't tell."],
+  ["Doors & Windows","Sticking doors, broken hardware and window trim fixed for good."],
+  ["Mounting & Installation","TVs, shelves, art and blinds mounted level and secure."],
+  ["Painting & Touch-Ups","Walls, ceilings and trim painted with careful prep and clean lines."],
+  ["Furniture Assembly","Beds, desks and cabinets assembled without the instruction headache."]]},
+ roofing:{n:"Roofing",h:["Roofs built to","ride out the storm."],s:[
+  ["Roof Replacement","Full tear-off and replacement with materials matched to your home."],
+  ["Roof Repair","Leaks, missing shingles and flashing fixed before they spread."],
+  ["Storm Damage","Inspection, photos and repair after wind and hail, plus insurance help."],
+  ["Shingle Roofing","Architectural shingles installed to spec for a full warranty."],
+  ["Tile Roofing","Concrete and clay tile installed and repaired by tile specialists."],
+  ["Roof Inspections","Detailed reports with photos so you know exactly what you need."]]},
+ plumbing:{n:"Plumbing",h:["Fast, honest","plumbing."],s:[
+  ["Drain Cleaning","Slow and clogged drains cleared for good, not just for the week."],
+  ["Pipe Repair","Leaks and corroded pipes fixed before they cause water damage."],
+  ["Water Heaters","Tank and tankless units repaired and installed, often same day."],
+  ["Repiping","Old pipes replaced with modern PEX or copper."],
+  ["Fixture Installation","Faucets, toilets, sinks and showers installed leak-free."],
+  ["Water Line Repair","Main and supply lines located and repaired with minimal digging."]]},
+ hvac:{n:"HVAC",h:["Cool, quiet comfort","all year long."],s:[
+  ["AC Repair","Fast diagnosis and repair to get the cold air back on."],
+  ["AC Installation","High-efficiency systems sized right for your home."],
+  ["Maintenance Plans","Seasonal tune-ups that prevent breakdowns and lower bills."],
+  ["Heat Pumps","Heat pump repair and installation for year-round comfort."],
+  ["Ductless Mini-Splits","Quiet, efficient cooling for additions, garages and hot rooms."],
+  ["Duct Cleaning","Cleaner air and better airflow from cleaned, sealed ducts."]]},
+ electrical:{n:"Electrical",h:["Safe, code-right","electrical work."],s:[
+  ["Panel Upgrades","Older panels replaced to handle today's appliances safely."],
+  ["Troubleshooting","Tripping breakers and dead circuits traced and fixed."],
+  ["Breakers & Wiring","Rewiring and new circuits done to code and inspected."],
+  ["Lighting Installation","Recessed, outdoor and fixture lighting installed cleanly."],
+  ["Outdoor Power","Exterior outlets, fuse boxes and landscape lighting."],
+  ["EV Chargers","Level 2 home chargers installed and permitted."]]},
+ landscaping:{n:"Landscaping",h:["Yards your neighbors","stop to look at."],s:[
+  ["Lawn Care","Weekly mowing, edging and trimming that keeps the yard sharp."],
+  ["Hedge Trimming","Hedges and shrubs shaped clean and kept healthy."],
+  ["Tree Trimming","Safe trimming that keeps trees healthy and off the roof."],
+  ["Garden Design","Planting plans built around your space, sun and style."],
+  ["Walkways & Patios","Paths and patios that frame the yard and last."],
+  ["Hardscaping","Pavers, borders and stonework that hold up for years."]]},
+ remodeling:{n:"Remodeling",h:["Remodels done right,","on time."],s:[
+  ["Kitchen Remodeling","Layouts, cabinets and counters for a kitchen you'll use every day."],
+  ["Bathroom Remodeling","Showers, vanities and tile turned into a room you enjoy."],
+  ["Kitchen Renovation","Updates that refresh the space without a full gut."],
+  ["Interior Renovation","Whole-room updates from demo to final walkthrough."],
+  ["Cabinets & Counters","New cabinets and countertops installed level and tight."],
+  ["Backsplash & Tile","Tile work that finishes the room with clean lines."]]},
+ painting:{n:"Painting",h:["Clean lines,","paint that lasts."],s:[
+  ["Interior Painting","Walls, ceilings and trim painted with careful prep."],
+  ["Drywall & Prep","Patches and texture matched before the first coat."],
+  ["Commercial Painting","Offices and storefronts painted on your schedule."],
+  ["Accent Walls","Bold colors and finishes that change the feel of a room."],
+  ["Wall Repair","Dents and cracks repaired so the finish looks new."],
+  ["Spray Finishes","Smooth spray finishes for cabinets, doors and trim."]]},
+ pressure:{n:"Pressure Washing",h:["Make your home","look brand new."],s:[
+  ["Driveway Cleaning","Oil, mold and dirt lifted from concrete and pavers."],
+  ["Equipment Washing","Trucks, trailers and equipment cleaned top to bottom."],
+  ["Gutter Cleaning","Gutters cleared and flushed so water drains away."],
+  ["Pool Decks","Slippery, stained pool decks cleaned and brightened."],
+  ["House Washing","Gentle soft washing for siding, stucco and trim."],
+  ["Window Cleaning","Streak-free windows inside and out."]]}
+};
+const ICON={
+ handyman:'<path d="M14.5 3.5l3 3-2 2 3.5 3.5-2 2-3.5-3.5-2 2-3-3z"/><path d="M9.5 10.5L3 17l3 3 6.5-6.5"/>',
+ roofing:'<path d="M2 12.5L12 4l10 8.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/>',
+ plumbing:'<path d="M12 3s6 6.8 6 11a6 6 0 0 1-12 0c0-4.2 6-11 6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/>',
+ hvac:'<path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17"/><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/>',
+ electrical:'<path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/>',
+ landscaping:'<path d="M5 20c0-8.5 5-14 15-15-.8 9.5-6.5 14.5-15 15z"/><path d="M5 20l8.5-8.5"/>',
+ remodeling:'<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-6h5v6"/>',
+ painting:'<rect x="3" y="3.5" width="14" height="6" rx="1.5"/><path d="M17 6.5h3.5v5.5H11v3"/><rect x="9.5" y="15" width="3" height="6" rx="1"/>',
+ pressure:'<path d="M3 9h8l2.5 2.5H17"/><path d="M7 9V6h3v3"/><path d="M20 8.5v.01M21.5 11.5v.01M20 14.5v.01M18 17v.01"/>'
+};
+
+const STYLES=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Luxe"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]];
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const list=s=>s?String(s).split(",").map(x=>x.trim()).filter(Boolean):[];
+const hex=(c,d)=>{c=String(c||"").replace("#","");return /^[0-9a-f]{6}$/i.test(c)?c:d};
+const ink=c=>{const n=parseInt(c,16);return ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>150?"#16191d":"#ffffff"};
+const fmtPhone=p=>{const d=String(p).replace(/\D/g,"").replace(/^1(?=\d{10}$)/,"");return d.length===10?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:p};
+const IMG={"electrical-hero":"6af5e0fbc007ee82acfc3889","electrical-note":"6af5e0fb4dccfd82dad77ede","electrical-svc3":"6af5e0fa4a2360a4d7b76b7e","electrical-svc1":"6af5e0fb4a2360a4d7b76bb2","electrical-svc5":"6af5e0fafebc0d282b0b4dc4","electrical-svc4":"6af5e0fa9b3d448d808a8548","electrical-work2":"6af5e0fa2dafa09586f577ae","electrical-work1":"6af5e0fa2dafa09586f5778a","electrical-svc2":"6af5e0fa8af1a750f4247c67","electrical-svc6":"6af5e0f94a2360a4d7b76b4a","handyman-svc1":"6af5e0f9e2f577d4a302eb67","handyman-note":"6af5e0f95364d71dd3e4b935","handyman-hero":"6af5e0f95364d71dd3e4b929","electrical-work3":"6af5e0f9ea5d882de5d367b0","handyman-svc6":"6af5e0f98af1a750f4247c43","handyman-svc5":"6af5e0f9febc0d282b0b4d70","handyman-svc4":"6af5e0f98af1a750f4247c0a","handyman-svc3":"6af5e0f9ea5d882de5d36769","handyman-svc2":"6af5e0f9febc0d282b0b4d50","handyman-work3":"6af5e0f84dccfd82dad77e72","hvac-hero":"6af5e0f92dafa09586f57731","handyman-work1":"6af5e0f8febc0d282b0b4d18","handyman-work2":"6af5e0f8ea5d882de5d3675d","hvac-svc3":"6af5e0f89b3d448d808a84c8","hvac-svc2":"6af5e0f85364d71dd3e4b8e3","hvac-svc1":"6af5e0f82dafa09586f576ea","hvac-note":"6af5e0f89b3d448d808a84b7","hvac-svc5":"6af5e0f74a2360a4d7b76abe","hvac-work1":"6af5e0f79b3d448d808a8484","hvac-svc6":"6af5e0f79b3d448d808a8478","landscaping-hero":"6af5e0f79b3d448d808a845c","hvac-svc4":"6af5e0f78af1a750f4247b7b","landscaping-note":"6af5e0f78af1a750f4247b9a","hvac-work2":"6af5e0f69b3d448d808a8450","hvac-work3":"6af5e0f6c007ee82acfc37dc","landscaping-svc4":"6af5e0f64a2360a4d7b76a87","landscaping-svc3":"6af5e0f64a2360a4d7b76a7c","landscaping-svc2":"6af5e0f6febc0d282b0b4cbb","landscaping-svc1":"6af5e0f6febc0d282b0b4cb0","landscaping-work2":"6af5e0f6ea5d882de5d366f3","landscaping-svc6":"6af5e0f64dccfd82dad77da6","landscaping-work1":"6af5e0f6febc0d282b0b4c8c","landscaping-svc5":"6af5e0f6c007ee82acfc37ae","painting-note":"6af5e0f55364d71dd3e4b865","painting-svc1":"6af5e0f6febc0d282b0b4c70","painting-hero":"6af5e0f5febc0d282b0b4c27","landscaping-work3":"6af5e0f5e2f577d4a302ea86","painting-svc2":"6af5e0f55364d71dd3e4b82f","painting-work1":"6af5e0f52dafa09586f5764c","painting-svc3":"6af5e0f5e2f577d4a302ea96","painting-svc4":"6af5e0f5c007ee82acfc378a","painting-svc6":"6af5e0f4e2f577d4a302ea3b","plumbing-note":"6af5e0f44dccfd82dad77d5c","plumbing-hero":"6af5e0f42dafa09586f57640","painting-svc5":"6af5e0f4e2f577d4a302ea27","painting-work3":"6af5e0f48af1a750f4247b17","painting-work2":"6af5e0f4ea5d882de5d3668b","plumbing-work1":"6af5e0f38af1a750f4247ab0","plumbing-svc3":"6af5e0f34a2360a4d7b769e8","plumbing-svc2":"6af5e0f3e2f577d4a302ea07","plumbing-svc4":"6af5e0f44dccfd82dad77d2e","plumbing-work2":"6af5e0f32dafa09586f5760a","plumbing-svc1":"6af5e0f32dafa09586f57618","pressure-note":"6af5e0f34dccfd82dad77ce6","pressure-hero":"6af5e0f2febc0d282b0b4b6f","pressure-svc1":"6af5e0f34dccfd82dad77cd6","plumbing-svc5":"6af5e0f3febc0d282b0b4b7c","plumbing-svc6":"6af5e0f3febc0d282b0b4b8b","plumbing-work3":"6af5e0f2febc0d282b0b4b64","pressure-svc4":"6af5e0f25364d71dd3e4b777","pressure-work1":"6af5e0f2ea5d882de5d365fb","pressure-work2":"6af5e0f25364d71dd3e4b76b","pressure-svc5":"6af5e0f2ea5d882de5d3660f","pressure-svc2":"6af5e0f29b3d448d808a8340","pressure-svc3":"6af5e0f22dafa09586f575e0","pressure-svc6":"6af5e0f1ea5d882de5d365cb","pressure-work3":"6af5e0f1febc0d282b0b4b30","remodeling-hero":"6af5e0f1ea5d882de5d365ab","remodeling-note":"6af5e0f14a2360a4d7b76958","remodeling-svc1":"6af5e0f1e2f577d4a302e97f","remodeling-svc5":"6af5e0f18af1a750f4247a40","remodeling-work2":"6af5e0f0e2f577d4a302e95f","remodeling-svc2":"6af5e0f08af1a750f4247a17","remodeling-svc4":"6af5e0f02dafa09586f575a3","remodeling-svc3":"6af5e0f02dafa09586f57598","remodeling-work3":"6af5e0f0c007ee82acfc3716","remodeling-work1":"6af5e0f04dccfd82dad77c90","remodeling-svc6":"6af5e0f04a2360a4d7b768ef","roofing-svc1":"6af5e0efea5d882de5d36545","roofing-hero":"6af5e0efc007ee82acfc36e2","roofing-svc6":"6af5e0efea5d882de5d36539","roofing-note":"6af5e0efc007ee82acfc36e8","roofing-svc5":"6af5e0efc007ee82acfc36d2","roofing-work2":"6af5e0efea5d882de5d36505","roofing-svc2":"6af5e0ee8af1a750f42479b1","roofing-svc4":"6af5e0ee4a2360a4d7b768c6","roofing-work1":"6af5e0ee2dafa09586f57558","roofing-svc3":"6af5e0ee8af1a750f42479bb","roofing-work3":"6af5e0eefebc0d282b0b4ac8"};const im=(t,k)=>"https://files.leadconnectorhq.com/file/"+IMG[t+"-"+k]+"/demo-"+t+"-"+k+".webp";
+function demoState(DEF){const p=new URLSearchParams(location.search),o={...DEF};for(const k in DEF){const v=p.get(k);if(v!==null&&v.trim()!=="")o[k]=v.trim().slice(0,k==="logo"?600:160)}return o}
+function demoData(S,DEF){
+  const tk=T[S.trade]?S.trade:"handyman",t=T[tk],city=S.city,biz=S.biz,own=S.owner;
+  const main=hex(S.color,DEF.color),acc=hex(S.color2,DEF.color2),R=document.documentElement.style;
+  R.setProperty("--main","#"+main);R.setProperty("--main-ink",ink(main));
+  R.setProperty("--accent","#"+acc);R.setProperty("--accent-ink",ink(acc));
+  const custom=list(S.svcs);
+  const svcs=custom.length?custom.slice(0,8).map(n=>t.s.find(x=>x[0].toLowerCase()===n.toLowerCase())||[n,`${n} for ${city} homes, quoted up front and done right the first time.`]):t.s;
+  const areas=list(S.areas).length?list(S.areas).slice(0,12):[city];
+  const yrs=parseInt(S.years,10);
+  const areaTxt=areas.length>1?areas.slice(0,-1).join(", ")+" and "+areas[areas.length-1]:areas[0];
+  const phone=fmtPhone(S.phone);
+  const words=biz.replace(/\b(llc|inc|corp|co)\.?$/i,"").trim().split(/\s+/);
+  let cut=words[0].length<4&&words.length>2?2:1;if(words.length===1)cut=1;
+  const reviews=[["Carla Mendez","2 weeks ago",`Called on a Monday and they were here Tuesday. Price was exactly what the estimate said. Will use again.`],["David R.","1 month ago",`${own} explained what was wrong and what it would cost before touching anything. Crew cleaned up after themselves too.`],["Ana Pereira","3 months ago",`Third time using ${biz}. Always on time and they text you when they're on the way, which I love.`]];
+  const faq=[["Are you licensed and insured?",`Yes. We'll send proof of license and insurance before any work starts.`],
+    ["Do you charge for estimates?",`No. Every estimate is free and in writing.`],
+    ["How soon can you start?","Jobs are usually on the calendar within a few days of approving the estimate. Urgent repairs often get same-week service."],
+    ["Do you work in my area?",`We cover ${areaTxt}. If you're nearby, text us and we'll let you know.`],
+    ["Can I just send a photo?",`Yes. Text a photo to ${phone} and we can often give you a ballpark right away.`],
+    ["How do I pay?","Card, check or bank transfer once the job is done and you're happy with it."]];
+  document.title=`${biz} | ${t.n} in ${city}`;
+  return {tk,t,city,biz,own,svcs,areas,yrs,areaTxt,phone,reviews,faq,lic:S.lic,
+    wmMain:words.slice(0,cut).join(" "),wmSub:words.length>cut?words.slice(cut).join(" "):t.n,
+    since:yrs>0?new Date().getFullYear()-yrs:null,year:new Date().getFullYear(),
+    icon:`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[tk]}</svg>`};
+}
+function styleLinks(el,current){el.innerHTML=STYLES.map(([f,n])=>`<a href="${f}${location.search}"${f===current?' aria-current="page"':''}>${n}</a>`).join("");}
+function demoForms(own){document.querySelectorAll("form[data-demo]").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const n=f.querySelector(".note");n.hidden=false;n.textContent=`On your live site, this request lands on ${own}'s phone as a text right away. This preview doesn't send anything.`}))}
+
+</script>
+<script>
+const DEF={biz:"Sunshine Home Services",trade:"handyman",city:"Palm Beach",phone:"5615550142",owner:"Danny",years:"12",lic:"",color:"1E293B",color2:"4A7CBA",areas:"Palm Beach,West Palm Beach,Palm Beach Gardens,Jupiter,Lake Worth,Boca Raton",svcs:"",logo:""};
+const S=demoState(DEF),D=demoData(S,DEF);
+const F={biz:D.biz,city:D.city,phone:D.phone,own:D.own,wmMain:D.wmMain,wmSub:D.wmSub,
+  h1a:D.t.h[0],h1b:D.t.h[1],
+  heroSub:`${D.t.n} for ${D.city} homeowners who want it done right the first time. Free written estimates, clear pricing, and a crew that shows up when we say we will.`,
+  licFact:D.lic?` · Lic. #${D.lic}`:"",
+  yearsFact:D.since?`In business since ${D.since}`:"Locally owned",
+  areasFact:`Serving ${D.areas.slice(0,3).join(", ")}${D.areas.length>3?" & nearby":""}`,
+  svcHead:`What we do`,
+  svcSub:`Not sure which one you need? Send a photo and a sentence. ${D.own} will tell you what it takes and what it costs.`,
+  noteHead:`A note from ${D.own}`,
+  pull:`If it's not right, call me directly.`,
+  note1:`I started ${D.biz}${D.yrs>0?` ${D.yrs} years ago`:""} because too many people in ${D.city} told me the same story: the contractor didn't call back, didn't show up, or left a mess. We do the opposite.`,
+  note2:`You'll get a written price before we start, a text when we're on the way, and I'll walk the job with you when it's done.`,
+  ownerRole:`Owner, ${D.biz}`,workHead:`Recent work around ${D.city}`,
+  contactHead:`Get a free estimate`,
+  contactSub:`Send the form or text us a photo of the job. We usually reply within 30 minutes during business hours.`,
+  areasList:D.areaTxt,licLine:D.lic?` · License #${D.lic}`:"",year:D.year};
+document.querySelectorAll("[data-f]").forEach(el=>{el.textContent=F[el.dataset.f]??""});
+const tel="tel:+1"+S.phone.replace(/\D/g,"").replace(/^1(?=\d{10}$)/,"");
+document.querySelectorAll("[data-tel]").forEach(a=>a.href=tel);
+document.querySelectorAll('[data-f="phone"]').forEach(el=>{if(el.closest("a"))return;const a=document.createElement("a");a.href=tel;a.textContent=el.textContent;el.textContent="";el.appendChild(a)});
+$("#mark").innerHTML=D.icon;
+$("#heroImg").style.backgroundImage=`url("${im(D.tk,"hero")}")`;
+const ni=$("#noteImg");ni.src=im(D.tk,"note");ni.alt=`${D.own}, owner of ${D.biz}`;
+$("#svcGrid").innerHTML=D.svcs.map((s,i)=>`<div class="svc-card"><img src="${im(D.tk,"svc"+(i%6+1))}" alt="${esc(s[0])} in ${esc(D.city)}" loading="lazy"><div><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p><a href="#estimate">Get a price →</a></div></div>`).join("");
+$("#f-svc").innerHTML=D.svcs.map(s=>`<option>${esc(s[0])}</option>`).join("")+"<option>Something else</option>";
+$("#gallery").innerHTML=["work1","work2","work3"].map(k=>`<img src="${im(D.tk,k)}" alt="${esc(D.t.n)} project in ${esc(D.city)}" loading="lazy">`).join("");
+const cols=["#5c6bc0","#00897b","#e65100"];
+$("#revs").innerHTML=D.reviews.map(([n,d,q],i)=>`<div class="rev"><div class="who"><i style="background:${cols[i]}">${esc(n[0])}</i><div><b>${esc(n)}</b><small>${d}</small></div></div><span class="stars" aria-label="5 stars">★★★★★</span><p>${esc(q)}</p></div>`).join("");
+$("#faqs").innerHTML=D.faq.map(([q,a])=>`<div><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join("");
+const nav=$("#nav");const onScroll=()=>nav.classList.toggle("solid",scrollY>120);addEventListener("scroll",onScroll,{passive:true});onScroll();
+styleLinks($("#styles"),"/demo-luxe");
+demoForms(D.own);
+BBLogo.show($(".logo"),BBLogo.get(D.biz,S.logo),`${D.biz} logo`);
+</script>

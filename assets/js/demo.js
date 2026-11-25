@@ -92,7 +92,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 /* ---- styles ---- */
 (function(){
 var P=location.pathname.replace(/\/+$/,'')||'/';
-var ST=[{p:'/demo',n:'Classic',d:'Navy and gold'},{p:'/demo-fresh',n:'Fresh',d:'Bright and friendly'},{p:'/demo-bold',n:'Bold',d:'Dark and modern'}];
+var ST=[{p:'/demo',n:'Classic',d:'Navy and gold'},{p:'/demo-fresh',n:'Fresh',d:'Bright and friendly'},{p:'/demo-bold',n:'Bold',d:'Dark and modern'},{p:'/demo-luxe',n:'Luxe',d:'Elegant and airy'},{p:'/demo-edge',n:'Edge',d:'Sleek and minimal'},{p:'/demo-earthy',n:'Earthy',d:'Warm and natural'}];
 var cur=ST.filter(function(s){return s.p===P})[0];if(!cur)return;
 var Q=new URLSearchParams(location.search);
 function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -104,16 +104,16 @@ function flush(){var now=Date.now(),add=now-(flushed||t0);flushed=now;if(documen
 (function(){var o=rd();var r=o[cur.n]||{ms:0,v:0};r.v++;o[cur.n]=r;o._last=cur.n;try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}})();
 setInterval(flush,5000);document.addEventListener('visibilitychange',function(){if(document.hidden){flush()}else{flushed=Date.now()}});addEventListener('pagehide',flush);
 window.bbStyleSummary=function(){flush();var o=rd();return ST.filter(function(s){return o[s.n]}).map(function(s){var m=Math.round(o[s.n].ms/1000),mm=Math.floor(m/60),ss=m%60;return s.n+' '+(mm?mm+'m ':'')+ss+'s ('+o[s.n].v+(o[s.n].v===1?' visit)':' visits)')}).join(', ')+(o._last?'; last looked at '+o._last:'')};
-var fl=document.createElement('link');fl.rel='stylesheet';fl.href='https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap';document.head.appendChild(fl);
+var fl=document.createElement('link');fl.rel='stylesheet';fl.href='https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@700;800&family=Playfair+Display:wght@500&family=Sora:wght@700;800&family=Fraunces:opsz,wght@9..144,800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap';document.head.appendChild(fl);
 var css=''+
 '.bbs{background:#0d1218;color:#fff;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:5}'+
-'.bbs-w{max-width:1240px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-right,0px)) 18px max(20px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 32px;align-items:center}'+
+'.bbs-w{max-width:1240px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-right,0px)) 18px max(20px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,auto);gap:16px 28px;align-items:center}'+
 '.bbs .bbs-t small{display:block;font-family:inherit;text-transform:none;letter-spacing:0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:6px}'+
 '.bbs-t small b{color:#f2a20c;font-weight:700}'+
 '.bbs .bbs-t h2{margin:0;font:800 22px/1.2 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em;color:#fff;text-transform:none}'+
 '.bbs .bbs-t p{margin:6px 0 0;font-family:inherit;font-size:14px;line-height:1.5;color:rgba(255,255,255,.72);max-width:44ch}'+
-'.bbs-c{display:flex;gap:12px}'+
-'.bbs-k{display:block;width:176px;flex:none;text-decoration:none;color:#fff;border-radius:14px;padding:6px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);transition:transform .15s,border-color .15s,background .15s}'+
+'.bbs-c{display:flex;gap:10px;min-width:0;overflow-x:auto;scrollbar-width:thin}'+
+'.bbs-k{display:block;width:148px;flex:none;text-decoration:none;color:#fff;border-radius:14px;padding:6px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);transition:transform .15s,border-color .15s,background .15s}'+
 '.bbs-k:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.07)}'+
 '.bbs-k[aria-current]{border-color:#f2a20c;background:rgba(242,162,12,.1)}'+
 '.bbs-k:focus-visible{outline:3px solid #f2a20c;outline-offset:2px}'+
@@ -129,6 +129,9 @@ var css=''+
 '.m-classic{background:#0b2440}.m-classic .h{color:#fff;font-weight:800}.m-classic .h i{background:#f2a20c}.m-classic .h em{background:#f2a20c;color:#16191d}.m-classic .hl{color:#fff;font-weight:800;font-family:"Plus Jakarta Sans",sans-serif}.m-classic .hl span{color:#f2a20c}.m-classic .fm{background:#fff}.m-classic .bt{background:#f2a20c}'+
 '.m-fresh{background:#eef2f0}.m-fresh .h{background:#1f5f4f;color:#fff;font-family:Outfit,sans-serif;font-weight:700}.m-fresh .h i{background:#ffb84d;border-radius:3px}.m-fresh .h em{background:#ffb84d;color:#17231f}.m-fresh .hl{color:#17231f;font-family:Outfit,sans-serif;font-weight:800}.m-fresh .hl span{color:#1f5f4f}.m-fresh .fm{background:#fff;border:1px solid #dbe3df}.m-fresh .bt{background:#1f5f4f;border-radius:4px}'+
 '.m-bold{background:#0f1114}.m-bold .h{background:#16191d;color:#f2f2ef;border-bottom:1.5px solid #ff6a13;font-family:Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.03em;font-weight:400}.m-bold .h i{background:#ff6a13;border-radius:0}.m-bold .h em{background:#ff6a13;color:#fff;border-radius:0}.m-bold .hl{color:#f2f2ef;font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:11.5px}.m-bold .hl span{color:#ff6a13}.m-bold .fm{background:#1d2127;border-top:2px solid #ff6a13;border-radius:0}.m-bold .bt{background:#ff6a13;border-radius:0}'+
+'.m-luxe{background:#f0f4f8}.m-luxe .h{background:#1e293b;color:#fff;font-family:"Playfair Display",Georgia,serif;font-weight:500}.m-luxe .h i{background:#4a7cba;border-radius:50%}.m-luxe .h em{background:#4a7cba;color:#fff}.m-luxe .hl{color:#1e293b;font-family:"Playfair Display",Georgia,serif;font-weight:500}.m-luxe .hl span{color:#4a7cba;font-style:italic}.m-luxe .fm{background:#fff;border-top:2px solid #4a7cba}.m-luxe .bt{background:#4a7cba}'+
+'.m-edge{background:#18181b}.m-edge .h{background:#18181b;color:#fafafa;border-bottom:1px solid #27272a;font-family:Sora,sans-serif;font-weight:700}.m-edge .h i{background:#22c55e}.m-edge .h em{background:#22c55e;color:#fff}.m-edge .hl{color:#fafafa;font-family:Sora,sans-serif;font-weight:800}.m-edge .hl span{color:#22c55e}.m-edge .fm{background:#fff;border-top:2px solid #22c55e}.m-edge .bt{background:#22c55e}'+
+'.m-earthy{background:#2d5f4a}.m-earthy .h{background:#fffbf5;color:#2a2520;font-family:Fraunces,Georgia,serif;font-weight:800}.m-earthy .h i{background:#c45d3e;border-radius:50%}.m-earthy .h em{background:#c45d3e;color:#fff;border-radius:999px}.m-earthy .hl{color:#fff;font-family:Fraunces,Georgia,serif;font-weight:800}.m-earthy .hl span{color:#e9b39f}.m-earthy .fm{background:#fffbf5;border-radius:8px}.m-earthy .bt{background:#c45d3e;border-radius:999px}'+
 '.bbs-k .l{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:8px 4px 2px}'+
 '.bbs .bbs-k .l b{font:800 14px/1.2 "Plus Jakarta Sans",system-ui,sans-serif;text-transform:none;letter-spacing:0;color:#fff}'+
 '.bbs-k .l span{font-size:11px;font-weight:700;color:rgba(255,255,255,.6);white-space:nowrap}'+
@@ -144,14 +147,14 @@ var css=''+
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
 function headline(){var h=document.querySelector('h1');var t=h?h.textContent.replace(/\s+/g,' ').trim():'';return t||'Built right the first time.'}
 function mini(s){var h=headline(),w=h.split(' '),k=Math.max(1,Math.ceil(w.length/2));var hl=esc(w.slice(0,k).join(' '))+' <span>'+esc(w.slice(k).join(' '))+'</span>';
-var cls=s.n==='Classic'?'m-classic':s.n==='Fresh'?'m-fresh':'m-bold';
+var cls='m-'+s.n.toLowerCase();
 return '<span class="bbs-m '+cls+'" aria-hidden="true"><span class="h"><i></i>'+esc(biz)+'<em>Free Estimate</em></span><span class="b"><span><p class="hl">'+hl+'</p><span class="bt"></span></span><span class="fm"></span></span></span>'}
 function build(){
 if(document.querySelector('.bbs'))return true;
 var strip=document.querySelector('.strip');if(!strip||!document.querySelector('h1'))return false;
 var keep=location.search;
 var el=document.createElement('section');el.className='bbs';el.setAttribute('aria-label','Choose your website style');
-el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in three different looks, so tap one to see '+esc(biz)+' in it.</p><button type="button" class="bbs-cta">Want this website? →</button></div><div class="bbs-c">'+
+el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><button type="button" class="bbs-cta">Want this website? →</button></div><div class="bbs-c">'+
 ST.map(function(s){var on=s===cur;return '<a class="bbs-k" href="'+s.p+esc(keep)+'"'+(on?' aria-current="page"':'')+' data-style="'+s.n+'">'+mini(s)+'<span class="l"><b>'+s.n+'</b><span>'+(on?'You’re viewing':'Tap to preview')+'</span></span><span class="s">'+s.d+'</span></a>'}).join('')+
 '</div></div><button type="button" class="bbs-x" aria-label="Hide the style picker">×</button>';
 strip.parentNode.insertBefore(el,strip);

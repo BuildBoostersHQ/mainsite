@@ -320,7 +320,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   <div class="fields">
     <label for="b-biz" class="half">Business name<input id="b-biz"></label>
     <label for="b-trade">Trade<select id="b-trade"></select></label>
-    <label for="b-style">Site style<select id="b-style"><option value="/demo">Classic</option><option value="/demo-fresh">Fresh</option><option value="/demo-bold">Bold</option></select></label>
+    <label for="b-style">Site style<select id="b-style"><option value="/demo">Classic</option><option value="/demo-fresh">Fresh</option><option value="/demo-bold">Bold</option><option value="/demo-luxe">Luxe</option><option value="/demo-edge">Edge</option><option value="/demo-earthy">Earthy</option></select></label>
     <label for="b-city">City<input id="b-city"></label>
     <label for="b-phone">Phone<input id="b-phone" inputmode="tel"></label>
     <label for="b-owner">Owner first name<input id="b-owner"></label>
@@ -601,7 +601,7 @@ function url(){
 }
 for(const k in Bf){$(Bf[k]).addEventListener("input",()=>{let v=$(Bf[k]).value.trim();if(k==="color"||k==="color2")v=v.replace("#","");S[k]=v||(["lic","areas","svcs","logo"].includes(k)?"":DEF[k]);if(k==="biz"&&LOGO_DATA)BBLogo.save(S.biz,LOGO_DATA);if(k==="logo"&&v)pullColors(v,true);render();url()})}
 $("#b-base").addEventListener("input",url);$("#b-style").addEventListener("input",url);
-$("#styles").innerHTML=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"]].map(([f,n])=>`<a href="${f}${location.search}"${f==="/demo"?' aria-current="page"':''}>${n}</a>`).join("");
+$("#styles").innerHTML=[["/demo","Classic"],["/demo-fresh","Fresh"],["/demo-bold","Bold"],["/demo-luxe","Luxe"],["/demo-edge","Edge"],["/demo-earthy","Earthy"]].map(([f,n])=>`<a href="${f}${location.search}"${f==="/demo"?' aria-current="page"':''}>${n}</a>`).join("");
 $("#b-copy").addEventListener("click",()=>{const u=$("#b-url");navigator.clipboard.writeText(u.value).then(()=>$("#toast").textContent="Link copied.").catch(()=>{u.select();$("#toast").textContent="Press Ctrl/Cmd+C to copy."})});
 function route(){const on=location.hash==="#builder";$("#builder").hidden=!on;if(on){fill();$("#builder").scrollIntoView()}}
 $("#b-close").addEventListener("click",e=>{e.preventDefault();history.replaceState(null,"",location.pathname+location.search);route();scrollTo(0,0)});
