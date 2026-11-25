@@ -190,16 +190,16 @@ if(!build()){var n=0,t=setInterval(function(){if(build()||++n>40)clearInterval(t
 
 /* ---- attention cues: ringing phone icons, pulsing call buttons, a constant glint on everything clickable, a "Try it" bubble on the estimate button ---- */
 (function(){if(!/^\/demo/.test(location.pathname))return;
-var CL='.btn,a.btn,button.btn,.bbs-cta,.bbx-claim,.bbx-revbtn,.bbp-btn:not(.ghost),.bbx-in button';
+var CL='.btn,a.btn,button.btn';
 var AF=CL.split(',').map(function(x){return x+'::after'}).join(',');
 var c='@media (prefers-reduced-motion:no-preference){'+
 '@keyframes bbRing{0%,82%,100%{transform:rotate(0)}84%{transform:rotate(-14deg)}86%{transform:rotate(12deg)}88%{transform:rotate(-10deg)}90%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}94%{transform:rotate(0)}}'+
 'a[href^="tel:"] svg,.nav-phone svg,.phone svg{animation:bbRing 3.2s ease-in-out infinite;transform-origin:50% 50%}'+
 '@keyframes bbPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 45%,transparent)}70%{box-shadow:0 0 0 14px transparent}100%{box-shadow:0 0 0 0 transparent}}'+
 '.mbar a[href^="tel:"],.hero a.btn[href^="tel:"]{animation:bbPulse 2.4s ease-out infinite}'+
-'@keyframes bbShine{0%{transform:translateX(-150%) skewX(-20deg)}60%,100%{transform:translateX(330%) skewX(-20deg)}}'+
+'@keyframes bbShine{0%{transform:translateX(-150%) skewX(-20deg)}45%,100%{transform:translateX(330%) skewX(-20deg)}}'+
 CL+'{position:relative;overflow:hidden;isolation:isolate}'+
-AF+'{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-150%) skewX(-20deg);animation:bbShine 2.2s ease-in-out infinite;pointer-events:none;z-index:-1}'+
+AF+'{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-150%) skewX(-20deg);animation:bbShine 5.8s ease-in-out infinite;pointer-events:none;z-index:-1}'+
 '@keyframes bbBob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}'+
 '.bb-try{animation:bbBob 1.4s ease-in-out infinite}'+
 '}'+
