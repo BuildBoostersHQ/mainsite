@@ -96,7 +96,7 @@ var ST=[{p:'/demo',n:'Classic',d:'Navy and gold'},{p:'/demo-fresh',n:'Fresh',d:'
 var cur=ST.filter(function(s){return s.p===P})[0];if(!cur)return;
 var Q=new URLSearchParams(location.search);
 function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-var biz=(Q.get('biz')||'').trim().slice(0,60)||'Ruiz Roofing';
+var biz=(Q.get('biz')||'').trim().slice(0,60)||'Sunshine Home Services';
 /* time spent per style, kept in this browser so it can go out with the "text me the link" form */
 var KEY='bbStyles:'+biz.toLowerCase(),t0=Date.now(),flushed=0;
 function rd(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
@@ -188,3 +188,15 @@ try{window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q
 if(!build()){var n=0,t=setInterval(function(){if(build()||++n>40)clearInterval(t)},150)}
 })();
 
+/* ---- attention cues: ringing phone icons, pulsing call buttons, a shine across the main estimate buttons ---- */
+(function(){if(!/^\/demo/.test(location.pathname))return;
+var c='@media (prefers-reduced-motion:no-preference){'+
+'@keyframes bbRing{0%,82%,100%{transform:rotate(0)}84%{transform:rotate(-14deg)}86%{transform:rotate(12deg)}88%{transform:rotate(-10deg)}90%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}94%{transform:rotate(0)}}'+
+'a[href^="tel:"] svg,.nav-phone svg,.phone svg{animation:bbRing 3.2s ease-in-out infinite;transform-origin:50% 50%}'+
+'@keyframes bbPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 45%,transparent)}70%{box-shadow:0 0 0 14px transparent}100%{box-shadow:0 0 0 0 transparent}}'+
+'.mbar a[href^="tel:"],.hero a.btn[href^="tel:"]{animation:bbPulse 2.4s ease-out infinite}'+
+'@keyframes bbShine{0%,70%{transform:translateX(-120%) skewX(-20deg)}100%{transform:translateX(260%) skewX(-20deg)}}'+
+'.hero a.btn[href="#estimate"],form[data-demo] button.btn,.mbar a.btn[href="#estimate"],.nav a.btn[href="#estimate"]{position:relative;overflow:hidden;isolation:isolate}'+
+'.hero a.btn[href="#estimate"]::after,form[data-demo] button.btn::after,.mbar a.btn[href="#estimate"]::after,.nav a.btn[href="#estimate"]::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-120%) skewX(-20deg);animation:bbShine 4s ease-in-out infinite;pointer-events:none;z-index:-1}'+
+'}';
+var st=document.createElement('style');st.textContent=c;document.head.appendChild(st);})();
