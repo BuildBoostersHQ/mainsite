@@ -10,6 +10,14 @@
   var thanksUrl = '/start-thank-you' + (code ? '/' + code : '');
 
   var VIBES = ['Friendly', 'Quiet and respectful', 'Affordable', 'High quality', 'Fast', 'Family-run', 'Straight shooter', 'Clean and careful'];
+  var STYLES = [
+    ['classic', 'Classic', 'Navy and gold', '#0b2440', '#f2a20c', '/demo'],
+    ['fresh', 'Fresh', 'Bright and clean', '#1C77C3', '#F39237', '/demo-fresh'],
+    ['bold', 'Bold', 'Dark and modern', '#16191d', '#ff6a13', '/demo-bold'],
+    ['freeze', 'Freeze', 'Elegant and airy', '#1E293B', '#4A7CBA', '/demo-luxe'],
+    ['edge', 'Edge', 'Sleek and minimal', '#111827', '#4A7CBA', '/demo-edge'],
+    ['earthy', 'Earthy', 'Warm and natural', '#2D5F4A', '#C45D3E', '/demo-earthy']
+  ];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
     first_name: 'Dave', billing_cycle: 'quarterly', ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
@@ -120,11 +128,12 @@
       var v = answers[key];
       if (v != null && v !== '') {
         if (el.tagName === 'SELECT') {
-          var has = Array.prototype.some.call(el.options, function (o) { return o.value === String(v); });
-          if (has) el.value = String(v);
+          /* Match loosely, so "plumbing" or "junk-removal" from the prospect list still selects the right option. */
+          var want = String(v).toLowerCase().replace(/[-_]+/g, ' ').trim();
+          Array.prototype.forEach.call(el.options, function (o) { if (o.value.toLowerCase() === want) el.value = o.value; });
         } else el.value = String(v);
       }
-      el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function () { save(key, el.value.trim()); });
+      el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function () { save(key, el.tagName === 'TEXTAREA' ? el.value : el.value.trim()); });
       el.addEventListener('blur', function () { clearTimeout(timer); flush(); });
     });
 
@@ -147,6 +156,34 @@
       });
       $('ob-domain-sec').hidden = false;
     }
+
+    /* The six site looks, each with its two colors and a link to a sample. */
+    var sbox = $('ob-styles');
+    STYLES.forEach(function (s) {
+      var lab = document.createElement('label'); lab.className = 'ob-radio'; lab.htmlFor = 'ob-style-' + s[0];
+      var inp = document.createElement('input'); inp.type = 'radio'; inp.name = 'ob-style'; inp.id = 'ob-style-' + s[0]; inp.value = s[0];
+      inp.checked = answers.style === s[0];
+      inp.addEventListener('change', function () { if (inp.checked) save('style', s[0], true); });
+      var name = document.createElement('span'); name.className = 'ob-style-name'; name.textContent = s[1];
+      var note = document.createElement('small'); note.textContent = s[2]; name.appendChild(note);
+      var dots = document.createElement('span'); dots.className = 'ob-dots'; dots.setAttribute('aria-hidden', 'true');
+      [s[3], s[4]].forEach(function (c) { var d = document.createElement('i'); d.style.background = c; dots.appendChild(d); });
+      var see = document.createElement('a'); see.href = s[5]; see.target = '_blank'; see.rel = 'noopener'; see.textContent = 'See it';
+      see.setAttribute('aria-label', 'See a sample of the ' + s[1] + ' look');
+      lab.appendChild(inp); lab.appendChild(name); lab.appendChild(dots); lab.appendChild(see); sbox.appendChild(lab);
+    });
+
+    /* Own color: only saved once he actually picks one. */
+    var color = $('ob-brand_color'), colorNote = $('ob-color-note'), colorClear = $('ob-color-clear');
+    function colorState() {
+      var v = /^#[0-9a-f]{6}$/i.test(answers.brand_color || '') ? answers.brand_color : '';
+      if (v) color.value = v;
+      colorNote.textContent = v ? 'Your site will use ' + v.toUpperCase() + ' as its main color.' : 'Leave this alone to use the colors of the look you picked.';
+      colorClear.hidden = !v;
+    }
+    colorState();
+    color.addEventListener('change', function () { save('brand_color', color.value, true); colorState(); });
+    colorClear.addEventListener('click', function () { save('brand_color', '', true); colorState(); });
 
     var rem = $('ob-photo_reminders');
     rem.checked = answers.photo_reminders === true;

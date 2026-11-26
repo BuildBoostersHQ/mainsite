@@ -40,8 +40,9 @@ html,body{margin:0;padding:0;background:#fff}
 .ob-one{margin-top:20px}
 .ob label{display:block;font-size:14px;font-weight:600;color:#121a24;margin-bottom:6px}
 .ob-hint{font-weight:400;color:#5b6878}
-.ob input,.ob select{width:100%;min-height:48px;padding:10px 12px;border:1px solid #c3ccd8;border-radius:8px;font:500 16px "Plus Jakarta Sans",system-ui,sans-serif;color:#121a24;background:#fff}
-.ob input:focus,.ob select:focus,.ob button:focus-visible,.ob a:focus-visible{outline:3px solid #f2a20c;outline-offset:2px}
+.ob input,.ob select,.ob textarea{width:100%;min-height:48px;padding:10px 12px;border:1px solid #c3ccd8;border-radius:8px;font:500 16px "Plus Jakarta Sans",system-ui,sans-serif;color:#121a24;background:#fff}
+.ob textarea{min-height:110px;line-height:1.5;resize:vertical}
+.ob input:focus,.ob select:focus,.ob textarea:focus,.ob button:focus-visible,.ob a:focus-visible{outline:3px solid #f2a20c;outline-offset:2px}
 .ob-chips{display:flex;flex-wrap:wrap;gap:10px}
 .ob-chip{min-height:44px;padding:8px 16px;border-radius:999px;border:1px solid #c3ccd8;background:#fff;color:#121a24;font:600 15px "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer}
 .ob-chip[aria-pressed="true"]{background:#0b2440;border-color:#0b2440;color:#fff}
@@ -55,6 +56,16 @@ html,body{margin:0;padding:0;background:#fff}
 .ob label.ob-radio{display:flex;align-items:center;gap:12px;min-height:52px;margin:0;padding:10px 14px;border:1px solid #c3ccd8;border-radius:8px;font-size:17px;font-weight:700;color:#0b2440;cursor:pointer}
 .ob label.ob-radio:has(input:checked){border-color:#0b2440;box-shadow:inset 0 0 0 1px #0b2440}
 .ob-radio input,.ob-check input{flex:none;width:22px;min-height:22px;height:22px;padding:0;margin:0;accent-color:#0b2440}
+.ob-styles{max-width:520px}
+.ob-style-name{flex:1 1 auto;display:flex;flex-direction:column;gap:2px}
+.ob-style-name small{font-size:13px;font-weight:500;color:#5b6878}
+.ob-dots{display:flex;gap:4px;flex:none}
+.ob-dots i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.ob label.ob-radio a{flex:none;font-size:14px;font-weight:700}
+.ob-color{align-items:center}
+.ob .ob-color input[type=color]{flex:none;width:56px;min-height:44px;height:44px;padding:3px;cursor:pointer}
+.ob-link{background:none;border:0;padding:0;min-height:44px;font:700 14px "Plus Jakarta Sans",system-ui,sans-serif;color:#0b2440;text-decoration:underline;cursor:pointer}
+.ob-wide{max-width:600px}
 .ob-consent{display:grid;gap:16px;max-width:600px;margin-bottom:24px}
 .ob label.ob-check{display:flex;align-items:flex-start;gap:12px;margin:0;font-size:15px;font-weight:400;line-height:1.55;color:#4a5767;cursor:pointer}
 .ob-check input{margin-top:1px}
