@@ -28,13 +28,28 @@ function clean(input) {
   return out;
 }
 
+// Pasted values often pick up a stray space, a trailing slash or the /rest/v1 path. Clean those off.
+const baseUrl = () => String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+const secret = () => String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
 async function supabase(path, options = {}) {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=representation', ...(options.headers || {}) },
-  });
-  if (!res.ok) throw new Error(`Supabase ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const key = secret();
+  const headers = { apikey: key, 'Content-Type': 'application/json', Prefer: 'return=representation', ...(options.headers || {}) };
+  // Old-style service_role keys are JWTs and also go in the Authorization header. New sb_secret_ keys go in apikey only.
+  if (!key.startsWith('sb_')) headers.Authorization = `Bearer ${key}`;
+  let res;
+  try { res = await fetch(`${baseUrl()}/rest/v1/${path}`, { ...options, headers }); }
+  catch (e) { const err = new Error('cannot reach Supabase'); err.hint = 'cannot_reach_supabase'; throw err; }
+  if (!res.ok) {
+    const text = (await res.text()).slice(0, 300);
+    const err = new Error(`Supabase ${res.status}: ${text}`);
+    // A short reason the page owner can act on. Never includes keys or client data.
+    if (res.status === 401 || res.status === 403) err.hint = 'key_rejected';
+    else if (/PGRST205|42P01|Could not find the table/i.test(text)) err.hint = 'table_missing';
+    else if (/PGRST204|42703|column/i.test(text)) err.hint = 'table_out_of_date';
+    else if (res.status === 404) err.hint = 'wrong_project_url';
+    throw err;
+  }
   return res.json();
 }
 
@@ -43,7 +58,8 @@ const find = async (code) => (await supabase(`${TABLE}?code=eq.${encodeURICompon
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Robots-Tag', 'noindex');
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return res.status(500).json({ error: 'not_configured' });
+  if (!baseUrl() || !secret()) return res.status(500).json({ error: 'not_configured' });
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(baseUrl())) return res.status(500).json({ error: 'server_error', reason: 'wrong_project_url' });
   try {
     if (req.method === 'GET') {
       const code = String((req.query && req.query.code) || '');
@@ -105,8 +121,8 @@ module.exports = async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'method_not_allowed' });
   } catch (err) {
-    console.error('onboarding', err);
-    return res.status(500).json({ error: 'server_error' });
+    console.error('onboarding', err.message);
+    return res.status(500).json({ error: 'server_error', reason: err.hint || 'unknown' });
   }
 };
 module.exports.clean = clean;
