@@ -27,6 +27,10 @@ create table if not exists public.client_onboarding (
   a2p_registered_at timestamptz,   -- set this once their texting registration is approved. Doing so deletes the EIN and switches their site to full
   site_deploy_hook text,           -- the Deploy Hook URL from the client's Vercel project, so approval can rebuild their site
   site_rebuild_requested_at timestamptz,
+  ghl_location_id text,            -- the client's HighLevel sub-account id, so A2P emails match the right client
+  a2p_status text,                 -- latest news from HighLevel's emails: campaign_approved, brand_rejected and so on
+  a2p_status_at timestamptz,
+  a2p_reason text,                 -- why it was rejected, when it was
   ein_deleted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -43,6 +47,10 @@ alter table public.client_onboarding
   add column if not exists a2p_registered_at timestamptz,
   add column if not exists site_deploy_hook text,
   add column if not exists site_rebuild_requested_at timestamptz,
+  add column if not exists ghl_location_id text,
+  add column if not exists a2p_status text,
+  add column if not exists a2p_status_at timestamptz,
+  add column if not exists a2p_reason text,
   add column if not exists ein_deleted_at timestamptz,
   add column if not exists launch_call_start timestamptz,
   add column if not exists google_approved_at timestamptz,
@@ -83,6 +91,25 @@ end $$;
 drop trigger if exists client_onboarding_rebuild_site on public.client_onboarding;
 create trigger client_onboarding_rebuild_site after update of a2p_registered_at on public.client_onboarding
   for each row execute function public.client_onboarding_rebuild_site();
+
+-- Every A2P registration email HighLevel sends, as read by /api/a2p-inbox. Kept so nothing is lost when an
+-- email cannot be matched to a client or its wording is new. Locked down like the table above.
+create table if not exists public.a2p_events (
+  id uuid primary key default gen_random_uuid(),
+  gmail_id text not null unique,
+  sent_at timestamptz,
+  received_at timestamptz not null default now(),
+  from_address text,
+  subject text,
+  body text,
+  client_id uuid references public.client_onboarding(id) on delete set null,
+  registration_type text,          -- brand, campaign or unknown
+  status text,                     -- approved, rejected, pending or unknown
+  reason text,
+  needs_look boolean not null default false,
+  acted boolean not null default false
+);
+alter table public.a2p_events enable row level security;
 
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
