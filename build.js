@@ -103,7 +103,10 @@ function render(name, fm, body) {
   const chat = layout !== 'demo' && fm.chat !== 'false';
   if (chat) html += CHAT;
   html += schema(name, fm, body);
-  html += partial.tracking + '</head>\n<body>\n';
+  // Pages that handle private client details (onboarding) set tracking: false, so no analytics, pixel or
+  // session recording runs on them and their private links are never sent to those tools.
+  const track = fm.tracking !== 'false';
+  html += (track ? partial.tracking : '') + '</head>\n<body>\n';
   if (chat) html += CHAT_SCRIPT;
 
   if (layout === 'site') {
@@ -117,7 +120,7 @@ function render(name, fm, body) {
     html += body + '\n';
   }
 
-  if (layout !== 'demo') html += GHL_TRACKING + '\n';
+  if (layout !== 'demo' && track) html += GHL_TRACKING + '\n';
   if (layout === 'site') html += '<script src="/assets/js/site.js" defer></script>\n';
   else if (layout === 'bare') html += '<script src="/assets/js/site.js" defer></script>\n';
   if (layout === 'demo') html += '<script src="/assets/js/demo.js" defer></script>\n';

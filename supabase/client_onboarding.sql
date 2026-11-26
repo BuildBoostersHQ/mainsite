@@ -4,7 +4,7 @@ create table if not exists public.client_onboarding (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
-  billing_cycle text,             -- 'monthly', 'quarterly' or 'six_month'. Quarterly and six_month clients see the Google updates note
+  billing_cycle text,             -- 'monthly', 'quarterly', 'six_month' or 'annual'. Everyone but monthly sees the Google updates note
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
   launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
   video_url text,                 -- https link to the personal walkthrough video (optional)
@@ -19,6 +19,10 @@ create table if not exists public.client_onboarding (
   sms_consent_cell text,           -- the cell number they agreed for
   text_link_requested_at timestamptz,
   submitted_at timestamptz,
+  ein_private text,                -- the client's EIN, for texting registration only. Never sent back to the page
+  ein_provided_at timestamptz,
+  a2p_registered_at timestamptz,   -- set this once their texting registration is approved. Doing so deletes the EIN
+  ein_deleted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -26,11 +30,32 @@ create table if not exists public.client_onboarding (
 -- Safe to run again: adds anything missing if the table was created from an earlier version of this file.
 alter table public.client_onboarding
   add column if not exists billing_cycle text,
+  add column if not exists ein_private text,
+  add column if not exists ein_provided_at timestamptz,
+  add column if not exists a2p_registered_at timestamptz,
+  add column if not exists ein_deleted_at timestamptz,
   add column if not exists launch_call_start timestamptz,
   add column if not exists google_approved_at timestamptz,
   add column if not exists sms_consent_at timestamptz,
   add column if not exists sms_consent_text text,
   add column if not exists sms_consent_cell text;
+
+-- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
+create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
+begin
+  if new.a2p_registered_at is not null and new.ein_private is not null then
+    new.ein_private := null;
+    new.ein_deleted_at := now();
+  end if;
+  return new;
+end $$;
+drop trigger if exists client_onboarding_wipe_ein on public.client_onboarding;
+create trigger client_onboarding_wipe_ein before insert or update on public.client_onboarding
+  for each row execute function public.client_onboarding_wipe_ein();
+
+-- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
+--   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
+--   where ein_private is not null and ein_provided_at < now() - interval '60 days';
 
 -- Locked down: no public access at all. Only the server function (service role key) can read or write.
 alter table public.client_onboarding enable row level security;
