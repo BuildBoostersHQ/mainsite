@@ -5,7 +5,10 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own'];
+const FLAGS = ['photo_reminders'];
+// The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
+const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
 const LISTS = { services: 40, areas: 60, vibes: 2, badges: 12 };
 const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
@@ -16,6 +19,7 @@ function clean(input) {
   for (const key of TEXT) {
     if (key in input && (typeof input[key] === 'string' || typeof input[key] === 'number')) out[key] = String(input[key]).trim().slice(0, 300);
   }
+  for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
   for (const [key, max] of Object.entries(LISTS)) {
     if (Array.isArray(input[key])) {
       out[key] = [...new Set(input[key].filter((v) => typeof v === 'string').map((v) => v.trim().slice(0, 80)).filter(Boolean))].slice(0, max);
@@ -54,6 +58,11 @@ module.exports = async function handler(req, res) {
         google_requested: !!row.google_requested_at,
         text_link_requested: !!row.text_link_requested_at,
         submitted: !!row.submitted_at,
+        sms_consent: !!row.sms_consent_at,
+        google_approved: !!row.google_approved_at,
+        launch_call_start: row.launch_call_start || '',
+        // The $30 thank-you runs out 24 hours after the client's page was created.
+        credit_deadline: row.created_at ? new Date(new Date(row.created_at).getTime() + 24 * 3600 * 1000).toISOString() : '',
         options: row.options || {},
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
         answers: { ...(row.prefill || {}), ...(row.answers || {}) },
@@ -71,6 +80,13 @@ module.exports = async function handler(req, res) {
       if (Object.keys(changes).length) patch.answers = { ...(row.answers || {}), ...changes };
       const column = ACTIONS[body.action];
       if (body.action && !column) return res.status(400).json({ error: 'unknown_action' });
+      if (body.action === 'submit') {
+        // Setup cannot finish without a cell number and a yes to service texts.
+        const cell = String((patch.answers || row.answers || {}).cell || '').replace(/\D/g, '');
+        if (cell.length < 10) return res.status(400).json({ error: 'cell_required' });
+        if (body.sms_consent !== true && !row.sms_consent_at) return res.status(400).json({ error: 'consent_required' });
+        if (!row.sms_consent_at) { patch.sms_consent_at = now; patch.sms_consent_text = SMS_CONSENT; patch.sms_consent_cell = cell; }
+      }
       // First time only, so the 24 hour clock and "who asked first" stay honest.
       if (column && !row[column]) patch[column] = now;
       await supabase(`${TABLE}?id=eq.${row.id}`, { method: 'PATCH', body: JSON.stringify(patch) });

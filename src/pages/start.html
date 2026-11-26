@@ -32,6 +32,12 @@ sitemap: false
 <p class="ob-lead">I've already pulled in your business information from Google. Just check that everything looks right, tell me which services you offer, and I'll take it from here.</p>
 <p class="ob-meta">It takes about six minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
 
+<div class="ob-thanks ob-thanks-top">
+<div class="ob-eyebrow ob-eyebrow-dark">A little thank you</div>
+<div class="ob-thirty">$30 off your next bill</div>
+<p>Finish your setup and approve the Google access request within 24 hours. I'll apply $30 off your next bill.</p>
+</div>
+
 <section class="ob-google" aria-labelledby="ob-g-h">
 <div class="ob-eyebrow">Start here</div>
 <h2 id="ob-g-h">Let me help with your Google profile</h2>
@@ -95,6 +101,13 @@ sitemap: false
 </div>
 </section>
 
+<section class="ob-sec" id="ob-domain-sec" hidden>
+<h2>Pick your web address</h2>
+<p class="ob-sub">I checked each of these myself. They are all available, easy to say out loud and good for showing up on Google, so pick the one you like best and I will register it for you.</p>
+<div class="ob-radios" id="ob-domains" role="radiogroup" aria-label="Web address"></div>
+<div class="ob-one"><label for="ob-domain_own">Already own one you would rather use?</label><input id="ob-domain_own" data-key="domain_own" type="text" inputmode="url" autocapitalize="none" placeholder="yourbusiness.com"></div>
+</section>
+
 <section class="ob-sec ob-rule" id="photos">
 <h2>Photos of your work</h2>
 <p class="ob-sub">This one can wait until after. Real photos from your phone beat stock photos every time, and shots of you and your crew on a job are the ones that win people over. Six is plenty to start.</p>
@@ -107,8 +120,13 @@ sitemap: false
 
 <div class="ob-end">
 <p class="ob-end-line">That is everything I need from you.</p>
+<div class="ob-consent">
+<label class="ob-check" for="ob-consent"><input type="checkbox" id="ob-consent"><span><b>Yes, text me about my account. (Required)</b> I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Read our <a href="/privacy-policy" target="_blank" rel="noopener">privacy policy</a> and <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>
+<label class="ob-check" for="ob-photo_reminders"><input type="checkbox" id="ob-photo_reminders"><span><b>Remind me to send photos.</b> Text me a photo reminder once a week for the first month, and once a month after that.</span></label>
+</div>
+<p class="ob-err" id="ob-submit-err" role="alert" hidden></p>
 <button class="ob-btn ob-btn-navy ob-btn-big" type="button" id="ob-submit">Looks right, build my site</button>
-<p class="ob-note" id="ob-submit-done" role="status" hidden><strong>Thank you, I have it.</strong> I am getting started on your site, and you can still come back to this page and change anything before our launch call.</p>
+<p class="ob-note" id="ob-submit-done" role="status" hidden><strong>Thank you, I have it.</strong> You can still change anything on this page before our launch call. <a id="ob-thanks-link" href="/start-thank-you">See your next steps.</a></p>
 </div>
 
 </main>
@@ -119,12 +137,6 @@ sitemap: false
 <p>Once you've finished this, I'll get started on your website. We'll go through it together on our launch call.</p>
 <p id="ob-call" hidden>Your launch call is <strong data-fill="launch_call_at"></strong>.</p>
 <div class="ob-sig">Maddie</div>
-
-<div class="ob-thanks">
-<div class="ob-eyebrow ob-eyebrow-dark">A little thank you</div>
-<div class="ob-thirty">$30 off your next bill</div>
-<p>Finish your setup and approve the Google access request within 24 hours. I'll apply $30 off your next bill.</p>
-</div>
 
 <p class="ob-help">If you get stuck on anything, text me at (786) 479-8856 and I will walk you through it.</p>
 </aside>

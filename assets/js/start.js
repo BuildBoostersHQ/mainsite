@@ -7,15 +7,17 @@
   var m = location.pathname.match(/^\/start\/([A-Za-z0-9_-]{12,64})\/?$/);
   var code = m ? m[1] : '';
   var demo = !code;
+  var thanksUrl = '/start-thank-you' + (code ? '/' + code : '');
 
   var VIBES = ['Friendly', 'Quiet and respectful', 'Affordable', 'High quality', 'Fast', 'Family-run', 'Straight shooter', 'Clean and careful'];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
     first_name: 'Dave', launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
-    google_requested: false, text_link_requested: false, submitted: false,
+    google_requested: false, text_link_requested: false, submitted: false, sms_consent: false,
     options: {
       services: ['Drain cleaning', 'Water heaters', 'Leak repair', 'Repiping', 'Toilets and faucets', 'Sewer lines', 'Garbage disposals', 'Emergency calls'],
-      areas: ['Miami', 'Coral Gables', 'Hialeah', 'Kendall', 'Doral', 'Miami Beach', 'Homestead', 'Pinecrest']
+      areas: ['Miami', 'Coral Gables', 'Hialeah', 'Kendall', 'Doral', 'Miami Beach', 'Homestead', 'Pinecrest'],
+      domains: ['smithplumbingmiami.com', 'smithplumbingfl.com', 'callsmithplumbing.com']
     },
     answers: {
       business_name: 'Smith Plumbing', business_phone: '(305) 555-0199', address: '1420 SW 8th St, Miami, FL 33135',
@@ -132,6 +134,26 @@
       chips(box, list);
     });
 
+    var domains = Array.isArray(opts.domains) ? opts.domains.slice(0, 6) : [];
+    if (domains.length) {
+      var dbox = $('ob-domains');
+      domains.forEach(function (name, i) {
+        var lab = document.createElement('label'); lab.className = 'ob-radio';
+        var inp = document.createElement('input'); inp.type = 'radio'; inp.name = 'ob-domain'; inp.value = name; inp.id = 'ob-domain-' + i;
+        lab.htmlFor = inp.id; inp.checked = answers.domain_choice === name;
+        inp.addEventListener('change', function () { if (inp.checked) save('domain_choice', name, true); });
+        var txt = document.createElement('span'); txt.textContent = name;
+        lab.appendChild(inp); lab.appendChild(txt); dbox.appendChild(lab);
+      });
+      $('ob-domain-sec').hidden = false;
+    }
+
+    var rem = $('ob-photo_reminders');
+    rem.checked = answers.photo_reminders === true;
+    rem.addEventListener('change', function () { save('photo_reminders', rem.checked, true); });
+    $('ob-consent').checked = !!d.sms_consent;
+    $('ob-thanks-link').href = thanksUrl;
+
     if (d.google_requested) { $('ob-google-btn').hidden = true; $('ob-google-done').hidden = false; }
     once($('ob-google-btn'), $('ob-google-done'), 'request_google');
 
@@ -141,14 +163,24 @@
 
     if (d.submitted) { $('ob-submit').hidden = true; $('ob-submit-done').hidden = false; }
     $('ob-submit').addEventListener('click', function () {
-      var btn = $('ob-submit'); btn.disabled = true;
+      var btn = $('ob-submit'), err = $('ob-submit-err');
+      var cell = (answers.cell || '').replace(/\D/g, '');
+      var problem = '';
+      if (cell.length < 10) problem = 'Please add your cell number in the About you section first, so I know where to text you.';
+      else if (!$('ob-consent').checked) problem = 'Please check the box to say I can text you about your account. I cannot run your setup without it.';
+      if (problem) {
+        err.textContent = problem; err.hidden = false;
+        (cell.length < 10 ? $('ob-cell') : $('ob-consent')).focus();
+        return;
+      }
+      err.hidden = true; btn.disabled = true;
       clearTimeout(timer);
       var rest = pending; pending = {};
-      var send = demo ? Promise.resolve() : api('POST', { answers: rest, action: 'submit' });
-      send.then(function () { btn.hidden = true; $('ob-submit-done').hidden = false; saved(demo ? '' : 'Saved.'); })
+      var send = demo ? Promise.resolve() : api('POST', { answers: rest, action: 'submit', sms_consent: true });
+      send.then(function () { location.href = thanksUrl; })
         .catch(function () {
           for (var k in rest) if (!(k in pending)) pending[k] = rest[k];
-          btn.disabled = false; saved('That did not go through. Please try again.');
+          btn.disabled = false; err.textContent = 'That did not go through. Please try again.'; err.hidden = false;
         });
     });
 

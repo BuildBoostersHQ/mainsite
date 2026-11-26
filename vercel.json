@@ -24,6 +24,10 @@
     {
       "source": "/start/:code",
       "destination": "/start"
+    },
+    {
+      "source": "/start-thank-you/:code",
+      "destination": "/start-thank-you"
     }
   ]
 }
