@@ -12,6 +12,9 @@ const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the
 const LISTS = { services: 40, areas: 60, vibes: 2, badges: 12 };
 const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
+const BUCKET = 'client-photos';
+const MAX_PHOTOS = 60;           // per client
+const MAX_PHOTO_BYTES = 3000000;  // after the phone has shrunk it
 
 function clean(input) {
   const out = {};
@@ -53,6 +56,30 @@ async function supabase(path, options = {}) {
   return res.json();
 }
 
+// Saves one photo into the private client-photos bucket, under that client's own folder.
+async function storePhoto(row, base64) {
+  const bytes = Buffer.from(String(base64), 'base64');
+  const jpeg = bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (!jpeg || bytes.length > MAX_PHOTO_BYTES) { const e = new Error('bad photo'); e.status = 400; e.code = 'photo_invalid'; throw e; }
+  const key = secret();
+  const name = `${row.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  let res;
+  try {
+    res = await fetch(`${baseUrl()}/storage/v1/object/${BUCKET}/${name}`, {
+      method: 'POST', body: bytes,
+      // Storage wants the key in both places. Supabase allows that when the two values match exactly.
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'false' },
+    });
+  } catch (e) { const err = new Error('cannot reach Supabase'); err.hint = 'cannot_reach_supabase'; throw err; }
+  if (!res.ok) {
+    const text = (await res.text()).slice(0, 300);
+    const err = new Error(`Supabase storage ${res.status}: ${text}`);
+    err.hint = /bucket.*not found|Bucket not found/i.test(text) ? 'photo_bucket_missing' : (res.status === 401 || res.status === 403) ? 'key_rejected' : 'photo_store_failed';
+    throw err;
+  }
+  return name;
+}
+
 const find = async (code) => (await supabase(`${TABLE}?code=eq.${encodeURIComponent(code)}&select=*&limit=1`))[0] || null;
 
 module.exports = async function handler(req, res) {
@@ -78,6 +105,7 @@ module.exports = async function handler(req, res) {
         google_requested: !!row.google_requested_at,
         text_link_requested: !!row.text_link_requested_at,
         submitted: !!row.submitted_at,
+        photo_count: row.photo_count || 0,
         sms_consent: !!row.sms_consent_at,
         google_approved: !!row.google_approved_at,
         launch_call_start: row.launch_call_start || '',
@@ -98,6 +126,12 @@ module.exports = async function handler(req, res) {
       const patch = { updated_at: now };
       const changes = clean(body.answers);
       if (Object.keys(changes).length) patch.answers = { ...(row.answers || {}), ...changes };
+      if (body.photo !== undefined) {
+        if ((row.photo_count || 0) >= MAX_PHOTOS) return res.status(400).json({ error: 'photo_limit' });
+        await storePhoto(row, body.photo);
+        patch.photo_count = (row.photo_count || 0) + 1;
+        patch.photos_last_at = now;
+      }
       if (body.ein !== undefined) {
         // Kept in its own column, away from the other answers, and wiped by the database once texting is registered.
         const ein = String(body.ein).replace(/\D/g, '');
@@ -116,11 +150,12 @@ module.exports = async function handler(req, res) {
       // First time only, so the 24 hour clock and "who asked first" stay honest.
       if (column && !row[column]) patch[column] = now;
       await supabase(`${TABLE}?id=eq.${row.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
-      return res.status(200).json({ ok: true, saved_at: now });
+      return res.status(200).json({ ok: true, saved_at: now, photo_count: patch.photo_count });
     }
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'method_not_allowed' });
   } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.code });
     console.error('onboarding', err.message);
     return res.status(500).json({ error: 'server_error', reason: err.hint || 'unknown' });
   }

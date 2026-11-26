@@ -20,6 +20,8 @@ create table if not exists public.client_onboarding (
   sms_consent_cell text,           -- the cell number they agreed for
   text_link_requested_at timestamptz,
   submitted_at timestamptz,
+  photo_count integer not null default 0,  -- how many photos they have sent from the page
+  photos_last_at timestamptz,
   ein_private text,                -- the client's EIN, for texting registration only. Never sent back to the page
   ein_provided_at timestamptz,
   a2p_registered_at timestamptz,   -- set this once their texting registration is approved. Doing so deletes the EIN
@@ -30,6 +32,8 @@ create table if not exists public.client_onboarding (
 
 -- Safe to run again: adds anything missing if the table was created from an earlier version of this file.
 alter table public.client_onboarding
+  add column if not exists photo_count integer not null default 0,
+  add column if not exists photos_last_at timestamptz,
   add column if not exists tier text,
   add column if not exists billing_cycle text,
   add column if not exists ein_private text,
@@ -58,6 +62,10 @@ create trigger client_onboarding_wipe_ein before insert or update on public.clie
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
 --   where ein_private is not null and ein_provided_at < now() - interval '60 days';
+
+-- Private storage for the photos clients send from their setup page. Each client's photos sit in a folder
+-- named with their row id. Only the server function can read or write it.
+insert into storage.buckets (id, name, public) values ('client-photos', 'client-photos', false) on conflict (id) do nothing;
 
 -- Locked down: no public access at all. Only the server function (service role key) can read or write.
 alter table public.client_onboarding enable row level security;

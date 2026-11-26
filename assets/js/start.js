@@ -195,6 +195,49 @@
     once($('ob-google-btn'), $('ob-google-done'), 'request_google');
 
     if (d.photo_folder_url && /^https:\/\//.test(d.photo_folder_url)) { $('ob-folder').href = d.photo_folder_url; $('ob-folder').hidden = false; }
+    /* Photos: each one is shrunk on the phone first, then sent up one at a time. */
+    var pBtn = $('ob-photo-btn'), pIn = $('ob-photo-input'), pCount = $('ob-photo-count');
+    var have = d.photo_count || 0;
+    function countText(extra) {
+      pCount.hidden = !(have || extra);
+      pCount.textContent = (have ? 'I have ' + have + (have === 1 ? ' photo' : ' photos') + ' from you so far.' : '') + (extra ? ' ' + extra : '');
+    }
+    function shrink(file) {
+      return new Promise(function (resolve, reject) {
+        var img = new Image(), url = URL.createObjectURL(file);
+        img.onload = function () {
+          var scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+          var c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          resolve(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('not an image')); };
+        img.src = url;
+      });
+    }
+    countText('');
+    pBtn.addEventListener('click', function () { pIn.click(); });
+    pIn.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(pIn.files || []);
+      if (!files.length) return;
+      pBtn.disabled = true;
+      var done = 0, failed = 0;
+      (function next() {
+        if (!files.length) {
+          pBtn.disabled = false; pIn.value = '';
+          countText(failed ? failed + (failed === 1 ? ' photo' : ' photos') + ' did not go through. Please try those again.' : (demo ? 'Sample page, nothing is saved.' : 'Thank you.'));
+          return;
+        }
+        var file = files.shift();
+        countText('Sending photo ' + (done + failed + 1) + '.');
+        shrink(file).then(function (data) { return demo ? null : api('POST', { photo: data }); })
+          .then(function (r) { done++; if (r && r.photo_count) have = r.photo_count; else if (demo) have++; next(); })
+          .catch(function () { failed++; next(); });
+      })();
+    });
+
     if (d.text_link_requested) { $('ob-textme').hidden = true; $('ob-textme-done').hidden = false; }
     once($('ob-textme'), $('ob-textme-done'), 'text_link');
 

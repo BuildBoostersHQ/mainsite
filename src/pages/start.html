@@ -114,7 +114,10 @@ sitemap: false
 <section class="ob-sec ob-rule" id="photos">
 <h2>Photos of your work</h2>
 <p class="ob-sub">This one can wait until after. Real photos from your phone beat stock photos every time, and shots of you and your crew on a job are the ones that win people over. Six is plenty to start.</p>
+<input type="file" id="ob-photo-input" accept="image/*" multiple hidden>
+<p class="ob-note ob-photo-count" id="ob-photo-count" role="status" hidden></p>
 <div class="ob-row">
+<button class="ob-btn ob-btn-navy" type="button" id="ob-photo-btn">Add photos from this phone</button>
 <a class="ob-btn ob-btn-line" id="ob-folder" href="#photos" target="_blank" rel="noopener" hidden>Open your photo folder</a>
 <button class="ob-btn ob-btn-line" type="button" id="ob-textme">Text this to me, I can't do it right now</button>
 </div>
