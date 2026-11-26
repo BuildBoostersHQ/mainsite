@@ -23,8 +23,7 @@
   function credit(d) {
     var missing = [];
     if (!d.submitted) missing.push('Finish your setup page and tap the button at the bottom.');
-    if (!d.google_requested) missing.push('Go back to your setup page and tap "Send me the request" in the Google step.');
-    else if (!d.google_approved) missing.push('Open the email from Google Business Manager on your phone and tap Approve.');
+    if (!d.google_requested) missing.push('Go back to your setup page and add me as a manager on your Google profile.');
     var deadline = d.credit_deadline ? new Date(d.credit_deadline) : null;
     var open = deadline && !isNaN(deadline) && deadline.getTime() > Date.now();
     if (!missing.length) {

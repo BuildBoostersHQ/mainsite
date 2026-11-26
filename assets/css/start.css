@@ -25,6 +25,17 @@ html,body{margin:0;padding:0;background:#fff}
 .ob-google h2{margin:6px 0 8px;font-size:26px;font-weight:800;letter-spacing:-.02em;color:#fff}
 .ob-google p{margin:0 0 10px;font-size:16px;line-height:1.55;color:#e7ecf2;max-width:540px}
 .ob-google .ob-btn{margin-top:12px}
+.ob-gsteps{margin:18px 0 0;padding:0;list-style:none;counter-reset:g;display:grid;gap:16px;max-width:560px}
+.ob-gsteps[hidden]{display:none}
+.ob-gsteps li{counter-increment:g;position:relative;padding-left:44px;display:grid;gap:10px;justify-items:start;font-size:16px;line-height:1.5;color:#e7ecf2}
+.ob-gsteps li::before{content:counter(g);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:50%;background:#f2a20c;color:#0b2440;font-weight:800;font-size:15px;display:grid;place-items:center}
+.ob-gsteps b{color:#fff}
+.ob-google .ob-gsteps .ob-btn{margin-top:0}
+.ob-gmail{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ob-gmail code{font:600 14px/1.2 ui-monospace,Menlo,monospace;background:rgba(255,255,255,.1);border-radius:8px;padding:10px;color:#fff;user-select:all;white-space:nowrap;letter-spacing:-.02em}
+.ob-btn-line{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.ob-ghelp{margin-top:18px!important}
+.ob-ghelp a{color:#fff}
 .ob-google-done{margin-top:12px!important;color:#fff!important}
 .ob-google-done strong{color:#f2a20c}
 .ob-google-done a{color:#fff}
