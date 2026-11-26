@@ -19,5 +19,11 @@
       "destination": "/:slug",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/start/:code",
+      "destination": "/start"
+    }
   ]
 }
