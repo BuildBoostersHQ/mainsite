@@ -1,0 +1,135 @@
+---
+layout: bare
+title: Let's Get You Set Up | Build Boosters
+description: Your Build Boosters setup page. Check what we pulled from Google, answer a few questions and we will build your site.
+robots: noindex
+chat: false
+sitemap: false
+---
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Dancing+Script:wght@600&family=Barlow+Condensed:wght@700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/start.css">
+
+<div class="ob" id="ob" data-state="loading">
+<div class="ob-w">
+
+<a class="ob-logo" href="/" aria-label="Build Boosters home">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
+<span><b>Build Boosters</b><small>Systems for contractors</small></span>
+</a>
+
+<p class="ob-msg" id="ob-loading" role="status">Loading your setup page.</p>
+<div class="ob-msg" id="ob-error" role="alert" hidden>
+<h2>This link did not work.</h2>
+<p>Text me at (786) 479-8856 and I will send you a fresh one.</p>
+</div>
+
+<div class="ob-cols" id="ob-main" hidden>
+<main class="ob-main">
+
+<h1>Hey <span data-fill="first_name">there</span>! Let's get everything ready.</h1>
+<p class="ob-lead">I've already pulled in your business information from Google. Just check that everything looks right, tell me which services you offer, and I'll take it from here.</p>
+<p class="ob-meta">It takes about six minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
+
+<section class="ob-google" aria-labelledby="ob-g-h">
+<div class="ob-eyebrow">Start here</div>
+<h2 id="ob-g-h">Let me help with your Google profile</h2>
+<p>This is the one step I need your help with. It lets me post your job photos, keep your business hours up to date, and help manage your Google profile.</p>
+<p>You'll always remain the owner, and you can remove my access at any time.</p>
+<button class="ob-btn ob-btn-amber" type="button" id="ob-google-btn">Send me the request</button>
+<p class="ob-google-done" id="ob-google-done" role="status" hidden><strong>The request is on its way.</strong> Open the email from Google on your phone and tap Approve, and this step is finished. <a href="/give-google-business-profile-access">See what to look for.</a></p>
+</section>
+
+<section class="ob-sec">
+<h2>Your business</h2>
+<p class="ob-sub">This came from your Google profile, so please fix anything that is out of date.</p>
+<div class="ob-grid">
+<div><label for="ob-business_name">Business name</label><input id="ob-business_name" data-key="business_name" type="text" autocomplete="organization"></div>
+<div><label for="ob-business_phone">Business phone</label><input id="ob-business_phone" data-key="business_phone" type="tel" autocomplete="off"></div>
+<div class="ob-full"><label for="ob-address">Address</label><input id="ob-address" data-key="address" type="text" autocomplete="street-address"></div>
+<div><label for="ob-weekday_hours">Weekday hours</label><input id="ob-weekday_hours" data-key="weekday_hours" type="text" placeholder="8:00 AM to 6:00 PM"></div>
+<div><label for="ob-weekends">Weekends</label><select id="ob-weekends" data-key="weekends"><option>Closed</option><option>Emergencies only</option><option>Open</option></select></div>
+</div>
+</section>
+
+<section class="ob-sec">
+<h2>What work do you do?</h2>
+<p class="ob-sub">Tap every service you want on your site, and each one gets its own page.</p>
+<div class="ob-chips" data-chips="services" role="group" aria-label="Services"></div>
+<div class="ob-one"><label for="ob-services_other">Anything we missed?</label><input id="ob-services_other" data-key="services_other" type="text" placeholder="Old-house repiping, tankless installs"></div>
+</section>
+
+<section class="ob-sec">
+<h2>Where will you drive for a job?</h2>
+<p class="ob-sub">Tap the towns you cover, and your site gets a page for each one so people nearby can find you.</p>
+<div class="ob-chips" data-chips="areas" role="group" aria-label="Service areas"></div>
+<div class="ob-one"><label for="ob-areas_other">Service more areas?</label><input id="ob-areas_other" data-key="areas_other" type="text" placeholder="Key Biscayne, South Miami"></div>
+</section>
+
+<section class="ob-sec ob-band">
+<h2>How would your customers describe you?</h2>
+<p class="ob-sub">I write your site to sound like you, so pick the two that fit best. You have picked <span id="ob-vibe-count">0</span> of 2.</p>
+<div class="ob-chips" data-chips="vibes" data-max="2" role="group" aria-label="How customers describe you"></div>
+<div class="ob-one"><label for="ob-vibes_other">Anything else people say about you?</label><input id="ob-vibes_other" data-key="vibes_other" type="text" placeholder="Shows up when he says he will"></div>
+</section>
+
+<section class="ob-sec">
+<h2>What sets you apart?</h2>
+<p class="ob-sub">Only tap what is true, because these go on your site as badges.</p>
+<div class="ob-chips" data-chips="badges" role="group" aria-label="What sets you apart"></div>
+<div class="ob-grid ob-gap">
+<div><label for="ob-years_in_business">Years in business</label><input id="ob-years_in_business" data-key="years_in_business" type="number" min="0" max="150" inputmode="numeric"></div>
+<div><label for="ob-years_experience">Years you have done this work</label><input id="ob-years_experience" data-key="years_experience" type="number" min="0" max="80" inputmode="numeric"></div>
+<div class="ob-full ob-narrow"><label for="ob-license">License number <span class="ob-hint">(only if you want it shown)</span></label><input id="ob-license" data-key="license" type="text"></div>
+</div>
+</section>
+
+<section class="ob-sec">
+<h2>About you</h2>
+<p class="ob-sub">Your customers see your first name on every text, and your cell is where I reach you.</p>
+<div class="ob-grid">
+<div><label for="ob-preferred_name">Your preferred name or nickname for texts</label><input id="ob-preferred_name" data-key="preferred_name" type="text" autocomplete="given-name"></div>
+<div><label for="ob-cell">Your cell</label><input id="ob-cell" data-key="cell" type="tel" autocomplete="tel"></div>
+<div class="ob-full ob-narrow"><label for="ob-job_software">What do you use for jobs and invoices?</label><select id="ob-job_software" data-key="job_software"><option>Pen and paper</option><option>Jobber</option><option>Housecall Pro</option><option>Something else</option></select></div>
+</div>
+</section>
+
+<section class="ob-sec ob-rule" id="photos">
+<h2>Photos of your work</h2>
+<p class="ob-sub">This one can wait until after. Real photos from your phone beat stock photos every time, and shots of you and your crew on a job are the ones that win people over. Six is plenty to start.</p>
+<div class="ob-row">
+<a class="ob-btn ob-btn-line" id="ob-folder" href="#photos" target="_blank" rel="noopener" hidden>Open your photo folder</a>
+<button class="ob-btn ob-btn-line" type="button" id="ob-textme">Text this to me, I can't do it right now</button>
+</div>
+<p class="ob-note" id="ob-textme-done" role="status" hidden>Got it. I will text you this link so you can finish the photos later.</p>
+</section>
+
+<div class="ob-end">
+<p class="ob-end-line">That is everything I need from you.</p>
+<button class="ob-btn ob-btn-navy ob-btn-big" type="button" id="ob-submit">Looks right, build my site</button>
+<p class="ob-note" id="ob-submit-done" role="status" hidden><strong>Thank you, I have it.</strong> I am getting started on your site, and you can still come back to this page and change anything before our launch call.</p>
+</div>
+
+</main>
+
+<aside class="ob-side">
+<div class="ob-video" id="ob-video" hidden><video controls playsinline preload="metadata" title="A walkthrough of this page from Maddie"></video></div>
+<p id="ob-video-note" hidden>Hey <span data-fill="first_name">there</span>, I recorded this one for you. It is 90 seconds of me walking through this page so you know what I am asking for and why.</p>
+<p>Once you've finished this, I'll get started on your website. We'll go through it together on our launch call.</p>
+<p id="ob-call" hidden>Your launch call is <strong data-fill="launch_call_at"></strong>.</p>
+<div class="ob-sig">Maddie</div>
+
+<div class="ob-thanks">
+<div class="ob-eyebrow ob-eyebrow-dark">A little thank you</div>
+<div class="ob-thirty">$30 off your next bill</div>
+<p>Finish your setup and approve the Google access request within 24 hours. I'll apply $30 off your next bill.</p>
+</div>
+
+<p class="ob-help">If you get stuck on anything, text me at (786) 479-8856 and I will walk you through it.</p>
+</aside>
+</div>
+
+</div>
+</div>
+<script src="/assets/js/start.js" defer></script>

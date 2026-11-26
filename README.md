@@ -29,6 +29,16 @@ Copy any post in `src/pages` (for example `speed-to-lead-contractors.html`), cha
 
 Create `src/pages/my-page.html` with front matter and push. It's served at `/my-page`.
 
+## Client onboarding page
+
+`/start/<code>` is the setup page a new client fills in. `/start` on its own shows a sample client and saves nothing.
+
+- `src/pages/start.html`, `assets/css/start.css`, `assets/js/start.js` are the page.
+- `api/onboarding.js` is the only thing that talks to Supabase. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in Vercel.
+- `supabase/client_onboarding.sql` creates the table. Run it once in the Supabase SQL editor.
+
+Each client is one row. Put what you pulled from Google in `prefill`, the chips to offer in `options`, and send them `buildboosters.com/start/<their code>`.
+
 ## Preview locally
 
 ```
