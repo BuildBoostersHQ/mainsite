@@ -24,7 +24,7 @@
     var missing = [];
     if (!d.submitted) missing.push('Finish your setup page and tap the button at the bottom.');
     if (!d.google_requested) missing.push('Go back to your setup page and tap "Send me the request" in the Google step.');
-    else if (!d.google_approved) missing.push('Open the email from Google on your phone and tap Approve.');
+    else if (!d.google_approved) missing.push('Open the email from Google Business Manager on your phone and tap Approve.');
     var deadline = d.credit_deadline ? new Date(d.credit_deadline) : null;
     var open = deadline && !isNaN(deadline) && deadline.getTime() > Date.now();
     if (!missing.length) {
@@ -34,7 +34,7 @@
       $('ty-credit').hidden = false;
     } else if (open) {
       $('ty-credit-eyebrow').textContent = missing.length === 1 ? 'One thing left' : 'A couple of things left';
-      $('ty-credit-title').textContent = 'You are close to $30 off your next bill';
+      $('ty-credit-title').textContent = "Let's get you that $30 off";
       $('ty-credit-text').textContent = 'Finish this by ' + nice(deadline) + ' and I will take $30 off your next bill.';
       missing.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; $('ty-credit-list').appendChild(li); });
       $('ty-credit').hidden = false;
