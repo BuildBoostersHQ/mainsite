@@ -54,6 +54,7 @@ sitemap: false
 <div class="ob-grid">
 <div><label for="ob-business_name">Business name</label><input id="ob-business_name" data-key="business_name" type="text" autocomplete="organization"></div>
 <div><label for="ob-business_phone">Business phone</label><input id="ob-business_phone" data-key="business_phone" type="tel" autocomplete="off"></div>
+<div class="ob-full ob-narrow"><label for="ob-trade">Your trade</label><select id="ob-trade" data-key="trade"><option value="">Choose one</option><option>Handyman</option><option>Painting</option><option>Junk removal</option><option>Pressure washing</option><option>Landscaping</option><option>Roofing</option><option>Plumbing</option><option>HVAC</option><option>Electrical</option><option>Remodeling</option><option>Something else</option></select></div>
 <div class="ob-full"><label for="ob-address">Address</label><input id="ob-address" data-key="address" type="text" autocomplete="street-address">
 <label class="ob-check ob-check-tight" for="ob-show_address"><input type="checkbox" id="ob-show_address" data-flag="show_address"><span><b>Show my address on my website.</b> Leave this off if you work from home or go to your customers.</span></label></div>
 <div><label for="ob-weekday_hours">Weekday hours</label><input id="ob-weekday_hours" data-key="weekday_hours" type="text" placeholder="8:00 AM to 6:00 PM"></div>
@@ -102,6 +103,17 @@ sitemap: false
 <div class="ob-full ob-narrow"><label for="ob-email">Your email</label><input id="ob-email" data-key="email" type="email" autocomplete="email"></div>
 <div class="ob-full ob-narrow"><label for="ob-job_software">What do you use for jobs and invoices?</label><select id="ob-job_software" data-key="job_software"><option>Pen and paper</option><option>Jobber</option><option>Housecall Pro</option><option>Something else</option></select></div>
 </div>
+</section>
+
+<section class="ob-sec" id="ob-look">
+<h2>Pick the look for your site</h2>
+<p class="ob-sub">These are six looks I have built for contractors. Tap "See it" to open a sample of each one, then pick your favorite.</p>
+<div class="ob-radios ob-styles" id="ob-styles" role="radiogroup" aria-label="Site look"></div>
+<div class="ob-one">
+<label for="ob-brand_color">Your own main color <span class="ob-hint">(optional, to match your logo or truck)</span></label>
+<div class="ob-row ob-color"><input type="color" id="ob-brand_color" value="#0b2440" aria-describedby="ob-color-note"><span class="ob-hint" id="ob-color-note">Leave this alone to use the colors of the look you picked.</span><button class="ob-link" type="button" id="ob-color-clear" hidden>Use the look's colors instead</button></div>
+</div>
+<div class="ob-one ob-wide"><label for="ob-site_notes">Anything else I should know before I build it? <span class="ob-hint">(optional)</span></label><textarea id="ob-site_notes" data-key="site_notes" rows="4" maxlength="1500" placeholder="A site you like, something you want front and center, something to leave off"></textarea></div>
 </section>
 
 <section class="ob-sec" id="ob-domain-sec" hidden>

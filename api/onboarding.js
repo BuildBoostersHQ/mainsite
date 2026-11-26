@@ -5,7 +5,8 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color'];
+const LONG = ['site_notes'];  // free text for whoever builds the site
 const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
@@ -22,6 +23,8 @@ function clean(input) {
   for (const key of TEXT) {
     if (key in input && (typeof input[key] === 'string' || typeof input[key] === 'number')) out[key] = String(input[key]).trim().slice(0, 300);
   }
+  for (const key of LONG) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 1500);
+  if (out.brand_color && !/^#[0-9a-f]{6}$/i.test(out.brand_color)) out.brand_color = '';
   for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
   for (const [key, max] of Object.entries(LISTS)) {
     if (Array.isArray(input[key])) {
