@@ -4,6 +4,7 @@ create table if not exists public.client_onboarding (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
+  billing_cycle text,             -- 'monthly', 'quarterly' or 'six_month'. Quarterly and six_month clients see the Google updates note
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
   launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
   video_url text,                 -- https link to the personal walkthrough video (optional)
@@ -24,6 +25,7 @@ create table if not exists public.client_onboarding (
 
 -- Safe to run again: adds anything missing if the table was created from an earlier version of this file.
 alter table public.client_onboarding
+  add column if not exists billing_cycle text,
   add column if not exists launch_call_start timestamptz,
   add column if not exists google_approved_at timestamptz,
   add column if not exists sms_consent_at timestamptz,
