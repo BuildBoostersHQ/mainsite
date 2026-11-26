@@ -5,17 +5,30 @@ create table if not exists public.client_onboarding (
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
+  launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
   video_url text,                 -- https link to the personal walkthrough video (optional)
   photo_folder_url text,          -- https link to the client's Drive photo folder (optional)
   prefill jsonb not null default '{}'::jsonb,   -- what we pulled from Google: business_name, business_phone, address, weekday_hours...
-  options jsonb not null default '{}'::jsonb,   -- {"services": [...], "areas": [...]} the chips to offer for this trade and city
+  options jsonb not null default '{}'::jsonb,   -- {"services": [...], "areas": [...], "domains": [...]} what to offer this client
   answers jsonb not null default '{}'::jsonb,   -- what the client confirmed or changed
   google_requested_at timestamptz,
+  google_approved_at timestamptz,  -- set this yourself once their Google access comes through
+  sms_consent_at timestamptz,      -- when they agreed to service texts
+  sms_consent_text text,           -- the exact words they agreed to
+  sms_consent_cell text,           -- the cell number they agreed for
   text_link_requested_at timestamptz,
   submitted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Safe to run again: adds anything missing if the table was created from an earlier version of this file.
+alter table public.client_onboarding
+  add column if not exists launch_call_start timestamptz,
+  add column if not exists google_approved_at timestamptz,
+  add column if not exists sms_consent_at timestamptz,
+  add column if not exists sms_consent_text text,
+  add column if not exists sms_consent_cell text;
 
 -- Locked down: no public access at all. Only the server function (service role key) can read or write.
 alter table public.client_onboarding enable row level security;
@@ -24,7 +37,7 @@ alter table public.client_onboarding enable row level security;
 -- insert into public.client_onboarding (code, owner_first_name, launch_call_at, prefill, options)
 -- values (
 --   replace(gen_random_uuid()::text, '-', ''),
---   'Dave', 'Thursday at 2:00 PM',
+--   'Dave', 'Thursday at 2:00 PM',   -- also set launch_call_start, for example '2026-12-03 14:00-05', to get calendar buttons
 --   '{"business_name":"Smith Plumbing","business_phone":"(305) 555-0199","address":"1420 SW 8th St, Miami, FL 33135","weekday_hours":"8:00 AM to 6:00 PM","services":["Drain cleaning"],"areas":["Miami"]}',
---   '{"services":["Drain cleaning","Water heaters","Leak repair","Repiping"],"areas":["Miami","Coral Gables","Hialeah","Kendall"]}'
+--   '{"services":["Drain cleaning","Water heaters","Leak repair","Repiping"],"areas":["Miami","Coral Gables","Hialeah","Kendall"],"domains":["smithplumbingmiami.com","smithplumbingfl.com","callsmithplumbing.com"]}'
 -- ) returning code;
