@@ -85,6 +85,9 @@
   function chips(box, options) {
     var key = box.getAttribute('data-chips');
     var max = parseInt(box.getAttribute('data-max') || '0', 10);
+    /* data-limit stops at the number and says so. data-max (vibes) swaps the oldest pick out instead. */
+    var limit = parseInt(box.getAttribute('data-limit') || '0', 10);
+    var cap = document.getElementById('ob-cap-' + key);
     var picked = Array.isArray(answers[key]) ? answers[key].slice() : [];
     /* Anything already picked that is not in the option list still shows, so it can be untapped. */
     var all = options.concat(picked.filter(function (p) { return options.indexOf(p) < 0; }));
@@ -96,7 +99,12 @@
       b.addEventListener('click', function () {
         var on = picked.indexOf(label) >= 0;
         if (on) picked = picked.filter(function (p) { return p !== label; });
-        else { if (max && picked.length >= max) picked.shift(); picked.push(label); }
+        else {
+          if (limit && picked.length >= limit) { if (cap) cap.hidden = false; return; }
+          if (max && picked.length >= max) picked.shift();
+          picked.push(label);
+        }
+        if (cap) cap.hidden = true;
         Array.prototype.forEach.call(box.children, function (c) {
           c.setAttribute('aria-pressed', picked.indexOf(c.textContent) >= 0 ? 'true' : 'false');
         });

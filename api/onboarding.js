@@ -10,7 +10,8 @@ const LONG = ['site_notes'];  // free text for whoever builds the site
 const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
-const LISTS = { services: 40, areas: 60, vibes: 2, badges: 12 };
+// 12 services and 10 towns is what the client site template builds pages for.
+const LISTS = { services: 12, areas: 10, vibes: 2, badges: 12 };
 const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
 const BUCKET = 'client-photos';

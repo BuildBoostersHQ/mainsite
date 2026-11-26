@@ -64,15 +64,17 @@ sitemap: false
 
 <section class="ob-sec">
 <h2>What work do you do?</h2>
-<p class="ob-sub">Choose every service you offer. I'll give each one its own page on your website.</p>
-<div class="ob-chips" data-chips="services" role="group" aria-label="Services"></div>
+<p class="ob-sub">Choose every service you offer, up to 12. I'll give each one its own page on your website.</p>
+<div class="ob-chips" data-chips="services" data-limit="12" role="group" aria-label="Services"></div>
+<p class="ob-cap" id="ob-cap-services" role="status" hidden>That is 12, which is the most your site can hold. Untap one if you want to swap it for another.</p>
 <div class="ob-one"><label for="ob-services_other">Anything we missed?</label><input id="ob-services_other" data-key="services_other" type="text" placeholder="Old-house repiping, tankless installs"></div>
 </section>
 
 <section class="ob-sec">
 <h2>Where will you drive for a job?</h2>
-<p class="ob-sub">Tap the towns you cover, and your site gets a page for each one so people nearby can find you.</p>
-<div class="ob-chips" data-chips="areas" role="group" aria-label="Service areas"></div>
+<p class="ob-sub">Tap the towns you cover, up to 10, and your site gets a page for each one so people nearby can find you.</p>
+<div class="ob-chips" data-chips="areas" data-limit="10" role="group" aria-label="Service areas"></div>
+<p class="ob-cap" id="ob-cap-areas" role="status" hidden>That is 10 towns, which is the most your site can hold. Untap one if you want to swap it for another.</p>
 <div class="ob-one"><label for="ob-areas_other">Service more areas?</label><input id="ob-areas_other" data-key="areas_other" type="text" placeholder="Key Biscayne, South Miami"></div>
 </section>
 
