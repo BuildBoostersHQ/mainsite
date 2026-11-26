@@ -4,6 +4,7 @@ create table if not exists public.client_onboarding (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
+  tier text,                      -- 'website', 'all_in_one' or 'ads'. Website clients are not asked for texting registration details
   billing_cycle text,             -- 'monthly', 'quarterly', 'six_month' or 'annual'. Everyone but monthly sees the Google updates note
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
   launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
@@ -29,6 +30,7 @@ create table if not exists public.client_onboarding (
 
 -- Safe to run again: adds anything missing if the table was created from an earlier version of this file.
 alter table public.client_onboarding
+  add column if not exists tier text,
   add column if not exists billing_cycle text,
   add column if not exists ein_private text,
   add column if not exists ein_provided_at timestamptz,

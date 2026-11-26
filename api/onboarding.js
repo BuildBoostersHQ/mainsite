@@ -52,6 +52,7 @@ module.exports = async function handler(req, res) {
       if (!row) return res.status(404).json({ error: 'not_found' });
       return res.status(200).json({
         first_name: row.owner_first_name || '',
+        tier: row.tier || '',
         billing_cycle: row.billing_cycle || '',
         // The EIN itself is never sent back to the page, only whether we have one.
         ein_on_file: !!row.ein_private,
