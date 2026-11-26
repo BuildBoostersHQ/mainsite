@@ -97,6 +97,8 @@ module.exports = async function handler(req, res) {
       if (!CODE.test(code)) return res.status(404).json({ error: 'not_found' });
       const row = await find(code);
       if (!row) return res.status(404).json({ error: 'not_found' });
+      // The client's website asks this on every build: thin site until the texting registration is approved, full after.
+      if (req.query.view === 'site') return res.status(200).json({ a2p_approved: !!row.a2p_registered_at });
       return res.status(200).json({
         first_name: row.owner_first_name || '',
         tier: row.tier || '',

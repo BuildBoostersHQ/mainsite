@@ -24,7 +24,9 @@ create table if not exists public.client_onboarding (
   photos_last_at timestamptz,
   ein_private text,                -- the client's EIN, for texting registration only. Never sent back to the page
   ein_provided_at timestamptz,
-  a2p_registered_at timestamptz,   -- set this once their texting registration is approved. Doing so deletes the EIN
+  a2p_registered_at timestamptz,   -- set this once their texting registration is approved. Doing so deletes the EIN and switches their site to full
+  site_deploy_hook text,           -- the Deploy Hook URL from the client's Vercel project, so approval can rebuild their site
+  site_rebuild_requested_at timestamptz,
   ein_deleted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -39,6 +41,8 @@ alter table public.client_onboarding
   add column if not exists ein_private text,
   add column if not exists ein_provided_at timestamptz,
   add column if not exists a2p_registered_at timestamptz,
+  add column if not exists site_deploy_hook text,
+  add column if not exists site_rebuild_requested_at timestamptz,
   add column if not exists ein_deleted_at timestamptz,
   add column if not exists launch_call_start timestamptz,
   add column if not exists google_approved_at timestamptz,
@@ -58,6 +62,27 @@ end $$;
 drop trigger if exists client_onboarding_wipe_ein on public.client_onboarding;
 create trigger client_onboarding_wipe_ein before insert or update on public.client_onboarding
   for each row execute function public.client_onboarding_wipe_ein();
+
+-- When a2p_registered_at is filled in, rebuild the client's website. Their site is thin until approval and
+-- full after ("mode": "auto" in the site template), and the rebuild is what makes the switch. It only ever
+-- calls a Vercel deploy hook, and a failed call never blocks the approval from saving.
+create extension if not exists pg_net;
+create or replace function public.client_onboarding_rebuild_site() returns trigger language plpgsql security definer as $$
+begin
+  if new.a2p_registered_at is not null and old.a2p_registered_at is null
+     and new.site_deploy_hook like 'https://api.vercel.com/v1/integrations/deploy/%' then
+    begin
+      perform net.http_post(url := new.site_deploy_hook, body := '{}'::jsonb);
+      update public.client_onboarding set site_rebuild_requested_at = now() where id = new.id;
+    exception when others then
+      raise warning 'Could not ask Vercel to rebuild the site for %: %', new.code, sqlerrm;
+    end;
+  end if;
+  return null;
+end $$;
+drop trigger if exists client_onboarding_rebuild_site on public.client_onboarding;
+create trigger client_onboarding_rebuild_site after update of a2p_registered_at on public.client_onboarding
+  for each row execute function public.client_onboarding_rebuild_site();
 
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
