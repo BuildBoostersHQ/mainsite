@@ -40,6 +40,8 @@ Create `src/pages/my-page.html` with front matter and push. It's served at `/my-
 
 Each client is one row. Put what you pulled from Google in `prefill`, the chips and domain choices to offer in `options`, and send them `buildboosters.com/start/<their code>`. Set `tier` to `website` to hide the texting registration section. Set `billing_cycle` to `quarterly`, `six_month` or `annual` to show the Google updates note. Set `launch_call_start` to get calendar buttons, and fill `google_approved_at` yourself once their Google access comes through.
 
+Photos a client adds on the page are shrunk on their phone, then saved to the private `client-photos` storage bucket in a folder named with their row id. `photo_count` on their row says how many have arrived.
+
 The EIN a client enters is saved in its own column (`ein_private`), is never sent back to the page, and is deleted by the database as soon as you fill in `a2p_registered_at` on their row. Both onboarding pages set `tracking: false`, so no analytics, pixel or session recording runs on them.
 
 ## Preview locally
