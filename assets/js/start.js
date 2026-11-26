@@ -236,8 +236,23 @@
         .catch(function () { einStatus.textContent = 'That did not save. Please try again.'; });
     });
 
-    if (d.google_requested) { $('ob-google-btn').hidden = true; $('ob-google-done').hidden = false; }
-    once($('ob-google-btn'), $('ob-google-done'), 'request_google');
+    var gDone = function () { $('ob-gsteps').hidden = true; $('ob-ghelp').hidden = true; $('ob-google-done').hidden = false; };
+    if (d.google_requested) gDone();
+    $('ob-google-btn').addEventListener('click', function () {
+      var btn = this; btn.disabled = true;
+      action('request_google').then(gDone)
+        .catch(function () { btn.disabled = false; saved('That did not go through. Please try again.'); });
+    });
+    $('ob-gcopy').addEventListener('click', function () {
+      var btn = this, email = $('ob-gmail').textContent;
+      var ok = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy email'; }, 2000); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents($('ob-gmail'));
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try { document.execCommand('copy'); ok(); } catch (e) { btn.textContent = 'Press and hold the email to copy'; }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(email).then(ok, fallback); else fallback();
+    });
 
     if (d.photo_folder_url && /^https:\/\//.test(d.photo_folder_url)) { $('ob-folder').href = d.photo_folder_url; $('ob-folder').hidden = false; }
     /* Photos: each one is shrunk on the phone first, then sent up one at a time. */
