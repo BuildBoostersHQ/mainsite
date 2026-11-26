@@ -12,7 +12,7 @@
   var VIBES = ['Friendly', 'Quiet and respectful', 'Affordable', 'High quality', 'Fast', 'Family-run', 'Straight shooter', 'Clean and careful'];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
-    first_name: 'Dave', billing_cycle: 'quarterly', launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
+    first_name: 'Dave', billing_cycle: 'quarterly', ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
     google_requested: false, text_link_requested: false, submitted: false, sms_consent: false,
     options: {
       services: ['Drain cleaning', 'Water heaters', 'Leak repair', 'Repiping', 'Toilets and faucets', 'Sewer lines', 'Garbage disposals', 'Emergency calls'],
@@ -154,8 +154,39 @@
     $('ob-consent').checked = !!d.sms_consent;
     $('ob-thanks-link').href = thanksUrl;
 
-    /* Clients who prepay for a quarter or six months also get their Google profile kept in step with the site. */
-    if (/^(quarterly|six[_ -]?month|6[_ -]?month)s?$/i.test(String(d.billing_cycle || '').trim())) $('ob-gupd').hidden = false;
+    /* Clients who prepay (quarterly, six months or annual) also get their Google profile kept in step with the site. */
+    if (/^(quarterly|six[_ -]?months?|6[_ -]?months?|annual|annually|yearly)$/i.test(String(d.billing_cycle || '').trim())) $('ob-gupd').hidden = false;
+
+    /* Plain yes or no checkboxes. */
+    root.querySelectorAll('[data-flag]').forEach(function (box) {
+      var key = box.getAttribute('data-flag');
+      box.checked = answers[key] === true;
+      box.addEventListener('change', function () { save(key, box.checked, true); });
+    });
+
+    /* EIN: sent once it is complete, kept in its own private column, and never sent back to this page. */
+    var ein = $('ob-ein'), einStatus = $('ob-ein-status'), type = $('ob-a2p_entity_type');
+    function einMode() {
+      var none = /no EIN/i.test(type.value);
+      $('ob-ein-wrap').hidden = none; $('ob-ein-none').hidden = !none;
+      if (none) einStatus.hidden = true;
+    }
+    type.addEventListener('change', einMode); einMode();
+    if (d.ein_on_file) { einStatus.textContent = 'Your EIN is on file. Type it again only if it has changed.'; einStatus.hidden = /no EIN/i.test(type.value); }
+    ein.addEventListener('input', function () {
+      var digits = ein.value.replace(/\D/g, '').slice(0, 9);
+      ein.value = digits.length > 2 ? digits.slice(0, 2) + '-' + digits.slice(2) : digits;
+    });
+    ein.addEventListener('change', function () {
+      var digits = ein.value.replace(/\D/g, '');
+      if (!digits) return;
+      einStatus.hidden = false;
+      if (digits.length !== 9) { einStatus.textContent = 'An EIN has 9 digits. Please check it and try again.'; return; }
+      if (demo) { einStatus.textContent = 'Sample page, nothing is saved.'; ein.value = ''; return; }
+      einStatus.textContent = 'Saving.';
+      api('POST', { ein: digits }).then(function () { ein.value = ''; einStatus.textContent = 'Your EIN is saved and kept private. Type it again only if it has changed.'; })
+        .catch(function () { einStatus.textContent = 'That did not save. Please try again.'; });
+    });
 
     if (d.google_requested) { $('ob-google-btn').hidden = true; $('ob-google-done').hidden = false; }
     once($('ob-google-btn'), $('ob-google-done'), 'request_google');

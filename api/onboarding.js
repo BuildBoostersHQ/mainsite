@@ -5,8 +5,8 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own'];
-const FLAGS = ['photo_reminders'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type'];
+const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
 const LISTS = { services: 40, areas: 60, vibes: 2, badges: 12 };
@@ -53,6 +53,8 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({
         first_name: row.owner_first_name || '',
         billing_cycle: row.billing_cycle || '',
+        // The EIN itself is never sent back to the page, only whether we have one.
+        ein_on_file: !!row.ein_private,
         launch_call_at: row.launch_call_at || '',
         video_url: row.video_url || '',
         photo_folder_url: row.photo_folder_url || '',
@@ -79,6 +81,12 @@ module.exports = async function handler(req, res) {
       const patch = { updated_at: now };
       const changes = clean(body.answers);
       if (Object.keys(changes).length) patch.answers = { ...(row.answers || {}), ...changes };
+      if (body.ein !== undefined) {
+        // Kept in its own column, away from the other answers, and wiped by the database once texting is registered.
+        const ein = String(body.ein).replace(/\D/g, '');
+        if (ein.length !== 9) return res.status(400).json({ error: 'ein_invalid' });
+        patch.ein_private = ein; patch.ein_provided_at = now; patch.ein_deleted_at = null;
+      }
       const column = ACTIONS[body.action];
       if (body.action && !column) return res.status(400).json({ error: 'unknown_action' });
       if (body.action === 'submit') {
