@@ -12,7 +12,7 @@
   var VIBES = ['Friendly', 'Quiet and respectful', 'Affordable', 'High quality', 'Fast', 'Family-run', 'Straight shooter', 'Clean and careful'];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
-    first_name: 'Dave', launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
+    first_name: 'Dave', billing_cycle: 'quarterly', launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
     google_requested: false, text_link_requested: false, submitted: false, sms_consent: false,
     options: {
       services: ['Drain cleaning', 'Water heaters', 'Leak repair', 'Repiping', 'Toilets and faucets', 'Sewer lines', 'Garbage disposals', 'Emergency calls'],
@@ -153,6 +153,9 @@
     rem.addEventListener('change', function () { save('photo_reminders', rem.checked, true); });
     $('ob-consent').checked = !!d.sms_consent;
     $('ob-thanks-link').href = thanksUrl;
+
+    /* Clients who prepay for a quarter or six months also get their Google profile kept in step with the site. */
+    if (/^(quarterly|six[_ -]?month|6[_ -]?month)s?$/i.test(String(d.billing_cycle || '').trim())) $('ob-gupd').hidden = false;
 
     if (d.google_requested) { $('ob-google-btn').hidden = true; $('ob-google-done').hidden = false; }
     once($('ob-google-btn'), $('ob-google-done'), 'request_google');

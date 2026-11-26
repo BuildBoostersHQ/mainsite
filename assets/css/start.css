@@ -28,6 +28,9 @@ html,body{margin:0;padding:0;background:#fff}
 .ob-google-done{margin-top:12px!important;color:#fff!important}
 .ob-google-done strong{color:#f2a20c}
 .ob-google-done a{color:#fff}
+.ob-gupd{margin-top:32px;max-width:580px}
+.ob-gupd h2{margin:0 0 6px;font-size:20px;font-weight:800;letter-spacing:-.01em;color:#0b2440}
+.ob-gupd p{margin:0;font-size:16px;line-height:1.55;color:#4a5767}
 .ob-sec{margin-top:64px}
 .ob-sec h2{margin:0 0 6px;font-size:26px;font-weight:800;letter-spacing:-.02em;color:#0b2440}
 .ob-sub{margin:0 0 20px;font-size:16px;line-height:1.55;color:#4a5767;max-width:560px}

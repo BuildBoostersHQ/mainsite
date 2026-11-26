@@ -52,6 +52,7 @@ module.exports = async function handler(req, res) {
       if (!row) return res.status(404).json({ error: 'not_found' });
       return res.status(200).json({
         first_name: row.owner_first_name || '',
+        billing_cycle: row.billing_cycle || '',
         launch_call_at: row.launch_call_at || '',
         video_url: row.video_url || '',
         photo_folder_url: row.photo_folder_url || '',
