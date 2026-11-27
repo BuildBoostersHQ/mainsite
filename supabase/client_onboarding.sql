@@ -171,6 +171,31 @@ create table if not exists public.job_events (
 );
 alter table public.job_events enable row level security;
 
+-- Every new Google review a client gets, as posted by the "Review Received" workflow in their sub-account
+-- to /api/review-inbox, with the reply drafted for it and what became of that reply.
+create table if not exists public.review_replies (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references public.client_onboarding(id) on delete set null,
+  ghl_location_id text,
+  source text not null default 'google',
+  rating integer not null,
+  reviewer text,
+  review_text text,
+  review_id text unique,                   -- the review's id from HighLevel, so the same review is never handled twice
+  review_url text,                         -- where the contractor reads and answers it
+  google_review_name text,                 -- accounts/.../locations/.../reviews/..., needed to post a reply through Google
+  draft text,                              -- the reply written for him
+  final_reply text,                        -- what was approved: the draft, or his own wording
+  approved_by text,                        -- yes, own_words or silence_48h
+  status text not null default 'held',     -- held, reviews_ai, unmatched, pending, texted, link_sent, queued, posted
+  texted_at timestamptz,
+  answered_at timestamptz,
+  posted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.review_replies enable row level security;
+create index if not exists review_replies_status_idx on public.review_replies (status);
+
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
 --   where ein_private is not null and ein_provided_at < now() - interval '60 days';
