@@ -202,6 +202,20 @@ module.exports = async function handler(req, res) {
         } catch (e) {
           console.error('onboarding: thank-you text failed:', e.message);
         }
+
+        // Trigger the initial site build in the background. The site goes live as thin immediately
+        // (auto mode shows thin on the live domain until A2P is approved). The copy writer runs
+        // separately via ?with_copy=true or as a follow-up call. This is non-blocking so the form
+        // submission response is not delayed by the build.
+        if (process.env.BB_INTERNAL_SECRET) {
+          const host = req.headers?.host || 'buildboosters.com';
+          const proto = host.includes('localhost') ? 'http' : 'https';
+          fetch(`${proto}://${host}/api/build-site?with_ghl=true`, {
+            method: 'POST',
+            headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code }),
+          }).catch((e) => console.error('onboarding: build-site trigger failed:', e.message));
+        }
       }
 
       return res.status(200).json({ ok: true, saved_at: now, photo_count: patch.photo_count });
