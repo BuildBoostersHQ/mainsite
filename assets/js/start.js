@@ -341,6 +341,96 @@
     navigator.sendBeacon('/api/onboarding', new Blob([JSON.stringify({ code: code, answers: pending })], { type: 'application/json' }));
   });
 
+  /* Find my business: for organic signups whose form has no prefill data. After they pick a
+     business from Google Maps, the prefill fields get filled and the form renders normally. */
+  function hasPrefill(d) {
+    var a = d.answers || {};
+    return !!(a.business_name || a.business_phone || a.address);
+  }
+
+  function setupFind(data) {
+    var findBox = $('ob-find'), resultBox = $('ob-find-results'), statusEl = $('ob-find-status');
+    var findBtn = $('ob-find-btn'), skipBtn = $('ob-find-skip');
+    var qEl = $('ob-find-q'), cityEl = $('ob-find-city');
+
+    function doSearch() {
+      var q = (qEl.value.trim() + ' ' + cityEl.value.trim()).trim();
+      if (q.length < 3) { statusEl.textContent = 'Type at least a few letters of your business name.'; statusEl.hidden = false; return; }
+      findBtn.disabled = true;
+      statusEl.textContent = 'Searching.'; statusEl.hidden = false;
+      resultBox.hidden = true; resultBox.textContent = '';
+      fetch('/api/business-lookup?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (resp) {
+          findBtn.disabled = false;
+          if (!resp.found || !resp.results || !resp.results.length) {
+            statusEl.textContent = 'No businesses matched that name. Try a different spelling, or tap the button below to type everything in by hand.';
+            return;
+          }
+          statusEl.hidden = true;
+          resp.results.forEach(function (biz) {
+            var card = document.createElement('div');
+            card.className = 'ob-biz-card';
+            card.innerHTML = '<div class="ob-biz-info"><div class="ob-biz-name"></div><div class="ob-biz-addr"></div></div><div class="ob-biz-rating"></div>';
+            card.querySelector('.ob-biz-name').textContent = biz.business_name;
+            card.querySelector('.ob-biz-addr').textContent = biz.address;
+            card.querySelector('.ob-biz-rating').textContent = biz.rating ? biz.rating + ' stars (' + biz.review_count + ' reviews)' : '';
+            card.addEventListener('click', function () {
+              /* Fill the data and render the form */
+              data.answers = data.answers || {};
+              if (biz.business_name) data.answers.business_name = biz.business_name;
+              if (biz.business_phone) data.answers.business_phone = biz.business_phone;
+              if (biz.address) data.answers.address = biz.address;
+              if (biz.weekday_hours) data.answers.weekday_hours = biz.weekday_hours;
+              if (biz.weekends) data.answers.weekends = biz.weekends;
+              if (biz.city) data.answers.city = biz.city;
+              /* Save the prefill to the server */
+              if (!demo) api('POST', { answers: data.answers }).catch(function () {});
+              findBox.hidden = true;
+              $('ob-lead-prefill').hidden = false;
+              $('ob-lead-manual').hidden = true;
+              render(data);
+            });
+            resultBox.appendChild(card);
+          });
+          resultBox.hidden = false;
+        })
+        .catch(function () {
+          findBtn.disabled = false;
+          statusEl.textContent = 'Could not search right now. You can type everything in by hand instead.';
+        });
+    }
+
+    findBtn.addEventListener('click', doSearch);
+    qEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+    cityEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+
+    skipBtn.addEventListener('click', function () {
+      findBox.hidden = true;
+      $('ob-lead-prefill').hidden = true;
+      $('ob-lead-manual').hidden = false;
+      render(data);
+    });
+  }
+
+  function maybeFind(data) {
+    if (hasPrefill(data)) {
+      /* Cold SMS prospect or someone who already started filling in. Skip the find step. */
+      $('ob-find').hidden = true;
+      $('ob-lead-prefill').hidden = false;
+      $('ob-lead-manual').hidden = true;
+      render(data);
+    } else {
+      /* Organic signup: show the find step first. */
+      $('ob-find').hidden = false;
+      $('ob-greeting').hidden = true;
+      $('ob-lead-prefill').hidden = true;
+      $('ob-lead-manual').hidden = true;
+      setupFind(data);
+      show('ready');
+    }
+  }
+
   if (demo) { render(SAMPLE); saved('Sample page, nothing is saved.'); }
-  else api('GET').then(render).catch(function () { show('error'); });
+  else api('GET').then(maybeFind).catch(function () { show('error'); });
 })();

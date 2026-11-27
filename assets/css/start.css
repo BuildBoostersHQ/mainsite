@@ -102,5 +102,14 @@ html,body{margin:0;padding:0;background:#fff}
 .ob-thirty{font-size:30px;font-weight:800;letter-spacing:-.02em;color:#0b2440;margin-top:4px}
 .ob-thanks p{margin:8px 0 0;font-size:15px;line-height:1.55;color:#4a5767}
 .ob-side .ob-help{margin-top:32px;font-size:15px;line-height:1.55;color:#4a5767}
+/* Find my business (organic signup flow) */
+#ob-find{margin-bottom:40px;padding-bottom:40px;border-bottom:1px solid #d5dce5}
+#ob-find-results{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.ob-biz-card{display:flex;align-items:center;gap:16px;padding:14px 18px;border:1.5px solid #d5dce5;border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s;background:#fff}
+.ob-biz-card:hover{border-color:#0b2440;background:#f4f6f9}
+.ob-biz-info{flex:1;min-width:0}
+.ob-biz-name{font-size:16px;font-weight:700;color:#0b2440;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-biz-addr{font-size:13px;color:#5b6878;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-biz-rating{font-size:13px;font-weight:600;color:#f2a20c;white-space:nowrap}
 @media (max-width:640px){.ob-w{padding:28px 20px 72px}.ob-band{margin-left:-20px;margin-right:-20px;padding:36px 20px}.ob-google{padding:24px}.ob-cols{margin-top:40px}.ob-btn{width:100%}}
 #ty-call{margin-bottom:72px}

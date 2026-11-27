@@ -29,8 +29,23 @@ sitemap: false
 <div class="ob-cols" id="ob-main" hidden>
 <main class="ob-main">
 
-<h1>Hey <span data-fill="first_name">there</span>! Let's get everything ready.</h1>
-<p class="ob-lead">I've already pulled in your business information from Google. Just check that everything looks right, tell me which services you offer, and I'll take it from here.</p>
+<!-- FIND MY BUSINESS: shown only when there is no prefill data (organic signups) -->
+<div id="ob-find" hidden>
+<h1>Let's find your business on Google.</h1>
+<p class="ob-lead">Type your business name and city, and I will pull everything from your Google profile so you do not have to type it all in by hand.</p>
+<div class="ob-grid" style="margin-bottom: 16px;">
+<div style="flex: 2; min-width: 200px;"><label for="ob-find-q">Business name</label><input id="ob-find-q" type="text" placeholder="Smith Plumbing" autocomplete="off"></div>
+<div style="flex: 1; min-width: 140px;"><label for="ob-find-city">City</label><input id="ob-find-city" type="text" placeholder="Miami" autocomplete="off"></div>
+</div>
+<button class="ob-btn ob-btn-navy" type="button" id="ob-find-btn">Search</button>
+<p class="ob-note" id="ob-find-status" role="status" hidden></p>
+<div id="ob-find-results" hidden></div>
+<button class="ob-btn ob-btn-line" type="button" id="ob-find-skip" style="margin-top: 12px;">I do not see my business, let me type it in</button>
+</div>
+
+<h1 id="ob-greeting">Hey <span data-fill="first_name">there</span>! Let's get everything ready.</h1>
+<p class="ob-lead" id="ob-lead-prefill">I've already pulled in your business information from Google. Just check that everything looks right, tell me which services you offer, and I'll take it from here.</p>
+<p class="ob-lead" id="ob-lead-manual" hidden>Tell me about your business and which services you offer, and I'll take it from here.</p>
 <p class="ob-meta">It takes about six minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
 
 <div class="ob-thanks ob-thanks-top">
