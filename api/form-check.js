@@ -9,7 +9,7 @@
 //
 // Timing for each track:
 //   first text   20 hours or more after the clock starts, any time from 9 AM to 7 PM
-//   later texts  the following mornings, between 8 and 11 AM
+//   later texts  the following mornings, between 8 and 10 AM
 // The clock starts at payment for the form track and at form submission for the other two.
 //
 // Also, once per client:
@@ -19,10 +19,7 @@
 //     and everything still missing goes on the launch call checklist
 //   - once the site is built, a text asking them to bring their customer list to the launch call
 //
-// Built to run every hour. On Vercel's free plan a schedule can only run once a day, so vercel.json
-// runs it once each morning (9 to 10 AM Eastern in winter, 10 to 11 in summer) and everything here
-// happens at that run. On a paid plan, change the schedule to "0 * * * *" and the timing above is exact.
-// Internal only.
+// Run every hour by Vercel's scheduler (see vercel.json), which needs a paid Vercel plan. Internal only.
 const { sb, allowed, configured, isCron } = require('./_sb');
 const { sendAlert } = require('./alert');
 const { textClient, digits } = require('./_text');
@@ -79,7 +76,7 @@ function due(track, sent, anchorIso, now) {
   if (sent.length >= max) return false;
   const hour = easternHour(now);
   if (sent.length === 0) return hoursSince(anchorIso, now) >= 20 && hour >= 9 && hour < 19;
-  return hour >= 8 && hour < 11 && hoursSince(sent[sent.length - 1], now) >= 12;
+  return hour >= 8 && hour < 10 && hoursSince(sent[sent.length - 1], now) >= 12;
 }
 
 // Everything the launch call has to cover because the form never came in (or came in with gaps).
