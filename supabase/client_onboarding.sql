@@ -39,6 +39,7 @@ create table if not exists public.client_onboarding (
   site_created_at timestamptz,     -- when the site automator created the repo and project
   site_domain text,                -- the registered domain, e.g. smithplumbingmiami.com
   domain_registered_at timestamptz,
+  nudges_sent jsonb not null default '{}'::jsonb,  -- tracks which follow-up texts have been sent: { day1: "...", day4: "..." }
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -71,7 +72,8 @@ alter table public.client_onboarding
   add column if not exists stripe_session_id text,
   add column if not exists stripe_customer_id text,
   add column if not exists site_domain text,
-  add column if not exists domain_registered_at timestamptz;
+  add column if not exists domain_registered_at timestamptz,
+  add column if not exists nudges_sent jsonb not null default '{}'::jsonb;
 
 -- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
