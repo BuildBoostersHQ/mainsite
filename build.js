@@ -100,7 +100,10 @@ function render(name, fm, body) {
   if (layout === 'demo') html += '<script>try{var bbT=localStorage.getItem("bbTheme");if(bbT)document.documentElement.setAttribute("data-theme",bbT)}catch(e){}</script>\n';
   if (layout === 'site') html += FONTS + '\n<link rel="stylesheet" href="/assets/css/site.css">\n';
   // Chat widget on every page except the client demo sites (and any page that sets chat: false).
-  const chat = layout !== 'demo' && fm.chat !== 'false';
+  // A2P texting rules: the chat widget may not sit on a page that also has a form collecting a phone number
+  // or SMS consent (contact, lead, landing or booking forms), so those pages are skipped automatically.
+  const phoneForm = /type="tel"|name="phone"|\/widget\/(bookings?|form|survey)\b/i.test(body);
+  const chat = layout !== 'demo' && fm.chat !== 'false' && !phoneForm;
   if (chat) html += CHAT;
   html += schema(name, fm, body);
   // Pages that handle private client details (onboarding) set tracking: false, so no analytics, pixel or
