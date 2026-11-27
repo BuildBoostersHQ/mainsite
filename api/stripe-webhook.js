@@ -120,7 +120,24 @@ module.exports = async function handler(req, res) {
     // TODO: text the client their setup link at https://buildboosters.com/start/{code}.
     // The texting channel (GHL API, Twilio, or another provider) is not decided yet.
 
-    return res.status(200).json({ ok: true, code, tier, billing_cycle });
+    // Try to link this client to their prospect record for prefill data.
+    // Best-effort: if the prospect DB is not configured or not found, the form still works fine.
+    let prospect_linked = false;
+    if (process.env.BB_INTERNAL_SECRET) {
+      try {
+        const host = req.headers?.host || 'buildboosters.com';
+        const proto = host.includes('localhost') ? 'http' : 'https';
+        const linkRes = await fetch(`${proto}://${host}/api/prospect-link`, {
+          method: 'POST',
+          headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, prospect_phone: phone, prospect_email: email }),
+        });
+        const linkData = await linkRes.json().catch(() => ({}));
+        prospect_linked = linkData.linked || false;
+      } catch {}
+    }
+
+    return res.status(200).json({ ok: true, code, tier, billing_cycle, prospect_linked });
   } catch (e) {
     console.error('stripe-webhook', e.message);
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });
