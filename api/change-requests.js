@@ -5,8 +5,9 @@
 //
 // GET  /api/change-requests?code=...        → list of their requests, newest first
 // POST /api/change-requests?code=...        → create a new request
-//   body: { category, body, location?, photo_keys?: string[] }
-//   photo_keys reference photos already uploaded through the onboarding photo endpoint.
+//   body: { category, body, location?, photos?: string[] }
+//   photos is an array of base64-encoded JPEG strings. Each photo is stored in the client-photos
+//   bucket under change-requests/{request_id}/. Max 20 photos per request, 3MB each.
 //
 // Internal (BB_INTERNAL_SECRET):
 // PATCH /api/change-requests?id=...         → update status and status_note
@@ -17,6 +18,23 @@ const CODE = /^[a-f0-9]{16,64}$/i;
 const UUID = /^[0-9a-f-]{36}$/i;
 const CATEGORIES = ['text', 'photos', 'hours', 'phone', 'address', 'services', 'areas', 'promo', 'google', 'domain', 'other'];
 const STATUSES = ['sent', 'working', 'done', 'closed'];
+const BUCKET = 'client-photos';
+const MAX_PHOTOS = 20;
+const MAX_PHOTO_BYTES = 3000000;
+
+// Store one photo into the client-photos bucket under change-requests/{requestId}/
+async function storePhoto(clientId, requestId, base64) {
+  const bytes = Buffer.from(String(base64), 'base64');
+  if (bytes.length < 3 || bytes.length > MAX_PHOTO_BYTES) return null;
+  const baseUrl = String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+  const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  const name = `${clientId}/change-requests/${requestId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const res = await fetch(`${baseUrl}/storage/v1/object/${BUCKET}/${name}`, {
+    method: 'POST', body: bytes,
+    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'false' },
+  });
+  return res.ok ? name : null;
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -63,7 +81,9 @@ module.exports = async function handler(req, res) {
       if (!body) return res.status(400).json({ error: 'body_required' });
       const category = CATEGORIES.includes(b.category) ? b.category : 'other';
       const location = typeof b.location === 'string' ? b.location.trim().slice(0, 200) : '';
-      const photoKeys = Array.isArray(b.photo_keys) ? b.photo_keys.filter(k => typeof k === 'string').slice(0, 20) : [];
+      const photos = Array.isArray(b.photos) ? b.photos.filter(p => typeof p === 'string' && p.length > 100).slice(0, MAX_PHOTOS) : [];
+
+      // Create the request first to get its ID for the photo storage path
       const saved = await sb('change_requests', {
         method: 'POST',
         body: JSON.stringify({
@@ -71,10 +91,32 @@ module.exports = async function handler(req, res) {
           category,
           body,
           location: location || null,
-          photo_count: photoKeys.length,
+          photo_count: photos.length,
         }),
       });
-      return res.status(201).json({ ok: true, request: saved[0] || {} });
+      const request = saved[0] || {};
+
+      // Store photos if any were sent as base64
+      if (photos.length > 0 && request.id) {
+        let stored = 0;
+        for (const photo of photos) {
+          try {
+            const path = await storePhoto(client.id, request.id, photo);
+            if (path) stored++;
+          } catch (e) {
+            console.error('change-requests: photo store failed:', e.message);
+          }
+        }
+        // Update the actual count of successfully stored photos
+        if (stored !== photos.length) {
+          await sb(`change_requests?id=eq.${request.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ photo_count: stored }),
+          }).catch(() => {});
+        }
+      }
+
+      return res.status(201).json({ ok: true, request });
     }
 
     return res.status(405).json({ error: 'method_not_allowed' });
