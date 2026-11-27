@@ -156,6 +156,54 @@ module.exports = async function handler(req, res) {
       // First time only, so the 24 hour clock and "who asked first" stay honest.
       if (column && !row[column]) patch[column] = now;
       await supabase(`${TABLE}?id=eq.${row.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
+
+      // On first submit: send a thank-you text with the personalized video (if set)
+      if (body.action === 'submit' && !row.submitted_at) {
+        try {
+          const ghlKey = (process.env.GHL_API_KEY || '').trim();
+          const locId = (process.env.GHL_LOCATION_ID || '').trim();
+          const a = { ...(row.prefill || {}), ...(row.answers || {}), ...(patch.answers || {}) };
+          const ownerName = row.owner_first_name || a.preferred_name || '';
+          const ownerCell = String(a.cell || a.business_phone || '').replace(/\D/g, '');
+          if (ghlKey && locId && ownerCell.length >= 10) {
+            const fullPhone = `+1${ownerCell}`;
+            // Find the contact
+            const searchRes = await fetch(
+              `https://services.leadconnectorhq.com/contacts/search/duplicate?locationId=${locId}&number=${encodeURIComponent(fullPhone)}`,
+              { headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28' } }
+            );
+            const searchData = await searchRes.json();
+            let contactId = searchData?.contact?.id;
+            if (!contactId) {
+              const createRes = await fetch('https://services.leadconnectorhq.com/contacts/', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ locationId: locId, firstName: ownerName || 'Client', phone: fullPhone }),
+              });
+              contactId = (await createRes.json())?.contact?.id;
+            }
+            if (contactId) {
+              let msg = ownerName
+                ? `${ownerName}, you are all set! We are building your site now and you will hear from us soon.`
+                : `You are all set! We are building your site now and you will hear from us soon.`;
+              // If a personalized video URL is set, include it
+              if (row.video_url) msg += ` Here is a quick message from me: ${row.video_url}`;
+              await fetch('https://services.leadconnectorhq.com/conversations/messages', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'SMS', contactId, message: msg }),
+              });
+            }
+          }
+          // Alert Maddie
+          const { sendAlert } = require('./alert');
+          const bizName = a.business_name || ownerName || code.slice(0, 8);
+          await sendAlert('Form submitted', `${bizName} just finished their setup form. Ready to build.`).catch(() => {});
+        } catch (e) {
+          console.error('onboarding: thank-you text failed:', e.message);
+        }
+      }
+
       return res.status(200).json({ ok: true, saved_at: now, photo_count: patch.photo_count });
     }
     res.setHeader('Allow', 'GET, POST');
