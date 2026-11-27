@@ -117,8 +117,59 @@ module.exports = async function handler(req, res) {
 
     await sb(TABLE, { method: 'POST', body: JSON.stringify(row) });
 
-    // TODO: text the client their setup link at https://buildboosters.com/start/{code}.
-    // The texting channel (GHL API, Twilio, or another provider) is not decided yet.
+    // Text the client their setup link through GHL and alert Maddie
+    if (phone.length === 10 && process.env.GHL_API_KEY && process.env.GHL_LOCATION_ID) {
+      const setupUrl = `https://buildboosters.com/start/${code}`;
+      const ownerName = firstName(name);
+      const smsBody = ownerName
+        ? `Hey ${ownerName}, it's Maddie from Build Boosters! Here's your setup page, takes about 5 minutes: ${setupUrl}`
+        : `Hey, it's Maddie from Build Boosters! Here's your setup page, takes about 5 minutes: ${setupUrl}`;
+      try {
+        const ghlKey = process.env.GHL_API_KEY.trim();
+        const locId = process.env.GHL_LOCATION_ID.trim();
+        const fullPhone = `+1${phone}`;
+        // Find or create the client as a GHL contact
+        const searchRes = await fetch(
+          `https://services.leadconnectorhq.com/contacts/search/duplicate?locationId=${locId}&number=${encodeURIComponent(fullPhone)}`,
+          { headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28' } }
+        );
+        const searchData = await searchRes.json();
+        let contactId = searchData?.contact?.id;
+        if (!contactId) {
+          const createRes = await fetch('https://services.leadconnectorhq.com/contacts/', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              locationId: locId,
+              firstName: ownerName || 'Client',
+              phone: fullPhone,
+              ...(email ? { email } : {}),
+            }),
+          });
+          const created = await createRes.json();
+          contactId = created?.contact?.id;
+        }
+        if (contactId) {
+          await fetch('https://services.leadconnectorhq.com/conversations/messages', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'SMS', contactId, message: smsBody }),
+          });
+        }
+      } catch (e) {
+        console.error('stripe-webhook: setup text failed:', e.message);
+      }
+    }
+    // Alert Maddie about the new client
+    try {
+      const { sendAlert } = require('./alert');
+      await sendAlert(
+        'New client paid',
+        `${name || 'Unknown'} (${tier}, ${billing_cycle}) just paid. Code: ${code}`
+      );
+    } catch (e) {
+      console.error('stripe-webhook: alert failed:', e.message);
+    }
 
     // Try to link this client to their prospect record for prefill data.
     // Best-effort: if the prospect DB is not configured or not found, the form still works fine.
