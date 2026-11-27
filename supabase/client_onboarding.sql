@@ -111,6 +111,22 @@ create table if not exists public.a2p_events (
 );
 alter table public.a2p_events enable row level security;
 
+-- Change requests from the client portal. Each request is one thing the client wants changed.
+-- Photos attached to a request sit in the client-photos bucket under change-requests/{request_id}/.
+create table if not exists public.change_requests (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references public.client_onboarding(id) on delete cascade,
+  category text not null default 'other',  -- text, photos, hours, phone, address, services, areas, promo, google, domain, other
+  body text not null,
+  location text,                           -- where on the site (optional)
+  photo_count integer not null default 0,
+  status text not null default 'sent',     -- sent, working, done, closed
+  status_note text,                        -- internal note on what was done or why it was closed
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.change_requests enable row level security;
+
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
 --   where ein_private is not null and ein_provided_at < now() - interval '60 days';
