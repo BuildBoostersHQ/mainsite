@@ -94,7 +94,14 @@ function buildTasks(r) {
     });
   }
 
-  if (r.site_repo && !r.site_domain) {
+  if (r.site_repo && !r.site_domain && a.domain_own) {
+    tasks.push({
+      id: `${code}:own_domain`,
+      title: 'Waiting on them to point their own domain',
+      instructions: `They want to use ${a.domain_own}. Their steps are at https://buildboosters.com/connect-domain/${code}. This task clears on its own once the domain points at the site.`,
+      priority: 'medium',
+    });
+  } else if (r.site_repo && !r.site_domain) {
     tasks.push({
       id: `${code}:no_domain`,
       title: 'No domain registered',

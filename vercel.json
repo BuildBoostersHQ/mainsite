@@ -28,6 +28,10 @@
     {
       "source": "/start-thank-you/:code",
       "destination": "/start-thank-you"
+    },
+    {
+      "source": "/connect-domain/:code",
+      "destination": "/connect-domain"
     }
   ],
   "crons": [

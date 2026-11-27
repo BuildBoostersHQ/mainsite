@@ -2,6 +2,7 @@
 // GET returns the clients and the recent A2P emails. POST takes two small actions:
 //   { action: 'approve', id }      mark a client's texting registration approved by hand (same effect as the email)
 //   { action: 'dismiss', event }   clear a "needs a look" email once it has been dealt with
+//   { action: 'sales_notes', id, text }  save the client's goals from the sales call
 // Internal only: needs BB_INTERNAL_SECRET in the x-bb-secret header. Never returns an EIN.
 const { sb, allowed, configured } = require('./_sb');
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -20,6 +21,14 @@ module.exports = async function handler(req, res) {
       }
       if (b.action === 'dismiss' && UUID.test(String(b.event))) {
         await sb(`a2p_events?id=eq.${b.event}`, { method: 'PATCH', body: JSON.stringify({ needs_look: false }) });
+        return res.status(200).json({ ok: true });
+      }
+      // Goals from the sales call, saved on the client's record so the launch deck fills itself in.
+      if (b.action === 'sales_notes' && UUID.test(String(b.id))) {
+        const found = await sb(`client_onboarding?id=eq.${b.id}&select=prefill&limit=1`);
+        if (!found.length) return res.status(404).json({ error: 'not_found' });
+        const prefill = { ...(found[0].prefill || {}), sales_notes: String(b.text || '').slice(0, 2000) };
+        await sb(`client_onboarding?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ prefill }) });
         return res.status(200).json({ ok: true });
       }
       return res.status(400).json({ error: 'bad_request' });

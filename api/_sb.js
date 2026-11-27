@@ -41,4 +41,15 @@ function allowed(req) {
 }
 
 const configured = () => !!baseUrl() && !!secret();
-module.exports = { sb, allowed, configured, isCron };
+
+// The client portal runs on each client's own domain and calls these endpoints from the browser,
+// so the browser needs to be told that is allowed. Returns true when it answered a preflight.
+function cors(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-client-code');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  if (req.method === 'OPTIONS') { res.status(204).end(); return true; }
+  return false;
+}
+module.exports = { sb, allowed, configured, isCron, cors };

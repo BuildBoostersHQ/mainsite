@@ -12,7 +12,7 @@
 // Internal (BB_INTERNAL_SECRET):
 // PATCH /api/change-requests?id=...         → update status and status_note
 // GET   /api/change-requests?all=true       → all requests across all clients (for the dashboard)
-const { sb, allowed, configured } = require('./_sb');
+const { sb, allowed, configured, cors } = require('./_sb');
 
 const CODE = /^[a-f0-9]{16,64}$/i;
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -38,6 +38,7 @@ async function storePhoto(clientId, requestId, base64) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
+  if (cors(req, res)) return;
   if (!configured()) return res.status(500).json({ error: 'not_configured' });
 
   try {

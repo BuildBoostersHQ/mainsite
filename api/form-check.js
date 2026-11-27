@@ -18,6 +18,7 @@
 //   - at 72 hours with no form, the site is built from the Google profile ("final with basics")
 //     and everything still missing goes on the launch call checklist
 //   - once the site is built, a text asking them to bring their customer list to the launch call
+//   - once the site is built, the steps to point a domain they already own at it
 //
 // Run every hour by Vercel's scheduler (see vercel.json), which needs a paid Vercel plan. Internal only.
 const { sb, allowed, configured, isCron } = require('./_sb');
@@ -55,6 +56,7 @@ const TEXTS = {
     (n) => `Last one from me about Google, ${n}. Real Maddie can do it with you on a quick call if that's easier. Just reply here and she'll set it up.`,
   ],
   basics: (n, url) => `Hey ${n}, Automated Maddie here. I got tired of waiting, so I built your website with what I found on your Google profile. Real Maddie will go over the rest with you on your launch call. You can still fill in your setup page any time: ${url}`,
+  ownDomain: (n, url, domain) => `Hey ${n}, Automated Maddie here. Your new website is ready to go on ${domain}. It's two small changes where your domain is kept, and I wrote out the steps for you: ${url}`,
   customerList: (n) => `Hey ${n}, Automated Maddie here. Your plan comes with one free text to all of your past customers to bring in repeat work. Bring your customer list to your launch call. A spreadsheet or an export from your invoicing app both work.`,
 };
 
@@ -177,6 +179,13 @@ async function check(r, now, origin, out) {
   if (!isWebsiteTier(r) && r.site_created_at && !nudges.customer_list && daytime && hoursSince(r.site_created_at, now) >= 2 && phone) {
     const result = await textClient(phone, TEXTS.customerList(first), first);
     if (result.sent) { nudges.customer_list = stamp; out.texts.push({ client: business, track: 'customer_list', number: 1 }); }
+  }
+
+  // They said they already own a domain: once the site exists, send the steps to point it at the site.
+  const ownDomain = String(a.domain_own || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/[/?#].*$/, '');
+  if (ownDomain && r.site_created_at && !r.site_domain && !nudges.own_domain && daytime && phone) {
+    const result = await textClient(phone, TEXTS.ownDomain(first, `https://buildboosters.com/connect-domain/${r.code}`, ownDomain), first);
+    if (result.sent) { nudges.own_domain = stamp; out.texts.push({ client: business, track: 'own_domain', number: 1 }); }
   }
 
   if (JSON.stringify(nudges) !== JSON.stringify(r.nudges_sent || {})) patch.nudges_sent = nudges;

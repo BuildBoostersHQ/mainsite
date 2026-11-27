@@ -1,0 +1,65 @@
+---
+layout: bare
+title: Connect Your Domain | Build Boosters
+description: Point the domain you already own at your new website.
+robots: noindex
+chat: false
+tracking: false
+sitemap: false
+---
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/start.css">
+<style>
+.cd-steps{margin:18px 0 0;padding-left:22px;display:grid;gap:12px;line-height:1.55}
+.cd-records{width:100%;border-collapse:collapse;margin:18px 0 6px;font-size:15px}
+.cd-records th,.cd-records td{text-align:left;padding:10px 12px;border-bottom:1px solid #e4e9ef}
+.cd-records th{font-weight:700;color:#5b6878;font-size:13px}
+.cd-records code{font:600 15px ui-monospace,Menlo,monospace;color:#0b2440;word-break:break-all}
+.cd-ok{color:#1e7a3c;font-weight:700}
+.cd-wait{color:#8a5a00;font-weight:700}
+</style>
+
+<div class="ob" id="cd">
+<div class="ob-w">
+
+<a class="ob-logo" href="/" aria-label="Build Boosters home">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
+<span><b>Build Boosters</b><small>Systems for contractors</small></span>
+</a>
+
+<p class="ob-msg" id="cd-loading" role="status">Looking up your domain.</p>
+<div class="ob-msg" id="cd-error" role="alert" hidden>
+<h2>This link did not work.</h2>
+<p>Text me at (786) 479-8856 and I will send you a fresh one.</p>
+</div>
+
+<main id="cd-main" hidden>
+<section class="ob-sec">
+<h1 id="cd-h">Put your new website on your domain</h1>
+<p class="ob-sub" id="cd-intro"></p>
+<p class="ob-note" id="cd-note" hidden></p>
+<p><a class="ob-btn ob-btn-amber" id="cd-signin" target="_blank" rel="noopener" hidden>Open my account</a></p>
+</section>
+
+<section class="ob-sec">
+<h2>The steps</h2>
+<ol class="cd-steps" id="cd-steps"></ol>
+<table class="cd-records" aria-label="The two records to set">
+<thead><tr><th>Type</th><th>Name</th><th>Value</th></tr></thead>
+<tbody id="cd-records"></tbody>
+</table>
+<p class="ob-note">If your screen looks different from these steps, text me a picture of it at (786) 479-8856 and I will tell you where to tap.</p>
+</section>
+
+<section class="ob-sec">
+<h2>Did it work?</h2>
+<p id="cd-status" role="status"></p>
+<p><button class="ob-btn ob-btn-amber" type="button" id="cd-check">Check my domain</button></p>
+</section>
+</main>
+
+</div>
+</div>
+<script src="/assets/js/connect-domain.js" defer></script>
