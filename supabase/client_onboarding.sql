@@ -65,6 +65,7 @@ alter table public.client_onboarding
   add column if not exists site_repo text,
   add column if not exists site_project_id text,
   add column if not exists site_created_at timestamptz,
+  add column if not exists processed_photos jsonb,
   add column if not exists stripe_session_id text,
   add column if not exists stripe_customer_id text;
 
