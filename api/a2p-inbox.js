@@ -9,6 +9,7 @@
 //
 // Needs BB_INTERNAL_SECRET in Vercel, plus the two Supabase variables the onboarding API already uses.
 const { sb, allowed, configured } = require('./_sb');
+const { sendAlert } = require('./alert');
 
 const SENDERS = () => String(process.env.A2P_SENDER_DOMAINS || 'gohighlevel.com,leadconnectorhq.com,msgsndr.com')
   .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -82,6 +83,11 @@ module.exports = async function handler(req, res) {
       }
       out.push({ id: gmailId, result: flips ? 'approved_site_going_full' : needsLook ? 'needs_look' : 'saved', type: got.type, status: got.status, matched: !!client });
     }
+    // Alert Maddie about anything that needs her attention
+    const looks = out.filter(r => r.result === 'needs_look');
+    const approvals = out.filter(r => r.result === 'approved_site_going_full');
+    if (looks.length) sendAlert('A2P emails need a look', `${looks.length} email${looks.length === 1 ? '' : 's'} could not be matched or read. Check the Launch page.`).catch(() => {});
+    if (approvals.length) sendAlert('A2P approved', approvals.map(r => r.id).join(', ') + ' got campaign approval. Site is going full.').catch(() => {});
     return res.status(200).json({ ok: true, results: out });
   } catch (e) {
     console.error('a2p-inbox', e.message);
