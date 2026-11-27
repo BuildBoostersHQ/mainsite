@@ -40,6 +40,8 @@ create table if not exists public.client_onboarding (
   site_domain text,                -- the registered domain, e.g. smithplumbingmiami.com
   domain_registered_at timestamptz,
   nudges_sent jsonb not null default '{}'::jsonb,  -- tracks which follow-up texts have been sent: { day1: "...", day4: "..." }
+  ghl_phone_number text,            -- the local GHL number bought for this client, e.g. +13055551234. Used as the business phone on the website
+  ghl_review_widget_id text,       -- the GHL review widget ID, embedded on the client's site for live Google reviews
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -73,7 +75,9 @@ alter table public.client_onboarding
   add column if not exists stripe_customer_id text,
   add column if not exists site_domain text,
   add column if not exists domain_registered_at timestamptz,
-  add column if not exists nudges_sent jsonb not null default '{}'::jsonb;
+  add column if not exists nudges_sent jsonb not null default '{}'::jsonb,
+  add column if not exists ghl_phone_number text,
+  add column if not exists ghl_review_widget_id text;
 
 -- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$

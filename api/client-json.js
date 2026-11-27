@@ -167,8 +167,8 @@ function buildClientJson(row) {
       legalName: a.a2p_legal_name || a.business_name || '',
       trade: trade,
       owner: a.preferred_name || '',
-      phone: digits(a.business_phone),
-      textNumber: '',
+      phone: digits(row.ghl_phone_number || a.business_phone),
+      textNumber: row.ghl_phone_number ? digits(row.ghl_phone_number) : '',
       email: a.email || '',
       address: addr,
       showAddress: a.show_address !== false,
@@ -216,7 +216,8 @@ function buildClientJson(row) {
       ghl: {
         formWebhook: '',
         chatWidgetId: '',
-        reviewWidgetId: '',
+        reviewWidgetId: row.ghl_review_widget_id || '',
+        locationId: row.ghl_location_id || '',
       },
       google: {
         reviewLink: '',

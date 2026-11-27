@@ -435,11 +435,17 @@ module.exports = async function handler(req, res) {
       results.steps.custom_values = { ok: false, error: e.message };
     }
 
-    // Step 3: Buy phone number
+    // Step 3: Buy phone number and save it to Supabase
     let phoneResult;
     try {
       phoneResult = await buyPhoneNumber(locationId, a.business_phone || '');
       results.steps.phone_number = phoneResult;
+      if (phoneResult && phoneResult.bought && phoneResult.number) {
+        await sb(`${TABLE}?id=eq.${row.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ ghl_phone_number: phoneResult.number }),
+        });
+      }
     } catch (e) {
       results.steps.phone_number = { bought: false, error: e.message };
     }
@@ -495,15 +501,25 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // Step 6: Review widget ID.
+    // The snapshot creates a review widget (5-star only, carousel). The GHL API endpoint
+    // to list reputation widgets is not confirmed, so for now this is a manual step:
+    // go to Reputation > Widgets in the sub-account, copy the widget ID, and save it
+    // to Supabase as ghl_review_widget_id. The client-json generator and the site template
+    // will pick it up automatically on the next build.
+    // TODO: automate this when GHL adds a reputation widget list endpoint.
+    results.steps.review_widget = { ok: false, reason: 'manual: copy widget ID from Reputation > Widgets' };
+
     // Build the manual steps reminder
     const manualSteps = [];
     if (phoneResult && phoneResult.bought && phoneResult.number) {
       manualSteps.push(`Configure call forwarding on ${phoneResult.number} to ${a.business_phone || 'their business phone'}`);
     } else {
-      manualSteps.push('Buy and configure a toll-free number manually');
+      manualSteps.push('Buy and configure a local number manually');
     }
     manualSteps.push('Connect GMB (Settings > Integrations > Sign in with Google)');
-    manualSteps.push('Update GMB phone to the toll-free number');
+    manualSteps.push('Update GMB phone to the GHL number');
+    manualSteps.push('Copy review widget ID from Reputation > Widgets and save to Supabase ghl_review_widget_id');
 
     // Alert Maddie
     const alertBody = `GHL sub-account created for ${bizName}.\n` +
