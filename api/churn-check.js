@@ -10,7 +10,7 @@
 // is not sent twice within 48 hours.
 //
 // Internal only (BB_INTERNAL_SECRET).
-const { sb, allowed, configured } = require('./_sb');
+const { sb, allowed, configured, isCron } = require('./_sb');
 const { sendAlert } = require('./alert');
 
 const DAY = 86400000;
@@ -22,7 +22,7 @@ function daysSince(iso) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
+  if (req.method !== 'POST' && !isCron(req)) return res.status(405).json({ error: 'method_not_allowed' });
   if (!configured() || !process.env.BB_INTERNAL_SECRET) return res.status(500).json({ error: 'not_configured' });
   if (!allowed(req)) return res.status(401).json({ error: 'unauthorized' });
 

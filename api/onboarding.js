@@ -213,7 +213,8 @@ module.exports = async function handler(req, res) {
           fetch(`${proto}://${host}/api/build-site?with_ghl=true`, {
             method: 'POST',
             headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code }),
+            // rebuild: a client who went 72 hours without the form already has a basics site.
+            body: JSON.stringify({ code, rebuild: true }),
           }).catch((e) => console.error('onboarding: build-site trigger failed:', e.message));
         }
       }

@@ -24,7 +24,16 @@ async function sb(path, options = {}) {
 
 // These endpoints are for Build Boosters' own tools only. The caller sends BB_INTERNAL_SECRET in the
 // x-bb-secret header. Returns true when it matches.
+// Vercel's scheduler calls an endpoint with GET and "Authorization: Bearer <CRON_SECRET>".
+function isCron(req) {
+  const want = String(process.env.CRON_SECRET || '').trim();
+  const got = String((req.headers && req.headers.authorization) || '').replace(/^Bearer\s+/i, '').trim();
+  if (want.length < 24 || got.length !== want.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(got), Buffer.from(want));
+}
+
 function allowed(req) {
+  if (isCron(req)) return true;
   const want = String(process.env.BB_INTERNAL_SECRET || '').trim();
   const got = String(req.headers['x-bb-secret'] || '').trim();
   if (want.length < 24 || got.length !== want.length) return false;
@@ -32,4 +41,4 @@ function allowed(req) {
 }
 
 const configured = () => !!baseUrl() && !!secret();
-module.exports = { sb, allowed, configured };
+module.exports = { sb, allowed, configured, isCron };

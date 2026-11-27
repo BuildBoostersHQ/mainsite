@@ -39,6 +39,8 @@ module.exports = async function handler(req, res) {
         a2p_status: r.a2p_status || '', a2p_status_at: r.a2p_status_at || null, a2p_reason: r.a2p_reason || '',
         a2p_approved_at: r.a2p_registered_at || null, site_rebuild_requested_at: r.site_rebuild_requested_at || null,
         has_location_id: !!r.ghl_location_id, has_deploy_hook: !!r.site_deploy_hook,
+        credit_30: !!r.credit_30_earned_at, built_with_basics: !!r.site_final_basics_at, launch_checklist: r.launch_checklist || [],
+        logo_url: a.logo_url || '', site_domain: r.site_domain || '', site_repo: r.site_repo || '', goals: a.sales_notes || a.goals || '',
       };
     });
     return res.status(200).json({ clients, events });

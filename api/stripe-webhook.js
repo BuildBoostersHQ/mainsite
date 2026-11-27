@@ -188,7 +188,29 @@ module.exports = async function handler(req, res) {
       } catch {}
     }
 
-    return res.status(200).json({ ok: true, code, tier, billing_cycle, prospect_linked });
+    // No prospect record means they found us on their own. Look their business up on Google by
+    // phone so the setup form still opens filled in. Never overwrites what is already there.
+    let google_prefilled = false;
+    if (!prospect_linked && phone.length === 10) {
+      try {
+        const { lookupByPhone } = require('./business-lookup');
+        const biz = await lookupByPhone(phone);
+        if (biz && biz.business_name) {
+          const found = {};
+          for (const k of ['business_name', 'business_phone', 'address', 'city', 'weekday_hours', 'weekends', 'website', 'place_id']) {
+            if (biz[k]) found[k] = biz[k];
+          }
+          // The name Stripe has is the cardholder, so Google's business name wins. Everything else keeps what Stripe gave us.
+          const merged = { ...found, ...prefill, business_name: found.business_name };
+          await sb(`${TABLE}?code=eq.${code}`, { method: 'PATCH', body: JSON.stringify({ prefill: merged }) });
+          google_prefilled = true;
+        }
+      } catch (e) {
+        console.error('stripe-webhook: Google lookup failed:', e.message);
+      }
+    }
+
+    return res.status(200).json({ ok: true, code, tier, billing_cycle, prospect_linked, google_prefilled });
   } catch (e) {
     console.error('stripe-webhook', e.message);
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });
