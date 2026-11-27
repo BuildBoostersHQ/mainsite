@@ -38,9 +38,9 @@ function parse(file) {
 
 // Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
 const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Websites and lead systems for contractors and home service businesses.', image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
-  contactPoint: { '@type': 'ContactPoint', telephone: '+1-786-479-8856', contactType: 'customer service', areaServed: 'US', availableLanguage: 'English' },
+  contactPoint: { '@type': 'ContactPoint', telephone: '+1-786-933-8832', contactType: 'customer service', areaServed: 'US', availableLanguage: 'English' },
   sameAs: ['https://github.com/BuildBoostersHQ'],
-  logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-479-8856',
+  logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-933-8832',
   address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
 const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
 const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
@@ -134,12 +134,12 @@ function render(name, fm, body) {
 
 // Make the business phone number tap-to-call everywhere it appears as plain text
 // (skips text already inside a link, and anything inside <head>, <script>, <style> or <title>).
-const PHONE = '(786) 479-8856';
+const PHONE = '(786) 933-8832';
 function linkPhone(html) {
   const out = []; let skip = 0; const SKIP = /^<(\/?)(a|script|style|title|head|textarea)\b/i;
   for (const part of html.split(/(<[^>]+>)/)) {
     if (part.startsWith('<')) { const m = part.match(SKIP); if (m) skip += m[1] ? -1 : 1; out.push(part); continue; }
-    out.push(skip > 0 ? part : part.split(PHONE).join(`<a class="tel" href="tel:+17864798856">${PHONE}</a>`));
+    out.push(skip > 0 ? part : part.split(PHONE).join(`<a class="tel" href="tel:+17869338832">${PHONE}</a>`));
   }
   return out.join('');
 }

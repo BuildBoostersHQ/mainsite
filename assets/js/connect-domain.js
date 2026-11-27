@@ -12,7 +12,7 @@
     $('cd-main').hidden = false;
     if (!d.domain) {
       $('cd-h').textContent = 'There is no domain on file for you yet.';
-      $('cd-intro').textContent = 'Text me the domain you own at (786) 479-8856 and I will set this page up for it.';
+      $('cd-intro').textContent = 'Text me the domain you own at (786) 933-8832 and I will set this page up for it.';
       return;
     }
     $('cd-h').textContent = 'Put your new website on ' + d.domain;

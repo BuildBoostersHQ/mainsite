@@ -50,7 +50,7 @@
     if (!ok) return;
     var end = new Date(start.getTime() + CALL_MINUTES * 60000);
     var title = 'Build Boosters launch call with Maddie';
-    var details = 'We will go through your new website together and put it live. If you need to move this, text Maddie at (786) 479-8856.';
+    var details = 'We will go through your new website together and put it live. If you need to move this, text Maddie at (786) 933-8832.';
     $('ty-gcal').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) +
       '&dates=' + stamp(start) + '/' + stamp(end) + '&details=' + encodeURIComponent(details);
     var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Build Boosters//Launch call//EN', 'BEGIN:VEVENT',
