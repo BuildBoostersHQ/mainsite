@@ -1,0 +1,61 @@
+---
+layout: bare
+title: Send Your Key | Build Boosters
+description: A private page for sending a key to Build Boosters.
+robots: noindex
+chat: false
+tracking: false
+sitemap: false
+---
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/start.css">
+
+<div class="ob" id="key">
+<div class="ob-w">
+
+<a class="ob-logo" href="/" aria-label="Build Boosters home">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
+<span><b>Build Boosters</b><small>Systems for contractors</small></span>
+</a>
+
+<p class="ob-msg" id="key-loading" role="status">Your page is loading.</p>
+<div class="ob-msg" id="key-error" role="alert" hidden>
+<h2>This link did not work.</h2>
+<p>Text me at (786) 933-8832 and I will send you a fresh one.</p>
+</div>
+<div class="ob-msg" id="key-used" role="status" hidden>
+<h2>This link was already used.</h2>
+<p>A key was already sent from this link, so the link is closed. Text me at (786) 933-8832 if you need to send a different one.</p>
+</div>
+<div class="ob-msg" id="key-expired" role="status" hidden>
+<h2>This link has expired.</h2>
+<p>Text me at (786) 933-8832 and I will send you a fresh one.</p>
+</div>
+<div class="ob-msg" id="key-sent" role="status" hidden>
+<h2 id="key-sent-h">I have your key. Thank you for sending it.</h2>
+<p id="key-sent-p">Your key is saved and encrypted. This link is now closed, and you can close this page.</p>
+</div>
+
+<main class="ob-ty" id="key-main" hidden>
+<h1 id="key-h">I need your key.</h1>
+<p class="ob-lead" id="key-lead"></p>
+<p class="ob-note" id="key-note" hidden></p>
+
+<form class="ob-sec ob-narrow" id="key-form" novalidate>
+<label for="key-value" id="key-label">Paste your key here</label>
+<input id="key-value" type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="4000" aria-describedby="key-safe">
+<button class="ob-link" type="button" id="key-toggle" aria-controls="key-value" aria-pressed="false">Show what I pasted</button>
+<p class="ob-meta" id="key-safe">Your key is stored encrypted and it is never shown again, not even to you on this page.</p>
+<p class="ob-err" id="key-err" role="alert" hidden></p>
+<p class="ob-note"><button class="ob-btn ob-btn-amber ob-btn-big" type="submit" id="key-send">Send my key</button></p>
+</form>
+
+<p class="ob-note">If you are not sure where to find it, text me at (786) 933-8832 and I will walk you through it.</p>
+</main>
+
+</div>
+</div>
+<script src="/assets/js/key.js" defer></script>

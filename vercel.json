@@ -32,6 +32,10 @@
     {
       "source": "/connect-domain/:code",
       "destination": "/connect-domain"
+    },
+    {
+      "source": "/key/:token",
+      "destination": "/key"
     }
   ],
   "crons": [

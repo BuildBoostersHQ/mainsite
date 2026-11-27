@@ -7,11 +7,15 @@
 // PATCH /api/review-queue  { id, field }  → mark a review or photo ask as sent
 //   field: "review_sent_at" or "photo_sent_at"
 //
+// The review asks leave out customers already matched to a Google review (the review_matches table,
+// filled by /api/review-match). ?all=true still shows everyone.
+//
 // Internal only (BB_INTERNAL_SECRET). The future Valentina system or a scheduled task reads this
 // queue to know who to text.
 const { sb, allowed, configured } = require('./_sb');
 
 const UUID = /^[0-9a-f-]{36}$/i;
+const tenDigits = (phone) => String(phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -46,7 +50,22 @@ module.exports = async function handler(req, res) {
       filter += `&review_ask_at=not.is.null&review_ask_at=lte.${now}&review_sent_at=is.null`;
     }
 
-    const rows = await sb(filter);
+    let rows = await sb(filter);
+
+    // Leave out anyone already matched to a Google review (confirmed through /api/review-match), so they
+    // are not asked again. If the review_matches table is not there yet, the queue works as it did before.
+    let alreadyReviewed = 0;
+    if (!photos && !all && rows.length) {
+      try {
+        const matches = await sb('review_matches?select=client_id,contact_phone&contact_phone=not.is.null&limit=10000');
+        const done = new Set(matches.map((m) => `${m.client_id}:${m.contact_phone}`));
+        const before = rows.length;
+        rows = rows.filter((r) => !(r.client_id && done.has(`${r.client_id}:${tenDigits(r.customer_phone)}`)));
+        alreadyReviewed = before - rows.length;
+      } catch (e) {
+        console.error('review-queue: could not read review_matches:', e.message);
+      }
+    }
     const events = rows.map(r => {
       const a = { ...(r.client_onboarding?.prefill || {}), ...(r.client_onboarding?.answers || {}) };
       return {
@@ -76,7 +95,7 @@ module.exports = async function handler(req, res) {
       byClient[key].events.push(e);
     }
 
-    return res.status(200).json({ ok: true, type: photos ? 'photo_asks' : 'review_asks', total: events.length, by_client: byClient });
+    return res.status(200).json({ ok: true, type: photos ? 'photo_asks' : 'review_asks', total: events.length, already_reviewed_skipped: alreadyReviewed, by_client: byClient });
   } catch (e) {
     console.error('review-queue', e.message);
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });

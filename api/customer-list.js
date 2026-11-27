@@ -205,4 +205,4 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });
   }
 };
-Object.assign(module.exports, { parseCsv, clean });
+Object.assign(module.exports, { parseCsv, clean, readList });
