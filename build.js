@@ -37,9 +37,9 @@ function parse(file) {
 
 
 // Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
-const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Build Boosters builds websites and follow-up systems for contractors and home service businesses, with missed-call text back and automatic review requests.', founder: { '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie' }, image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
+const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Build Boosters builds websites and follow-up systems for contractors and home service businesses, with missed-call text back and automatic review requests.', founder: { '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', sameAs: ['https://www.linkedin.com/in/madeleinejolie/'] }, image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
   contactPoint: { '@type': 'ContactPoint', telephone: '+1-786-933-8832', contactType: 'customer service', areaServed: 'US', availableLanguage: 'English' },
-  sameAs: ['https://github.com/BuildBoostersHQ'],
+  sameAs: ['https://chromewebstore.google.com/detail/contractor-website-checke/aodlincjjmjjnbcgeedalofjbnhmefmp', 'https://github.com/BuildBoostersHQ'],
   logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-933-8832',
   address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
 const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
@@ -47,7 +47,7 @@ const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/
 function schema(name, fm, body) {
   const out = [];
   if (name === 'about' || name === 'contact') out.push({ '@context': 'https://schema.org', ...ORG });
-  if (name === 'madeleine-jolie') out.push({ '@context': 'https://schema.org', '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', jobTitle: 'Founder and CEO', worksFor: { '@id': SITE + '/#org', ...ORG } });
+  if (name === 'madeleine-jolie') out.push({ '@context': 'https://schema.org', '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie', jobTitle: 'Founder and CEO', sameAs: ['https://www.linkedin.com/in/madeleinejolie/'], worksFor: { '@id': SITE + '/#org', ...ORG } });
   if (name === 'index') {
     out.push({ '@context': 'https://schema.org', ...ORG });
     out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Build Boosters', url: SITE + '/', publisher: { '@id': SITE + '/#org' } });
