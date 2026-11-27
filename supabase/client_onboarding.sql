@@ -32,6 +32,11 @@ create table if not exists public.client_onboarding (
   a2p_status_at timestamptz,
   a2p_reason text,                 -- why it was rejected, when it was
   ein_deleted_at timestamptz,
+  stripe_session_id text,          -- the Stripe checkout session that created this row
+  stripe_customer_id text,         -- the Stripe customer id, for linking to billing
+  site_repo text,                  -- e.g. BuildBoostersHQ/smith-plumbing-miami
+  site_project_id text,            -- the Vercel project id
+  site_created_at timestamptz,     -- when the site automator created the repo and project
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -56,7 +61,12 @@ alter table public.client_onboarding
   add column if not exists google_approved_at timestamptz,
   add column if not exists sms_consent_at timestamptz,
   add column if not exists sms_consent_text text,
-  add column if not exists sms_consent_cell text;
+  add column if not exists sms_consent_cell text,
+  add column if not exists site_repo text,
+  add column if not exists site_project_id text,
+  add column if not exists site_created_at timestamptz,
+  add column if not exists stripe_session_id text,
+  add column if not exists stripe_customer_id text;
 
 -- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
