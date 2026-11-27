@@ -25,7 +25,7 @@ const CHAT = '<link rel="preconnect" href="https://widgets.leadconnectorhq.com">
   '<style>chat-widget{animation:bb-chat-in .35s ease-out both}@keyframes bb-chat-in{from{opacity:0}to{opacity:1}}</style>\n' +
   '<link rel="preload" as="script" href="https://widgets.leadconnectorhq.com/loader.js">\n';
 // The loader itself goes first thing in <body>, since it attaches the widget to the body.
-const CHAT_SCRIPT = '<script src="https://widgets.leadconnectorhq.com/loader.js" data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js" data-widget-id="6af53870d6230b40f96f92c5" async></script>\n';
+const CHAT_SCRIPT = '<script src="https://widgets.leadconnectorhq.com/loader.js" data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js" data-widget-id="6af5385f12ff64e1d08966f2" async></script>\n';
 
 function parse(file) {
   const raw = fs.readFileSync(file, 'utf8');
