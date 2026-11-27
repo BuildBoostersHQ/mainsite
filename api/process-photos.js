@@ -23,23 +23,22 @@ const anthropicKey = () => String(process.env.ANTHROPIC_API_KEY || '').trim();
 
 function storageHeaders() {
   const key = secret();
-  return { apikey: key, Authorization: `Bearer ${key}` };
+  return { apikey: key, Authorization: 'Bearer ' + key };
 }
 
 async function listPhotos(clientId) {
-  const res = await fetch(`${baseUrl()}/storage/v1/object/list/${BUCKET}`, {
+  const res = await fetch(baseUrl() + '/storage/v1/object/list/' + BUCKET, {
     method: 'POST',
     headers: { ...storageHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prefix: `${clientId}/`, limit: 100 }),
+    body: JSON.stringify({ prefix: clientId + '/', limit: 100 }),
   });
   if (!res.ok) return [];
   const files = await res.json();
-  // Filter to only jpg files in the root (not in processed/)
-  return (files || []).filter(f => f.name && /\.jpe?g$/i.test(f.name) && !f.name.startsWith('processed/'));
+  return (files || []).filter(function (f) { return f.name && /\.jpe?g$/i.test(f.name) && !f.name.startsWith('processed/'); });
 }
 
 async function downloadPhoto(path) {
-  const res = await fetch(`${baseUrl()}/storage/v1/object/${BUCKET}/${encodeURIComponent(path)}`, {
+  const res = await fetch(baseUrl() + '/storage/v1/object/' + BUCKET + '/' + encodeURIComponent(path), {
     headers: storageHeaders(),
   });
   if (!res.ok) return null;
@@ -47,7 +46,7 @@ async function downloadPhoto(path) {
 }
 
 async function uploadProcessed(path, buffer) {
-  const res = await fetch(`${baseUrl()}/storage/v1/object/${BUCKET}/${path}`, {
+  const res = await fetch(baseUrl() + '/storage/v1/object/' + BUCKET + '/' + path, {
     method: 'POST',
     headers: { ...storageHeaders(), 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
     body: buffer,
@@ -57,70 +56,47 @@ async function uploadProcessed(path, buffer) {
 
 async function resizeIfPossible(buffer) {
   try {
-    const sharp = require('sharp');
-    const meta = await sharp(buffer).metadata();
+    var sharp = require('sharp');
+    var meta = await sharp(buffer).metadata();
     if (meta.width && meta.width > 1600) {
       return { buffer: await sharp(buffer).resize(1600, null, { withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer(), resized: true };
     }
     return { buffer: await sharp(buffer).jpeg({ quality: 80 }).toBuffer(), resized: true };
-  } catch {
-    // sharp not available on this runtime
-    return { buffer, resized: false };
+  } catch (e) {
+    return { buffer: buffer, resized: false };
   }
 }
 
 async function analyzePhoto(imageBase64, services) {
-  const key = anthropicKey();
+  var key = anthropicKey();
   if (!key) return { alt: '', service_tag: '', suitable: true, reason: '', error: 'no_api_key' };
 
-  const serviceList = services.length ? services.join(', ') : 'general contractor work';
-  const prompt = `You are looking at a photo uploaded by a contractor for their business website gallery.
-
-Do two things:
-
-1. Write a one-sentence alt text describing what the photo shows. Mention the type of work if visible. Keep it under 120 characters. No quotes around it.
-
-2. Decide if this photo is suitable for a contractor's website gallery. Flag it as unsuitable if it shows:
-   - Recognizable faces (close enough to identify someone)
-   - License plates
-   - House numbers or street addresses
-   - Is very blurry or too dark to see the work
-   - Is not related to contractor work at all (selfies, screenshots, memes)
-
-3. Tag it with the most relevant service from this list: ${serviceList}. If none fit, use "general".
-
-Reply with ONLY this JSON, no other text:
-{"alt": "...", "suitable": true or false, "reason": "why it was flagged, or empty string", "service_tag": "..."}`;
+  var serviceList = services.length ? services.join(', ') : 'general contractor work';
+  var prompt = 'You are looking at a photo uploaded by a contractor for their business website gallery.\n\n'
+    + 'Do three things:\n\n'
+    + '1. Write a one-sentence alt text describing what the photo shows. Mention the type of work if visible. Keep it under 120 characters. No quotes.\n\n'
+    + '2. Decide if the photo is suitable for a contractor website gallery. Flag as unsuitable if it shows recognizable faces, license plates, house numbers, is very blurry or too dark, or is unrelated to contractor work.\n\n'
+    + '3. Tag it with the most relevant service from this list: ' + serviceList + '. If none fit, use "general".\n\n'
+    + 'Reply with ONLY this JSON:\n{"alt": "...", "suitable": true, "reason": "", "service_tag": "..."}';
 
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    var res = await fetch(ANTHROPIC_API, {
       method: 'POST',
-      headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
       body: JSON.stringify({
         model: HAIKU_MODEL,
         max_tokens: 256,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-            { type: 'text', text: prompt },
-          ],
-        }],
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+          { type: 'text', text: prompt },
+        ]}],
       }),
     });
-    if (!res.ok) {
-      const err = await res.text();
-      return { alt: '', service_tag: '', suitable: true, reason: '', error: `haiku_${res.status}` };
-    }
-    const data = await res.json();
-    const text = (data.content && data.content[0] && data.content[0].text) || '';
-    // Parse JSON from the response, handling possible markdown fencing
-    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(cleaned);
+    if (!res.ok) return { alt: '', service_tag: '', suitable: true, reason: '', error: 'haiku_' + res.status };
+    var data = await res.json();
+    var text = (data.content && data.content[0] && data.content[0].text) || '';
+    var cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    var parsed = JSON.parse(cleaned);
     return {
       alt: String(parsed.alt || '').slice(0, 120),
       service_tag: String(parsed.service_tag || 'general').toLowerCase(),
@@ -138,56 +114,50 @@ module.exports = async function handler(req, res) {
   if (!configured() || !process.env.BB_INTERNAL_SECRET) return res.status(500).json({ error: 'not_configured' });
   if (!allowed(req)) return res.status(401).json({ error: 'unauthorized' });
 
-  const code = String((req.body && req.body.code) || '').trim();
+  var code = String((req.body && req.body.code) || '').trim();
   if (!code) return res.status(400).json({ error: 'code_required' });
 
   try {
-    // Look up the client
-    const rows = await sb(`client_onboarding?code=eq.${encodeURIComponent(code)}&select=id,prefill,answers,processed_photos&limit=1`);
+    var rows = await sb('client_onboarding?code=eq.' + encodeURIComponent(code) + '&select=id,prefill,answers,processed_photos&limit=1');
     if (!rows.length) return res.status(404).json({ error: 'not_found' });
-    const client = rows[0];
-    const answers = { ...(client.prefill || {}), ...(client.answers || {}) };
-    const services = Array.isArray(answers.services) ? answers.services : [];
-    const alreadyProcessed = new Set((client.processed_photos || []).map(p => p.name));
+    var client = rows[0];
+    var answers = Object.assign({}, client.prefill || {}, client.answers || {});
+    var services = Array.isArray(answers.services) ? answers.services : [];
+    var alreadyProcessed = new Set((client.processed_photos || []).map(function (p) { return p.name; }));
 
-    // List photos in storage
-    const files = await listPhotos(client.id);
-    const toProcess = files.filter(f => !alreadyProcessed.has(f.name));
+    var files = await listPhotos(client.id);
+    var toProcess = files.filter(function (f) { return !alreadyProcessed.has(f.name); });
 
     if (!toProcess.length) {
       return res.status(200).json({ ok: true, processed: 0, flagged: 0, skipped: files.length, photos: client.processed_photos || [], message: 'All photos are already processed.' });
     }
 
-    const results = [];
-    let flagged = 0;
-    let resizeAvailable = true;
+    var results = [];
+    var flagged = 0;
+    var resizeAvailable = true;
 
-    for (const file of toProcess) {
-      const path = `${client.id}/${file.name}`;
-      const raw = await downloadPhoto(path);
+    for (var i = 0; i < toProcess.length; i++) {
+      var file = toProcess[i];
+      var path = client.id + '/' + file.name;
+      var raw = await downloadPhoto(path);
       if (!raw) { results.push({ name: file.name, error: 'download_failed' }); continue; }
 
-      // Resize
-      const { buffer: processed, resized } = await resizeIfPossible(raw);
-      if (!resized) resizeAvailable = false;
+      var r = await resizeIfPossible(raw);
+      if (!r.resized) resizeAvailable = false;
 
-      // Analyze with Haiku
-      const base64 = processed.toString('base64');
-      const analysis = await analyzePhoto(base64, services);
+      var base64 = r.buffer.toString('base64');
+      var analysis = await analyzePhoto(base64, services);
 
-      // Upload processed version
-      const processedPath = `${client.id}/processed/${file.name}`;
-      const uploaded = await uploadProcessed(processedPath, processed);
+      var processedPath = client.id + '/processed/' + file.name;
+      var uploaded = await uploadProcessed(processedPath, r.buffer);
 
-      const publicUrl = `${baseUrl()}/storage/v1/object/public/${BUCKET}/${processedPath}`;
-
-      const result = {
+      var result = {
         name: file.name,
         alt: analysis.alt,
         service_tag: analysis.service_tag,
         suitable: analysis.suitable,
         reason: analysis.reason,
-        url: uploaded ? publicUrl : '',
+        url: uploaded ? (baseUrl() + '/storage/v1/object/public/' + BUCKET + '/' + processedPath) : '',
         processed_at: new Date().toISOString(),
       };
       if (analysis.error) result.analysis_error = analysis.error;
@@ -195,27 +165,19 @@ module.exports = async function handler(req, res) {
       results.push(result);
     }
 
-    // Merge with existing processed photos and save
-    const allPhotos = [...(client.processed_photos || []), ...results.filter(r => !r.error)];
-    await sb(`client_onboarding?id=eq.${client.id}`, {
+    var allPhotos = (client.processed_photos || []).concat(results.filter(function (r) { return !r.error; }));
+    await sb('client_onboarding?id=eq.' + client.id, {
       method: 'PATCH',
       body: JSON.stringify({ processed_photos: allPhotos }),
     });
 
-    // Alert on flagged photos
     if (flagged > 0) {
-      const bizName = answers.business_name || code;
-      const reasons = results.filter(r => !r.suitable).map(r => r.reason).filter(Boolean).join('; ');
-      sendAlert('Photos flagged', `${flagged} photo${flagged === 1 ? '' : 's'} from ${bizName} ${flagged === 1 ? 'was' : 'were'} flagged: ${reasons || 'see the processed photos list'}`).catch(() => {});
+      var bizName = answers.business_name || code;
+      var reasons = results.filter(function (r) { return !r.suitable; }).map(function (r) { return r.reason; }).filter(Boolean).join('; ');
+      sendAlert('Photos flagged', flagged + ' photo' + (flagged === 1 ? '' : 's') + ' from ' + bizName + (flagged === 1 ? ' was' : ' were') + ' flagged: ' + (reasons || 'see the processed photos list')).catch(function () {});
     }
 
-    return res.status(200).json({
-      ok: true,
-      processed: results.filter(r => !r.error).length,
-      flagged,
-      resize_available: resizeAvailable,
-      photos: results,
-    });
+    return res.status(200).json({ ok: true, processed: results.filter(function (r) { return !r.error; }).length, flagged: flagged, resize_available: resizeAvailable, photos: results });
   } catch (e) {
     console.error('process-photos', e.message);
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });
