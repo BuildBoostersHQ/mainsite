@@ -85,11 +85,19 @@ module.exports = async function handler(req, res) {
     const rows = await sb(`${TABLE}?code=eq.${encodeURIComponent(code)}&select=*&limit=1`);
     const row = rows[0];
     if (!row) return res.status(404).json({ error: 'not_found' });
-    if (row.site_repo) return res.status(409).json({ error: 'already_built', repo: row.site_repo });
+    // A finished site is only built again when the caller asks for a rebuild: the client sent the
+    // setup form after a basics build, so client.json is written again from their answers.
+    // A build that stopped partway (repo saved, never finished) can always be run again.
+    const rebuild = !!(req.body && req.body.rebuild);
+    const basics = !!(req.body && req.body.basics);
+    const finished = !!row.site_created_at;
+    if (finished && !rebuild) return res.status(409).json({ error: 'already_built', repo: row.site_repo });
 
     const clientId = row.id;
-    const name = repoName(row);
-    const fullRepo = `${ORG}/${name}`;
+    // Keep the repo the client already has. Their answers can change the business name or city,
+    // and a new name here would create a second site.
+    const fullRepo = row.site_repo || `${ORG}/${repoName(row)}`;
+    const name = fullRepo.split('/')[1];
 
     // ---- Step 2: Generate client.json ----
     let clientJson;
@@ -149,7 +157,7 @@ module.exports = async function handler(req, res) {
 
     const content = Buffer.from(JSON.stringify(clientJson, null, 2) + '\n').toString('base64');
     const writeBody = {
-      message: 'Set up client.json from onboarding answers',
+      message: finished ? 'Rewrite client.json from the setup form' : basics ? 'Set up client.json from the Google profile' : 'Set up client.json from onboarding answers',
       content,
       ...(existingSha ? { sha: existingSha } : {}),
     };
@@ -280,7 +288,9 @@ module.exports = async function handler(req, res) {
       site_repo: fullRepo,
       site_project_id: projectId,
       site_deploy_hook: deployHookUrl || null,
-      site_created_at: now,
+      site_created_at: row.site_created_at || now,
+      ...(finished ? { site_rebuilt_at: now } : {}),
+      ...(basics && !finished ? { site_final_basics_at: now } : {}),
       ...(registeredDomain ? { site_domain: registeredDomain, domain_registered_at: now } : {}),
     });
 
@@ -399,7 +409,8 @@ module.exports = async function handler(req, res) {
     }
 
     // ---- Text the client that their site is ready ----
-    try {
+    // Not on a rebuild (they were already told) and not on a basics build (form-check sends its own text).
+    if (!finished && !basics) try {
       const ghlKey = (process.env.GHL_API_KEY || '').trim();
       const locId = (process.env.GHL_LOCATION_ID || '').trim();
       const a = { ...(row.prefill || {}), ...(row.answers || {}) };
@@ -436,6 +447,8 @@ module.exports = async function handler(req, res) {
       deployHookUrl: deployHookUrl || null,
       domain: registeredDomain || null,
       copyWritten: !!copyResult,
+      rebuilt: finished,
+      basics,
       ghl: ghlResult,
       dns: dnsResult,
     });

@@ -210,7 +210,7 @@
     });
 
     /* Website-only clients do not get a texting number, so they are not asked for registration details. */
-    if (/^website/i.test(String(d.tier || '').trim())) $('ob-a2p').hidden = true;
+    if (/^website/i.test(String(d.tier || '').trim())) { $('ob-a2p').hidden = true; document.querySelector('.ob-google .ob-eyebrow').textContent = 'Start here'; }
 
     /* EIN: sent once it is complete, kept in its own private column, and never sent back to this page. */
     var ein = $('ob-ein'), einStatus = $('ob-ein-status'), type = $('ob-a2p_entity_type');

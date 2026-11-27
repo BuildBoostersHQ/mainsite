@@ -110,6 +110,21 @@ function cleanResult(place) {
   };
 }
 
+// Finds one business by its phone number. Used when someone pays without a prospect record, so
+// their setup form still opens filled in. Returns null unless Google has exactly one match.
+async function lookupByPhone(phone) {
+  const key = (process.env.GOOGLE_PLACES_KEY || '').trim();
+  const d = String(phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+  if (!key || d.length !== 10) return null;
+  const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent('+1' + d)}&inputtype=phonenumber&fields=place_id&key=${key}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data = await res.json();
+  const found = data.candidates || [];
+  if (found.length !== 1) return null;
+  return cleanResult(await placeDetails(found[0].place_id, key));
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   // CORS for the form page
@@ -168,3 +183,4 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'server_error', reason: e.message || 'unknown' });
   }
 };
+module.exports.lookupByPhone = lookupByPhone;

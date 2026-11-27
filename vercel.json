@@ -29,5 +29,23 @@
       "source": "/start-thank-you/:code",
       "destination": "/start-thank-you"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/form-check",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/churn-check",
+      "schedule": "30 14 * * *"
+    },
+    {
+      "path": "/api/auto-build",
+      "schedule": "45 14 * * *"
+    },
+    {
+      "path": "/api/weekly-update",
+      "schedule": "0 20 * * 5"
+    }
   ]
 }
