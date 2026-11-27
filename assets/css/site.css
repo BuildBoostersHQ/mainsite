@@ -308,6 +308,7 @@ a.trade:hover{transform:translateY(-2px)}
 /* Footer city links */
 footer .areas{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 14px;opacity:.85}
 footer .areas b{font-weight:700}
+footer .what{flex-basis:100%}
 /* Article stat callouts and tables */
 .bb-post .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:6px 0 30px}
 .bb-post .stats>div{background:var(--soft);border-radius:16px;padding:18px 18px 16px;border-top:4px solid var(--accent)}

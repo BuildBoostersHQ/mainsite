@@ -37,7 +37,7 @@ function parse(file) {
 
 
 // Structured data (JSON-LD) added at build time, so every page gets it without hand-writing it.
-const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Websites and lead systems for contractors and home service businesses.', image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
+const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/#org', name: 'Build Boosters', url: SITE + '/', description: 'Build Boosters builds websites and follow-up systems for contractors and home service businesses, with missed-call text back and automatic review requests.', founder: { '@type': 'Person', name: 'Madeleine Jolie', url: SITE + '/madeleine-jolie' }, image: 'https://files.leadconnectorhq.com/file/6af6120de2f577d4a30a6670/bb-share-image.png', priceRange: '$79-$997 per month',
   contactPoint: { '@type': 'ContactPoint', telephone: '+1-786-933-8832', contactType: 'customer service', areaServed: 'US', availableLanguage: 'English' },
   sameAs: ['https://github.com/BuildBoostersHQ'],
   logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-933-8832',
