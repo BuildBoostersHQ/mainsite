@@ -1,17 +1,34 @@
 // /api/stripe-webhook — creates a client row in Supabase when a Stripe payment comes through.
 //
-// Listens for checkout.session.completed events. Determines tier from the amount, checks for
-// duplicates by email, generates a setup code, and creates the row. The setup link text is sent
-// by a separate function or GHL workflow (texting channel not decided yet).
+// Listens for checkout.session.completed events. The plan comes from the tags on the payment link
+// (metadata tier and billing_cycle), and falls back to the amount paid. Checks for duplicates by
+// email, generates a setup code, creates the row, texts the setup link and alerts Maddie.
+//
+// Stripe signs the exact text it sends, so the signature is checked against the request as it
+// arrived, never against a re-built copy of the parsed body. If the original text cannot be read
+// and STRIPE_SECRET_KEY is set, the event is fetched back from Stripe by its id instead.
 //
 // Needs STRIPE_WEBHOOK_SECRET in Vercel, plus the two Supabase variables the other endpoints use.
+// STRIPE_SECRET_KEY is optional and only used for that fallback.
 const crypto = require('crypto');
 const { sb, configured } = require('./_sb');
 
 const TABLE = 'client_onboarding';
 
-// Tier mapping from Stripe amount in cents. Annual amounts are 10x monthly (2 months free).
+// Fallback only, for a payment whose link has no tier tag: the plan worked out from the amount in cents.
+// A monthly amount includes the $297 setup fee charged on the first payment.
 const TIERS = {
+  // Plans from November 2026 (Essentials is the website plan)
+  44400:  { tier: 'website',         billing_cycle: 'monthly' },
+  42700:  { tier: 'website',         billing_cycle: 'quarterly' },
+  147000: { tier: 'website',         billing_cycle: 'annual' },
+  57600:  { tier: 'all_in_one',      billing_cycle: 'monthly' },
+  82900:  { tier: 'all_in_one',      billing_cycle: 'quarterly' },
+  279000: { tier: 'all_in_one',      billing_cycle: 'annual' },
+  79400:  { tier: 'dominance',       billing_cycle: 'monthly' },
+  142500: { tier: 'dominance',       billing_cycle: 'quarterly' },
+  497000: { tier: 'dominance',       billing_cycle: 'annual' },
+  // Earlier plans
   7900:   { tier: 'website',         billing_cycle: 'monthly' },
   19700:  { tier: 'all_in_one',      billing_cycle: 'monthly' },
   59100:  { tier: 'all_in_one',      billing_cycle: 'quarterly' },  // 90-day prepay
@@ -43,6 +60,63 @@ function verifySignature(payload, sigHeader, secret) {
   } catch { return false; }
 }
 
+// The request exactly as Stripe sent it. Reads the request stream first, because touching req.body
+// makes the platform parse it and the parsed copy can never be turned back into the signed text.
+// Returns '' when the original text is not available.
+function readRawBody(req) {
+  return new Promise((resolve) => {
+    const fromBody = () => {
+      const b = req.body;
+      if (typeof b === 'string') return b;
+      if (Buffer.isBuffer(b)) return b.toString('utf8');
+      return '';
+    };
+    if (!req || typeof req.on !== 'function') return resolve(fromBody());
+    const chunks = [];
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      const text = Buffer.concat(chunks).toString('utf8');
+      resolve(text || fromBody());
+    };
+    // A stream that was already used up never ends, so stop waiting after a moment.
+    const timer = setTimeout(finish, 1500);
+    req.on('data', (c) => chunks.push(typeof c === 'string' ? Buffer.from(c) : c));
+    req.on('end', finish);
+    req.on('error', finish);
+  });
+}
+
+// Fetches an event back from Stripe by id. Used only when the signed text could not be read:
+// an event that Stripe itself returns for our own key is genuine.
+async function fetchEventFromStripe(id) {
+  const key = String(process.env.STRIPE_SECRET_KEY || '').trim();
+  if (!key || !/^evt_[A-Za-z0-9]+$/.test(String(id || ''))) return null;
+  try {
+    const r = await fetch(`https://api.stripe.com/v1/events/${id}`, { headers: { Authorization: `Bearer ${key}` } });
+    if (!r.ok) return null;
+    const ev = await r.json();
+    return ev && ev.id === id ? ev : null;
+  } catch { return null; }
+}
+
+// Returns the verified event, or null with a reason.
+async function loadEvent(req, webhookSecret) {
+  const sig = (req.headers && req.headers['stripe-signature']) || '';
+  const raw = await readRawBody(req);
+  if (raw) {
+    if (!verifySignature(raw, sig, webhookSecret)) return { event: null, reason: 'invalid_signature' };
+    try { return { event: JSON.parse(raw) }; } catch { return { event: null, reason: 'bad_json' }; }
+  }
+  const parsed = req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body) ? req.body : null;
+  const fetched = parsed ? await fetchEventFromStripe(parsed.id) : null;
+  if (fetched) return { event: fetched };
+  console.error('stripe-webhook: the signed request text was not available, so the event could not be verified');
+  return { event: null, reason: 'raw_body_unavailable' };
+}
+
 function firstName(full) {
   return String(full || '').trim().split(/\s+/)[0] || '';
 }
@@ -55,17 +129,10 @@ module.exports = async function handler(req, res) {
   if (!webhookSecret) return res.status(500).json({ error: 'not_configured', reason: 'STRIPE_WEBHOOK_SECRET is not set' });
   if (!configured()) return res.status(500).json({ error: 'not_configured', reason: 'Supabase is not configured' });
 
-  // Vercel parses the body as JSON by default, but we need the raw string for signature verification.
-  const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-  const sig = req.headers['stripe-signature'] || '';
-
-  if (!verifySignature(rawBody, sig, webhookSecret)) {
-    return res.status(400).json({ error: 'invalid_signature' });
-  }
+  const { event, reason } = await loadEvent(req, webhookSecret);
+  if (!event) return res.status(400).json({ error: reason });
 
   try {
-    const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-
     // Only handle completed checkouts. Everything else gets a silent 200.
     if (event.type !== 'checkout.session.completed') {
       return res.status(200).json({ ok: true, skipped: event.type });
@@ -77,7 +144,11 @@ module.exports = async function handler(req, res) {
     const meta = session.metadata || {};
     const details = session.customer_details || {};
     const email = String(details.email || session.customer_email || meta.email || '').trim().toLowerCase();
-    const name = String(details.name || meta.business_name || '').trim();
+    const collected = session.collected_information || {};
+    // The business name box on the payment page, when the link collects one. Otherwise the cardholder's name.
+    const business = String(details.business_name || collected.business_name || meta.business_name || '').trim();
+    const person = String(details.individual_name || collected.individual_name || details.name || '').trim();
+    const name = business || person;
     const phone = String(details.phone || meta.prospect_phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
     const amount = session.amount_total || 0;
 
@@ -106,7 +177,7 @@ module.exports = async function handler(req, res) {
 
     const row = {
       code,
-      owner_first_name: firstName(name),
+      owner_first_name: firstName(person),
       tier,
       billing_cycle,
       prefill,
@@ -120,7 +191,7 @@ module.exports = async function handler(req, res) {
     // Text the client their setup link through GHL and alert Maddie
     if (phone.length === 10 && process.env.GHL_API_KEY && process.env.GHL_LOCATION_ID) {
       const setupUrl = `https://buildboosters.com/start/${code}`;
-      const ownerName = firstName(name);
+      const ownerName = firstName(person);
       const smsBody = ownerName
         ? `Hey ${ownerName}, it's Maddie from Build Boosters! Here's your setup page, takes about 5 minutes: ${setupUrl}`
         : `Hey, it's Maddie from Build Boosters! Here's your setup page, takes about 5 minutes: ${setupUrl}`;
@@ -165,7 +236,7 @@ module.exports = async function handler(req, res) {
       const { sendAlert } = require('./alert');
       await sendAlert(
         'New client paid',
-        `${name || 'Unknown'} (${tier}, ${billing_cycle}) just paid. Code: ${code}`
+        `${name || 'Unknown'} (${tier}, ${billing_cycle}) just paid. Code: ${code}${tier === 'unknown' ? '. The payment link has no tier tag, so set the plan by hand.' : ''}`
       );
     } catch (e) {
       console.error('stripe-webhook: alert failed:', e.message);
@@ -200,8 +271,8 @@ module.exports = async function handler(req, res) {
           for (const k of ['business_name', 'business_phone', 'address', 'city', 'weekday_hours', 'weekends', 'website', 'place_id']) {
             if (biz[k]) found[k] = biz[k];
           }
-          // The name Stripe has is the cardholder, so Google's business name wins. Everything else keeps what Stripe gave us.
-          const merged = { ...found, ...prefill, business_name: found.business_name };
+          // A business name typed at checkout wins. Without one the name Stripe has is the cardholder, so Google's wins.
+          const merged = { ...found, ...prefill, business_name: business || found.business_name };
           await sb(`${TABLE}?code=eq.${code}`, { method: 'PATCH', body: JSON.stringify({ prefill: merged }) });
           google_prefilled = true;
         }
@@ -219,3 +290,4 @@ module.exports = async function handler(req, res) {
 
 module.exports.tierFromAmount = tierFromAmount;
 module.exports.verifySignature = verifySignature;
+module.exports.readRawBody = readRawBody;

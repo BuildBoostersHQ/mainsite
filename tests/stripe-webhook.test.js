@@ -153,5 +153,64 @@ function signEvent(event) {
     await handler(makeReq(body, sig), res);
     console.log(lastInsert.tier === 'all_in_one' && lastInsert.billing_cycle === 'quarterly' ? '  PASS' : '  FAIL', 'prepay tier/cycle'); }
 
+  // ---- The request as Vercel really delivers it ----
+  // Stripe sends indented JSON. Vercel hands the function a stream plus a parsed req.body, and
+  // re-building the text from the parsed copy never matches the signature.
+  const must = (name, cond) => { console.log(cond ? '  PASS' : '  FAIL', name); if (!cond) process.exit(1); };
+  const { Readable } = require('stream');
+  function vercelReq(prettyBody, sigHeader, { stream = true } = {}) {
+    const req = stream ? Readable.from([Buffer.from(prettyBody)]) : {};
+    req.method = 'POST';
+    req.headers = { 'stripe-signature': sigHeader };
+    Object.defineProperty(req, 'body', { get: () => JSON.parse(prettyBody) });
+    return req;
+  }
+  function signPretty(event) {
+    const body = JSON.stringify(event, null, 2);
+    const ts = Math.floor(Date.now() / 1000);
+    const s = crypto.createHmac('sha256', secret).update(`${ts}.${body}`).digest('hex');
+    return { body, sig: `t=${ts},v1=${s}` };
+  }
+  const paid = (over) => ({ id: 'evt_test1', type: 'checkout.session.completed', data: { object: {
+    id: 'cs_live_1', customer: 'cus_1', amount_total: 44400,
+    customer_details: { name: 'Dave Smith', email: 'dave2@example.com', phone: '+13055550199', business_name: 'Smith Pressure Washing', individual_name: 'Dave Smith' },
+    metadata: { tier: 'website', billing_cycle: 'monthly' }, ...over,
+  } } });
+
+  { rows.length = 0; lastInsert = null;
+    const { body, sig } = signPretty(paid());
+    const res = makeRes(); await handler(vercelReq(body, sig), res);
+    must('indented payload from the stream verifies', res.code === 200 && res.data.ok === true);
+    must('tier comes from the link tags', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly');
+    must('business name from checkout is used', lastInsert.prefill.business_name === 'Smith Pressure Washing');
+    must('first name is the person, not the business', lastInsert.owner_first_name === 'Dave'); }
+
+  { const { body, sig } = signPretty(paid());
+    const res = makeRes(); await handler(vercelReq(body.replace('44400', '100'), sig), res);
+    must('a changed payload is rejected', res.code === 400 && res.data.error === 'invalid_signature'); }
+
+  { const { body, sig } = signPretty(paid());
+    const res = makeRes(); await handler(vercelReq(body, sig, { stream: false }), res);
+    must('parsed body with no original text is refused', res.code === 400 && res.data.error === 'raw_body_unavailable'); }
+
+  { rows.length = 0; lastInsert = null;
+    const event = paid({ id: 'cs_live_2', customer_details: { name: 'Al Roof', email: 'al@example.com' }, metadata: {} });
+    event.id = 'evt_fromstripe';
+    const { body, sig } = signPretty(event);
+    process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
+    const realFetch = global.fetch;
+    global.fetch = async (url, opts) => (String(url).startsWith('https://api.stripe.com/v1/events/evt_fromstripe')
+      ? { ok: true, json: async () => event } : realFetch(url, opts));
+    const res = makeRes(); await handler(vercelReq(body, sig, { stream: false }), res);
+    global.fetch = realFetch; delete process.env.STRIPE_SECRET_KEY;
+    must('falls back to fetching the event from Stripe', res.code === 200 && res.data.ok === true);
+    must('untagged $444 payment is the website plan, monthly', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly'); }
+
+  for (const [cents, tier, cycle] of [[57600, 'all_in_one', 'monthly'], [82900, 'all_in_one', 'quarterly'], [279000, 'all_in_one', 'annual'],
+    [79400, 'dominance', 'monthly'], [142500, 'dominance', 'quarterly'], [497000, 'dominance', 'annual'], [42700, 'website', 'quarterly'], [147000, 'website', 'annual']]) {
+    const r = tierFromAmount(cents);
+    must(`$${cents / 100} -> ${tier}/${cycle}`, r.tier === tier && r.billing_cycle === cycle);
+  }
+
   console.log('All tests passed.');
 })();
