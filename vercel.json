@@ -33,7 +33,7 @@
   "crons": [
     {
       "path": "/api/form-check",
-      "schedule": "0 * * * *"
+      "schedule": "0 14 * * *"
     },
     {
       "path": "/api/churn-check",
