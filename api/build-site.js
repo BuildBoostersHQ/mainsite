@@ -19,6 +19,9 @@
 //        LEGAL_SOURCE_TOKEN, plus the two Supabase variables.
 const { sb, allowed, configured } = require('./_sb');
 const { buildClientJson } = require('./client-json');
+const { checkDomains, registerDomain } = require('./domain');
+
+const cfAccount = () => (process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 
 const TABLE = 'client_onboarding';
 const CODE = /^[a-f0-9]{16,32}$/;
@@ -235,13 +238,48 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // ---- Step 8: Save everything to Supabase ----
+    // ---- Step 8: Register domain if provided ----
+    // Pass { domain: "example.com" } to register and assign it.
+    // The domain gets registered through Cloudflare Registrar and added to the Vercel project.
+    let registeredDomain = row.site_domain || null;
+    const requestedDomain = req.body && req.body.domain;
+    if (requestedDomain && !registeredDomain && cfAccount() && process.env.CLOUDFLARE_API_TOKEN) {
+      try {
+        // Check availability first
+        const checked = await checkDomains([requestedDomain]);
+        const info = checked[0];
+        if (info && info.registrable) {
+          const regResult = await registerDomain(requestedDomain);
+          if (regResult && (regResult.state === 'succeeded' || regResult.state === 'pending' || regResult.completed)) {
+            registeredDomain = requestedDomain;
+            // Add the domain to the Vercel project
+            try {
+              await fetch(`https://api.vercel.com/v10/projects/${projectId}/domains${vcQuery()}`, {
+                method: 'POST',
+                headers: vcHeaders(),
+                body: JSON.stringify({ name: requestedDomain }),
+              });
+            } catch (e) {
+              console.error('build-site: Vercel domain assignment failed:', e.message);
+            }
+          }
+        } else {
+          console.error(`build-site: domain ${requestedDomain} not registrable: ${info?.reason || 'unknown'}`);
+        }
+      } catch (e) {
+        console.error('build-site: domain registration failed:', e.message);
+        // Non-fatal: the site works fine on the Vercel subdomain
+      }
+    }
+
+    // ---- Step 9: Save everything to Supabase ----
     const now = new Date().toISOString();
     await patch(clientId, {
       site_repo: fullRepo,
       site_project_id: projectId,
       site_deploy_hook: deployHookUrl || null,
       site_created_at: now,
+      ...(registeredDomain ? { site_domain: registeredDomain, domain_registered_at: now } : {}),
     });
 
     // ---- Step 9: Trigger the first deploy ----
@@ -329,6 +367,7 @@ module.exports = async function handler(req, res) {
       repo: fullRepo,
       projectId,
       deployHookUrl: deployHookUrl || null,
+      domain: registeredDomain || null,
       copyWritten: !!copyResult,
     });
   } catch (e) {
