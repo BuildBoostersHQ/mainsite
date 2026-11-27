@@ -5,7 +5,7 @@
 // Steps it automates:
 //   1. Create a sub-account from the BB Template snapshot
 //   2. List and fill all 16 custom values from the client's onboarding answers
-//   3. Search for and buy a toll-free phone number
+//   3. Search for and buy a local phone number matching the client's area code
 //   4. Add the contractor as a restricted user
 //   5. Set chat widget colors to match the client's brand color
 //   6. Save the ghl_location_id back to Supabase
@@ -225,20 +225,20 @@ async function fillCustomValues(locationId, clientData) {
   return { filled, failed };
 }
 
-// ---- Step 3: Search for and buy a toll-free number ----
+// ---- Step 3: Search for and buy a local phone number ----
+// Local numbers look more legit for contractors than toll-free. A 305 number for a Miami plumber
+// reads as "this is a real local guy" which is exactly the brand.
 async function buyPhoneNumber(locationId, clientPhone) {
   const ac = areaCode(clientPhone);
 
-  // Search for available toll-free numbers
+  // Search for available local numbers matching the client's area code
   const searchParams = new URLSearchParams({
-    numberTypes: 'tollFree',
+    numberTypes: 'local',
     smsEnabled: 'true',
     mmsEnabled: 'true',
     voiceEnabled: 'true',
     countryCode: 'US',
-    firstPart: '',
-    lastPart: '',
-    anywhere: ac || '',
+    areaCode: ac || '',
   });
 
   const searchRes = await fetch(
@@ -254,7 +254,7 @@ async function buyPhoneNumber(locationId, clientPhone) {
   const searchData = await searchRes.json();
   const numbers = searchData.data || searchData.numbers || searchData.result || [];
   if (!Array.isArray(numbers) || numbers.length === 0) {
-    return { bought: false, reason: 'no toll-free numbers available' };
+    return { bought: false, reason: `no local numbers available for area code ${ac || 'any'}` };
   }
 
   // Pick the first available number
@@ -274,11 +274,9 @@ async function buyPhoneNumber(locationId, clientPhone) {
       body: JSON.stringify({
         phoneNumber,
         countryCode: 'US',
-        numberType: 'tollFree',
+        numberType: 'local',
         fingerprintId,
         skipLocationKYC: true,
-        // These fields are listed as required in the API docs but may be optional
-        // for LC Phone (non-Twilio) accounts. If they fail, phone purchase stays manual.
         addressSid: '',
         bundleSid: '',
         paymentIntentId: '',

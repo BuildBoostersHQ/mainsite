@@ -74,6 +74,8 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'not_configured', reason: 'VERCEL_TOKEN is not set' });
 
   const withCopy = 'with_copy' in (req.query || {});
+  const withGhl = 'with_ghl' in (req.query || {});
+  const withDns = 'with_dns' in (req.query || {});
 
   try {
     const code = String((req.body && req.body.code) || '');
@@ -362,6 +364,40 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // ---- Optional: Set up GHL sub-account ----
+    let ghlResult = null;
+    if (withGhl && process.env.GHL_AGENCY_API_KEY && !row.ghl_location_id) {
+      try {
+        const host = req.headers?.host || 'buildboosters.com';
+        const proto = host.includes('localhost') ? 'http' : 'https';
+        const ghlRes = await fetch(`${proto}://${host}/api/ghl-setup`, {
+          method: 'POST',
+          headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        ghlResult = await ghlRes.json().catch(() => ({}));
+      } catch (e) {
+        console.error('build-site: ghl-setup failed:', e.message);
+      }
+    }
+
+    // ---- Optional: Set up DNS ----
+    let dnsResult = null;
+    if ((withDns || registeredDomain) && registeredDomain && process.env.CLOUDFLARE_API_TOKEN) {
+      try {
+        const host = req.headers?.host || 'buildboosters.com';
+        const proto = host.includes('localhost') ? 'http' : 'https';
+        const dnsRes = await fetch(`${proto}://${host}/api/dns-setup`, {
+          method: 'POST',
+          headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: registeredDomain, code }),
+        });
+        dnsResult = await dnsRes.json().catch(() => ({}));
+      } catch (e) {
+        console.error('build-site: dns-setup failed:', e.message);
+      }
+    }
+
     return res.status(200).json({
       ok: true,
       repo: fullRepo,
@@ -369,6 +405,8 @@ module.exports = async function handler(req, res) {
       deployHookUrl: deployHookUrl || null,
       domain: registeredDomain || null,
       copyWritten: !!copyResult,
+      ghl: ghlResult,
+      dns: dnsResult,
     });
   } catch (e) {
     console.error('build-site', e.message);
