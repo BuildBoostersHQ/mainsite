@@ -155,11 +155,17 @@ module.exports = async function handler(req, res) {
   try {
     const code = String(req.query?.code || req.headers?.['x-client-code'] || '').trim();
     if (!CODE.test(code)) return res.status(401).json({ error: 'unauthorized' });
-    const rows = await sb(`${TABLE}?code=eq.${encodeURIComponent(code)}&select=id,owner_first_name,prefill,answers,ghl_location_id,a2p_registered_at&limit=1`);
+    const rows = await sb(`${TABLE}?code=eq.${encodeURIComponent(code)}&select=id,owner_first_name,tier,prefill,answers,ghl_location_id,a2p_registered_at&limit=1`);
     const client = rows[0];
     if (!client) return res.status(401).json({ error: 'unauthorized' });
     const a = { ...(client.prefill || {}), ...(client.answers || {}) };
     const business = a.business_name || client.owner_first_name || code.slice(0, 8);
+
+    // The free reactivation text is part of the texting plans, so website-only clients are not offered the upload.
+    if (/^website/i.test(String(client.tier || '').trim())) {
+      if (req.method === 'GET') return res.status(200).json({ uploaded: false, available: false });
+      if (!allowed(req)) return res.status(403).json({ error: 'not_in_plan' });
+    }
 
     if (req.method === 'GET') {
       const list = await readList(client.id);
