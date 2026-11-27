@@ -398,6 +398,37 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // ---- Text the client that their site is ready ----
+    try {
+      const ghlKey = (process.env.GHL_API_KEY || '').trim();
+      const locId = (process.env.GHL_LOCATION_ID || '').trim();
+      const a = { ...(row.prefill || {}), ...(row.answers || {}) };
+      const ownerName = row.owner_first_name || a.preferred_name || '';
+      const ownerCell = String(a.cell || a.business_phone || '').replace(/\D/g, '');
+      if (ghlKey && locId && ownerCell.length >= 10) {
+        const fullPhone = `+1${ownerCell}`;
+        const searchRes = await fetch(
+          `https://services.leadconnectorhq.com/contacts/search/duplicate?locationId=${locId}&number=${encodeURIComponent(fullPhone)}`,
+          { headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28' } }
+        );
+        const searchData = await searchRes.json();
+        const contactId = searchData?.contact?.id;
+        if (contactId) {
+          const bookUrl = 'https://buildboosters.com/book-launch';
+          const msg = ownerName
+            ? `Hey ${ownerName}, your website is built and ready for you to see. Book a quick launch call and we will walk through everything together: ${bookUrl}`
+            : `Hey, your website is built and ready for you to see. Book a quick launch call and we will walk through everything together: ${bookUrl}`;
+          await fetch('https://services.leadconnectorhq.com/conversations/messages', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${ghlKey}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'SMS', contactId, message: msg }),
+          });
+        }
+      }
+    } catch (e) {
+      console.error('build-site: launch call text failed:', e.message);
+    }
+
     return res.status(200).json({
       ok: true,
       repo: fullRepo,
