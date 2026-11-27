@@ -138,6 +138,25 @@ create table if not exists public.change_requests (
 );
 alter table public.change_requests enable row level security;
 
+-- Job events from Jobber, Housecall Pro or manual entry. Each row is one job completed, quote created
+-- or invoice paid. The review and photo ask systems read this table to know who to text and when.
+create table if not exists public.job_events (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references public.client_onboarding(id) on delete set null,
+  source text not null,                    -- jobber, hcp, manual
+  event_type text not null,                -- job_completed, quote_created, invoice_paid
+  customer_name text,
+  customer_phone text,
+  job_title text,
+  amount_cents integer,
+  review_ask_at timestamptz,               -- completed_at + 3 hours
+  photo_ask_at timestamptz,                -- completed_at + 6 hours
+  review_sent_at timestamptz,              -- set when the review text goes out
+  photo_sent_at timestamptz,               -- set when the photo ask goes out
+  created_at timestamptz not null default now()
+);
+alter table public.job_events enable row level security;
+
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
 --   where ein_private is not null and ein_provided_at < now() - interval '60 days';
