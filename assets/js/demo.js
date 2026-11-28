@@ -65,7 +65,7 @@ function openCard(){if(open)return;open=true;var tip=document.querySelector('.bb
     if(d.length!==10){er.textContent='Enter a 10-digit mobile number.';ph.focus();return}
     if(!f.bbl_ok.checked){er.textContent='Check the box so we\'re allowed to text you.';return}
     er.textContent='';var b=f.querySelector('.go');b.disabled=true;b.textContent='Sending\u2026';
-    var data={action:'text_link',phone:'+1'+d,first_name:f.bbl_name.value.trim(),biz:n,trade:Q.get('trade')||'',city:Q.get('city')||'',link:link(d),consent:'yes',page:location.pathname,styles_viewed:(window.bbStyleSummary?window.bbStyleSummary():'')};
+    var data={action:'text_link',phone:'+1'+d,first_name:f.bbl_name.value.trim(),biz:n,trade:Q.get('trade')||'',city:Q.get('city')||'',link:link(d),consent:'yes',page:location.pathname,styles_viewed:(window.bbStyleSummary?window.bbStyleSummary():''),colors_picked:(window.bbColorSummary?window.bbColorSummary():'')};
     var fin=function(){try{localStorage.setItem('bbSent','1')}catch(e){}if(!Q.get('phone')){var fm='('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6);document.querySelectorAll('[data-f="phone"]').forEach(function(e){e.textContent=fm});document.querySelectorAll('a[href^="tel:"]').forEach(function(a){a.setAttribute('href','tel:+1'+d)})}card.querySelector('h3').textContent='On its way to your phone!';card.querySelector('p').textContent='You\'ll get a text with your link in a minute. Maddie will follow up about getting '+n+' live.';
       f.outerHTML='<div class="ok">Sent to ('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6)+' \u2713</div>'};
     if(!/^https:/.test(HOOK)){fin();return}
@@ -97,6 +97,60 @@ var cur=ST.filter(function(s){return s.p===P})[0];if(!cur)return;
 var Q=new URLSearchParams(window.BB_QS||location.search);
 function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 var biz=(Q.get('biz')||'').trim().slice(0,60)||'Sunshine Home Services';
+/* ---- your colors: the visitor picks two colors or uploads a logo, and every style shows them for this visit ---- */
+var CK='bbColors';
+function hx6(c){c=String(c||'').trim().replace('#','').toLowerCase();return /^[0-9a-f]{6}$/.test(c)?c:''}
+function inkOf(c){var n=parseInt(c,16);return ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>150?'#16191d':'#ffffff'}
+function getC(){try{var o=JSON.parse(sessionStorage.getItem(CK)||'null');if(o&&o.biz===biz)return o}catch(e){}return null}
+function putC(o){try{if(o){o.biz=biz;sessionStorage.setItem(CK,JSON.stringify(o))}else sessionStorage.removeItem(CK)}catch(e){}}
+function paintC(){var o=getC(),st=document.getElementById('bb-colors');
+  if(!o||(!o.main&&!o.acc)){if(st)st.remove();return}
+  if(!st){st=document.createElement('style');st.id='bb-colors';document.head.appendChild(st)}
+  st.textContent=':root{'+(o.main?'--main:#'+o.main+'!important;--main-ink:'+inkOf(o.main)+'!important;':'')+(o.acc?'--accent:#'+o.acc+'!important;--accent-ink:'+inkOf(o.acc)+'!important;':'')+'}'}
+paintC();
+window.bbColorSummary=function(){var o=getC();if(!o||(!o.main&&!o.acc))return '';return [o.main?'main #'+o.main:'',o.acc?'button #'+o.acc:'',o.logo?'from their uploaded logo':''].filter(Boolean).join(', ')};
+function nowC(k){var v=getComputedStyle(document.documentElement).getPropertyValue(k).trim();if(/^#[0-9a-f]{3}$/i.test(v))v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];return hx6(v)||'0b2440'}
+function logoApi(){try{return typeof BBLogo!=='undefined'?BBLogo:null}catch(e){return null}}
+/* Shrinks an uploaded logo so it fits in this browser's storage and reads fast. */
+function shrink(img){var w=img.naturalWidth||img.width||300,h=img.naturalHeight||img.height||150,k=Math.min(1,420/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/png')}
+var colorsOpen=false;
+function openColors(){if(colorsOpen)return;colorsOpen=true;
+  var L=logoApi(),o=getC()||{},pal=[];
+  var ov=document.createElement('div');ov.className='bbc-ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','bbc-t');
+  ov.innerHTML='<div class="bbc"><button class="x" type="button" aria-label="Close">×</button><h3 id="bbc-t">See '+esc(biz)+' in your colors</h3>'+
+    '<p>Upload your logo and the site picks up its colors, or choose the two colors yourself. Your logo stays on your device.</p>'+
+    (L?'<label class="up"><input type="file" accept="image/*"><span>Upload my logo</span></label><p class="st" aria-live="polite"></p><div class="pal" hidden><span>Main color</span><div data-k="main"></div><span>Button color</span><div data-k="acc"></div></div>':'')+
+    '<div class="pk"><label>Main color<input type="color" data-k="main"></label><label>Button color<input type="color" data-k="acc"></label></div>'+
+    '<div class="ft"><button type="button" class="rs">Back to the original colors</button><button type="button" class="ok">Done</button></div></div>';
+  document.body.appendChild(ov);requestAnimationFrame(function(){ov.classList.add('on')});
+  var card=ov.querySelector('.bbc'),st=ov.querySelector('.st'),palBox=ov.querySelector('.pal'),im=ov.querySelector('input[data-k=main]'),ia=ov.querySelector('input[data-k=acc]');
+  function sync(){im.value='#'+nowC('--main');ia.value='#'+nowC('--accent');drawPal()}
+  function set(k,h){h=hx6(h);if(!h)return;var c=getC()||{};c[k]=h;putC(c);paintC();sync()}
+  function drawPal(){if(!palBox)return;palBox.hidden=!pal.length;if(!pal.length)return;var c=getC()||{};
+    palBox.querySelectorAll('div').forEach(function(d){var k=d.getAttribute('data-k');d.innerHTML=pal.map(function(q){return '<button type="button" data-h="'+q.hex+'" style="background:#'+q.hex+'" aria-label="Use #'+q.hex+'" aria-pressed="'+(c[k]===q.hex)+'"></button>'}).join('')})}
+  sync();
+  im.addEventListener('input',function(){set('main',im.value)});ia.addEventListener('input',function(){set('acc',ia.value)});
+  if(palBox)palBox.addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(b)set(b.parentNode.getAttribute('data-k'),b.getAttribute('data-h'))});
+  var file=ov.querySelector('input[type=file]');
+  if(file)file.addEventListener('change',function(){var f=file.files&&file.files[0];if(!f)return;
+    if(!/^image\//.test(f.type)){st.textContent='That file is not an image. Please use a PNG, JPG or SVG.';return}
+    st.textContent='Reading your logo…';var r=new FileReader();
+    r.onerror=function(){st.textContent='That image could not be read. Please try a PNG or JPG.'};
+    r.onload=function(){L.load(String(r.result)).then(function(img){
+      var src=shrink(img);return L.load(src).then(function(small){
+        pal=L.palette(small);var p=L.pick(pal),c=getC()||{};c.logo=1;
+        if(p){c.main=p.main;if(p.accent)c.acc=p.accent}
+        putC(c);L.save(biz,src);L.show(document.querySelector('.logo'),src,biz+' logo');paintC();sync();
+        st.textContent=!p?'Your logo is on the site, but no colors could be read from it. Please pick them below.':p.accent?'Colors pulled from your logo. Tap a swatch to change either one.':'Main color pulled from your logo. Please pick a button color below.'})
+    }).catch(function(){st.textContent='That image could not be read. Please try a PNG or JPG.'})};
+    r.readAsDataURL(f)});
+  function close(){ov.classList.remove('on');setTimeout(function(){ov.remove();colorsOpen=false},220);removeEventListener('keydown',key);var b=document.querySelector('.bbs-col');if(b)b.focus()}
+  function key(e){if(e.key==='Escape')close()}
+  addEventListener('keydown',key);
+  ov.addEventListener('click',function(e){if(e.target===ov)close()});
+  ov.querySelector('.x').addEventListener('click',close);ov.querySelector('.ok').addEventListener('click',close);
+  ov.querySelector('.rs').addEventListener('click',function(){putC(null);paintC();pal=[];if(L){L.save(biz,'');L.show(document.querySelector('.logo'),L.get(biz,Q.get('logo')||''),biz+' logo')}if(st)st.textContent='Back to the original colors.';sync()});
+  setTimeout(function(){(file||im).focus()},250)}
 /* time spent per style, kept in this browser so it can go out with the "text me the link" form */
 var KEY='bbStyles:'+biz.toLowerCase(),t0=Date.now(),flushed=0;
 function rd(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
@@ -144,6 +198,15 @@ var css=''+
 '@media (max-width:1000px){.bbs-w{grid-template-columns:1fr;gap:14px}.bbs-t{padding-right:34px}}'+
 '@media (max-width:640px){.bbs-w{padding-block:14px}.bbs .bbs-t h2{font-size:19px}.bbs-m .h em{display:none}.bbs-t p{font-size:13.5px}.bbs-c{overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:2px 20px 4px;gap:10px;scrollbar-width:none}.bbs-c::-webkit-scrollbar{display:none}.bbs-k{width:104px;scroll-snap-align:start}.bbs-m{height:86px}}'+
 '.bbs-row{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-top:10px}.bbs .bbs-row .bbs-cta{margin-top:0}'+
+'.bbs .bbs-col{display:inline-flex;align-items:center;gap:9px;border:1.5px solid rgba(255,255,255,.28);background:none;color:#fff;border-radius:999px;padding:12px 18px;font:700 14.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer;text-transform:none;letter-spacing:0;box-shadow:none}.bbs .bbs-col:hover{border-color:#f2a20c}.bbs .bbs-col:focus-visible{outline:3px solid #f2a20c;outline-offset:2px}.bbs-col i{width:16px;height:16px;border-radius:50%;flex:none;background:conic-gradient(#e5484d,#f2a20c,#30a46c,#0090ff,#8e4ec6,#e5484d)}.bbs.min .bbs-col{display:none}'+
+'.bbc-ov{position:fixed;inset:0;z-index:2147483100;background:rgba(6,12,20,.55);display:grid;place-items:center;padding:16px;opacity:0;transition:opacity .2s;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}.bbc-ov.on{opacity:1}'+
+'.bbc{width:min(440px,100%);background:#fff;color:#141b24;border-radius:22px;padding:26px 24px 22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.55);position:relative;max-height:calc(100vh - 32px);overflow:auto;text-align:left}'+
+'.bbc h3{margin:0 40px 8px 0;font:800 22px/1.2 inherit;font-family:inherit;letter-spacing:-.01em;color:#141b24;text-transform:none}.bbc p{margin:0 0 16px;font-size:15px;line-height:1.5;color:#55606e}.bbc p.st{margin:10px 0 0;font-size:14px;min-height:0}.bbc p.st:empty{display:none}'+
+'.bbc .x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:0;background:#eef1f5;color:#141b24;font-size:20px;line-height:1;cursor:pointer}'+
+'.bbc .up{display:flex;align-items:center;justify-content:center;border:2px dashed #c9d1dc;border-radius:14px;padding:18px;font-weight:700;font-size:15.5px;cursor:pointer;color:#141b24;position:relative}.bbc .up:hover{border-color:#141b24}.bbc .up input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}.bbc .up:focus-within{outline:3px solid #f2a20c;outline-offset:2px}'+
+'.bbc .pal{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:center;margin-top:14px;font-size:13.5px;font-weight:700}.bbc .pal div{display:flex;flex-wrap:wrap;gap:8px}.bbc .pal button{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #c9d1dc;cursor:pointer;padding:0}.bbc .pal button[aria-pressed=true]{box-shadow:0 0 0 3px #141b24}'+
+'.bbc .pk{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid #e6eaf0}.bbc .pk label{display:grid;gap:8px;font-size:14px;font-weight:700}.bbc .pk input{width:100%;height:48px;border:1.5px solid #c9d1dc;border-radius:12px;padding:4px;background:#fff;cursor:pointer}'+
+'.bbc .ft{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px}.bbc .rs{border:0;background:none;padding:8px 0;font:600 14px/1.2 inherit;font-family:inherit;color:#55606e;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.bbc .ok{border:0;border-radius:999px;padding:14px 30px;background:#141b24;color:#fff;font:800 15.5px/1 inherit;font-family:inherit;cursor:pointer}'+
 '.bbs-th{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:4px 2px;color:#fff;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;font:700 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;outline-offset:5px;border-radius:8px}'+
 '.bbs-th b{font-weight:700}.bbs-th:hover b{text-decoration:underline;text-underline-offset:3px}'+
 '.sun-and-moon{width:24px;height:24px;flex:none;stroke-linecap:round}.sun-and-moon>.sun,.sun-and-moon>.sun-beams,.sun-and-moon .moon>circle{transform-origin:center center}'+
@@ -166,7 +229,7 @@ if(document.querySelector('.bbs'))return true;
 var strip=document.querySelector('.strip');if(!strip||!document.querySelector('h1'))return false;
 var keep=location.search;
 var el=document.createElement('section');el.className='bbs';el.setAttribute('aria-label','Choose your website style');
-el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><span class="bbs-row"><button type="button" class="bbs-cta">Get this site for your business →</button>'+(cur.n==='Bold'?'':'<button type="button" class="bbs-th" title="Toggles light and dark" aria-live="polite"><svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><mask class="moon" id="bb-moon-mask"><rect x="0" y="0" width="100%" height="100%" fill="white"/><circle cx="24" cy="10" r="6" fill="black"/></mask><circle class="sun" cx="12" cy="12" r="6" mask="url(#bb-moon-mask)" fill="currentColor"/><g class="sun-beams" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg><b></b></button>')+'</span></div><div class="bbs-c">'+
+el.innerHTML='<div class="bbs-w"><div class="bbs-t"><small>Preview built for <b>'+esc(biz)+'</b> by Build Boosters</small><h2>Choose your style<button type="button" class="open">Show styles</button></h2><p>This is the same website in six different looks, so tap one to see '+esc(biz)+' in it.</p><span class="bbs-row"><button type="button" class="bbs-cta">Get this site for your business →</button><button type="button" class="bbs-col"><i aria-hidden="true"></i>See it in your colors</button>'+(cur.n==='Bold'?'':'<button type="button" class="bbs-th" title="Toggles light and dark" aria-live="polite"><svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><mask class="moon" id="bb-moon-mask"><rect x="0" y="0" width="100%" height="100%" fill="white"/><circle cx="24" cy="10" r="6" fill="black"/></mask><circle class="sun" cx="12" cy="12" r="6" mask="url(#bb-moon-mask)" fill="currentColor"/><g class="sun-beams" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg><b></b></button>')+'</span></div><div class="bbs-c">'+
 ST.map(function(s){var on=s===cur;return '<a class="bbs-k" href="'+(window.bbHref?window.bbHref(s.p):s.p+esc(keep))+'"'+(on?' aria-current="page"':'')+' data-style="'+s.n+'">'+mini(s)+'<span class="l"><b>'+s.n+'</b></span></a>'}).join('')+
 '</div></div>'+'<button type="button" class="bbs-x" aria-label="Hide the style picker">×</button>';
 strip.parentNode.insertBefore(el,strip);
@@ -179,6 +242,7 @@ el.querySelector('.open').addEventListener('click',function(){el.classList.remov
 el.querySelectorAll('.bbs-k').forEach(function(a){a.addEventListener('click',function(){flush()})});
 var c=el.querySelector('.bbs-c'),on=el.querySelector('.bbs-k[aria-current]');if(c&&on&&c.scrollWidth>c.clientWidth)c.scrollLeft=on.offsetLeft-20;
 el.querySelector('.bbs-cta').addEventListener('click',function(){var b=document.querySelector('.bbx-claim');if(b)b.click()});
+el.querySelector('.bbs-col').addEventListener('click',openColors);
 var popped=false;function done(){try{return localStorage.getItem('bbSent')==='1'||sessionStorage.getItem('bbPop')==='1'}catch(e){return false}}
 addEventListener('scroll',function(){if(popped||done())return;var d=document.documentElement;if((scrollY+innerHeight)/d.scrollHeight<0.6)return;if(document.querySelector('.bbl-ov'))return;var b=document.querySelector('.bbx-claim');if(!b)return;popped=true;try{sessionStorage.setItem('bbPop','1')}catch(e){}b.click()},{passive:true});
 return true}
