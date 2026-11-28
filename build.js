@@ -42,7 +42,7 @@ const ORG = { '@type': ['Organization', 'ProfessionalService'], '@id': SITE + '/
   sameAs: ['https://chromewebstore.google.com/detail/contractor-website-checke/aodlincjjmjjnbcgeedalofjbnhmefmp', 'https://github.com/BuildBoostersHQ'],
   logo: 'https://files.leadconnectorhq.com/file/6af6120d4a2360a4d7beffc8/bb-icon.png', telephone: '+1-786-933-8832',
   address: { '@type': 'PostalAddress', streetAddress: '82 NE 191st St, PMB 383218', addressLocality: 'Miami', addressRegion: 'FL', postalCode: '33179', addressCountry: 'US' } };
-const PLANS = [['Website', 79], ['All-In-One', 197], ['All-In-One + Google Ads', 997]];
+const PLANS = [['Essentials', 147], ['All In One', 279], ['Dominance', 497]];
 const textOf = (h) => h.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
 function schema(name, fm, body) {
   const out = [];
