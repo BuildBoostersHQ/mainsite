@@ -31,6 +31,8 @@ assert.strictEqual(html.split('class="card back"').length - 1, 8);
 assert.ok(html.includes('Smith &amp; Sons &lt;Plumbing&gt;'));
 assert.ok(!html.includes('<script'));
 assert.ok(html.includes('(813) 555-0142'));
+assert.ok(html.includes('Questions or concerns? Call us at <b>(813) 555-0142</b>.'));
+assert.ok(!cardHtml({ business: 'Smith Plumbing', reviewUrl: 'https://a.co', style: 'classic' }).includes('Questions or concerns'), 'no phone, no call line');
 assert.ok(!html.includes('—'), 'no em dashes');
 
 console.log('review-card: all checks passed');

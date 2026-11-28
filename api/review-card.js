@@ -7,7 +7,9 @@
 //
 // Two US Letter pages, 8 cards each (2 across, 4 down), every card 3.5 x 2 inches:
 //   Page 1, fronts: their logo, phone and website on their main color
-//   Page 2, backs:  their logo, "How did we do?", and a QR code to their review link
+//   Page 2, backs:  their logo, "How did we do?", a QR code to their review link, and a line
+//                   with their phone number for questions or concerns, so an unhappy customer
+//                   calls first
 // A client with no logo of their own (logo_url in their answers) gets the trade emblem beside
 // their name, the same lockup as their website header.
 // Print double-sided, flipping on the long edge, then cut on the dashed lines. Open the page in
@@ -129,6 +131,7 @@ function cardHtml({ business, reviewUrl, style, brandColor, phone, domain, logo,
     <h2>How did we do?</h2>
     <p>Your feedback helps our small business grow.</p>
     <p class="scan">Scan to review us on Google.</p>
+    ${prettyPhone(phone) ? `<p class="call">Questions or concerns? Call us at <b>${esc(prettyPhone(phone))}</b>.</p>` : ''}
   </div>
   <div class="code">${qr}</div>
 </div>`;
@@ -151,7 +154,7 @@ body { font-family: ${look.body}; -webkit-print-color-adjust: exact; print-color
 .logo { display: flex; align-items: center; min-width: 0; }
 .logo .mark { flex: none; color: ${look.accent}; }
 .logo b { ${look.wm} line-height: 1; min-width: 0; overflow-wrap: break-word; }
-.logo.small { gap: 0.08in; margin-bottom: 0.15in; color: ${dark ? look.fg : main}; }
+.logo.small { gap: 0.08in; margin-bottom: 0.12in; color: ${dark ? look.fg : main}; }
 .logo.small .mark { width: 0.3in; height: 0.3in; }
 .logo.small b { font-size: ${(14.5 * look.wmScale * long).toFixed(1)}pt; }
 .logo.small img { max-height: 0.4in; max-width: 1.8in; display: block; }
@@ -167,7 +170,9 @@ body { font-family: ${look.body}; -webkit-print-color-adjust: exact; print-color
 .words { flex: 1; min-width: 0; }
 .back h2 { font-family: ${look.head}; font-weight: ${look.headWeight}; font-size: ${look.upper ? 18 : 15}pt; line-height: 1.05; white-space: nowrap; ${look.upper ? 'text-transform: uppercase; letter-spacing: .01em;' : 'letter-spacing: -.015em;'} margin-bottom: 0.07in; }
 .back p { font-size: 8.6pt; line-height: 1.4; font-weight: 500; color: ${look.muted}; max-width: 1.5in; }
-.back p.scan { margin-top: 0.13in; max-width: none; font-weight: 700; color: ${dark ? look.accent : main}; white-space: nowrap; }
+.back p.scan { margin-top: 0.1in; max-width: none; font-weight: 700; color: ${dark ? look.accent : main}; white-space: nowrap; }
+.back p.call { margin-top: 0.1in; max-width: none; font-size: 7.4pt; white-space: nowrap; }
+.back p.call b { font-weight: 700; color: ${look.fg}; }
 .code { flex: none; width: 1.14in; height: 1.14in; background: #fff; }
 .code svg { display: block; width: 100%; height: 100%; }
 @media screen { body { background: #e9edf2; } .sheet { background: #fff; margin: 0.25in auto; box-shadow: 0 6px 30px rgba(0,0,0,.12); } }
