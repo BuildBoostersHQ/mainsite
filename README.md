@@ -68,6 +68,10 @@ So nobody who already left a review gets asked again.
 - Confirmed pairs are saved in `review_matches`, and `/api/review-queue` leaves those customers out of the review asks by phone number. A customer with no phone on the list is saved but cannot be skipped. Tagging the contact inside their HighLevel sub-account is not built yet (`tagReviewedContactsInSubAccount` in `api/review-match.js`).
 - `supabase/review_matches.sql` creates the table. Run it once in the Supabase SQL editor.
 
+## Valentina's transcripts
+
+`/api/valentina-log` is what Maddie's dashboard reads to show what Valentina said and did. It is internal (`x-bb-secret`) and reads two tables that the valentina-ai project writes: `valentina_messages` (every text, reply, action and handoff) and `valentina_reviews` (the conversations its daily review flagged). It returns the flagged conversations, the last two weeks of conversations, one number's full transcript, and lets a flagged conversation be marked reviewed with a note. Photo links are never sent, only how many photos there were.
+
 ## Welcome page and texting registration
 
 `/welcome` is where Stripe sends a buyer after payment. Each payment link's confirmation address has to be `https://buildboosters.com/welcome?session_id={CHECKOUT_SESSION_ID}`, so the page can tell who just paid. With that, the page asks for the texting registration details first: whether they have an EIN, legal name, business type, EIN and the street address on their IRS letter. Without it, or on a plan tagged `website`, the page shows the plain "check your phone" message. `/welcome?sample=1` shows the form and saves nothing.
