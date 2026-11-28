@@ -5,7 +5,9 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color',
+  // The registration address, picked from Google's list on /welcome or /start. a2p_address_check is what /api/address said about it.
+  'a2p_address', 'a2p_street', 'a2p_unit', 'a2p_city', 'a2p_state', 'a2p_zip', 'a2p_address_check'];
 const LONG = ['site_notes'];  // free text for whoever builds the site
 const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
@@ -14,6 +16,10 @@ const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the
 const LISTS = { services: 12, areas: 10, vibes: 2, badges: 12 };
 const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
+// A Stripe checkout id, which Stripe puts in the /welcome address after payment.
+const SESSION = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
+// The carriers turn down a registration whose address is a P.O. box.
+const PO_BOX = /\b(p\.?\s*o\.?\s*b(ox)?\.?|post\s+office\s+box|pob)\s*#?\s*\d+/i;
 const BUCKET = 'client-photos';
 const MAX_PHOTOS = 60;           // per client
 const MAX_PHOTO_BYTES = 3000000;  // after the phone has shrunk it
@@ -26,6 +32,7 @@ function clean(input) {
   }
   for (const key of LONG) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 1500);
   if (out.brand_color && !/^#[0-9a-f]{6}$/i.test(out.brand_color)) out.brand_color = '';
+  if (PO_BOX.test(out.a2p_address || '') || PO_BOX.test(out.a2p_street || '')) for (const k of Object.keys(out)) if (/^a2p_(address|street|unit|city|state|zip)/.test(k)) delete out[k];
   for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
   for (const [key, max] of Object.entries(LISTS)) {
     if (Array.isArray(input[key])) {
@@ -93,6 +100,15 @@ module.exports = async function handler(req, res) {
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(baseUrl())) return res.status(500).json({ error: 'server_error', reason: 'wrong_project_url' });
   try {
     if (req.method === 'GET') {
+      // /welcome only knows the Stripe checkout id from its address. This trades it for the client's
+      // setup code. The payment webhook creates the row, so a 404 here can simply mean "not yet".
+      const session = String((req.query && req.query.session) || '');
+      if (session) {
+        if (!SESSION.test(session)) return res.status(404).json({ error: 'not_found' });
+        const hit = (await supabase(`${TABLE}?stripe_session_id=eq.${encodeURIComponent(session)}&select=code&limit=1`))[0];
+        if (!hit) return res.status(404).json({ error: 'not_found' });
+        return res.status(200).json({ code: hit.code });
+      }
       const code = String((req.query && req.query.code) || '');
       if (!CODE.test(code)) return res.status(404).json({ error: 'not_found' });
       const row = await find(code);
@@ -128,6 +144,7 @@ module.exports = async function handler(req, res) {
       if (!body || !CODE.test(String(body.code || ''))) return res.status(404).json({ error: 'not_found' });
       const row = await find(body.code);
       if (!row) return res.status(404).json({ error: 'not_found' });
+      const code = row.code;
       const now = new Date().toISOString();
       const patch = { updated_at: now };
       const changes = clean(body.answers);

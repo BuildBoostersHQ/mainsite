@@ -100,6 +100,7 @@ function launchChecklist(r, a) {
     if (!has(a.a2p_legal_name)) items.push('Legal business name and business type for texting registration');
     if (!r.ein_provided_at && !r.ein_private) items.push('EIN for texting registration');
   }
+  if (!isWebsiteTier(r) && !has(a.a2p_address)) items.push('Street address for texting registration (the one on their IRS letter, never a P.O. box)');
   if (!isWebsiteTier(r)) items.push('Customer list for their free reactivation text');
   return items;
 }

@@ -18,14 +18,11 @@ body {
   color: #c8ddf0;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .welcome {
   max-width: 540px;
   margin: 0 auto;
-  padding: 60px 24px;
+  padding: 48px 24px 72px;
   text-align: center;
 }
 .welcome-logo {
@@ -33,7 +30,7 @@ body {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  margin-bottom: 48px;
+  margin-bottom: 36px;
 }
 .welcome-logo svg {
   width: 28px; height: 28px;
@@ -77,6 +74,47 @@ body {
 }
 .welcome-fallback a { color: #f2a20c; text-decoration: none; }
 .welcome-fallback a:hover { text-decoration: underline; }
+
+/* Texting registration, shown first once we know who just paid. */
+.reg { text-align: left; }
+.reg h1 { text-align: left; font-size: 28px; }
+.reg .lead { margin-bottom: 28px; }
+.reg-q { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+.reg-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+.reg-choice button {
+  font: inherit; font-size: 16px; font-weight: 700; color: #fff; cursor: pointer;
+  background: transparent; border: 1.5px solid rgba(255,255,255,0.22); border-radius: 6px; padding: 14px 10px;
+}
+.reg-choice button[aria-pressed="true"] { border-color: #f2a20c; background: rgba(242,162,12,0.12); }
+.reg-fields { margin-top: 24px; }
+.reg-field { margin-bottom: 20px; position: relative; }
+.reg-field label { display: block; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.reg-field label .h { font-weight: 400; color: #93b4d4; }
+.reg-field input, .reg-field select {
+  width: 100%; font: inherit; font-size: 16px; color: #0b2440; background: #fff;
+  border: 1.5px solid transparent; border-radius: 6px; padding: 13px 12px;
+}
+.reg-field input:focus, .reg-field select:focus { outline: none; border-color: #f2a20c; }
+.reg-list { margin-top: 4px; background: #fff; border-radius: 6px; overflow: hidden; }
+.reg-list button {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; color: #0b2440; cursor: pointer;
+  background: #fff; border: 0; border-bottom: 1px solid #e3e9f0; padding: 12px;
+}
+.reg-list button:last-child { border-bottom: 0; }
+.reg-list button:hover, .reg-list button:focus { background: #f4f7fb; outline: none; }
+.reg-hint { font-size: 14px; line-height: 1.6; color: #93b4d4; margin-top: 8px; }
+.reg-hint button { font: inherit; color: #f2a20c; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+.reg-private { font-size: 14px; line-height: 1.6; color: #93b4d4; margin: 4px 0 24px; }
+.reg-btn {
+  display: block; width: 100%; font: inherit; font-size: 17px; font-weight: 800; color: #0b2440; cursor: pointer;
+  background: #f2a20c; border: 0; border-radius: 6px; padding: 16px; text-align: center; text-decoration: none;
+}
+.reg-btn[disabled] { opacity: 0.6; cursor: default; }
+.reg-status { font-size: 15px; line-height: 1.6; color: #ffd27a; margin-top: 14px; }
+.reg-later { margin-top: 22px; font-size: 14px; line-height: 1.6; color: #93b4d4; text-align: center; }
+.reg-later button { font: inherit; color: #93b4d4; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+.reg-sign { margin-top: 28px; font-size: 15px; color: #c8ddf0; }
+[hidden] { display: none !important; }
 </style>
 
 <div class="welcome">
@@ -85,27 +123,85 @@ body {
     <b>Build Boosters</b>
   </a>
 
-  <div class="welcome-check">
-    <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+  <p class="lead" id="wl-loading" role="status" hidden>Getting your account ready.</p>
+
+  <!-- TEXTING REGISTRATION: shown first when the page knows who just paid and their plan includes texting. -->
+  <div class="reg" id="wl-reg" hidden>
+    <h1>You're in<span id="wl-name"></span>, and there is one thing I need from you right now.</h1>
+    <p class="lead">The phone carriers take a few days to approve a new texting number, so the sooner I send your details in, the sooner your missed call texts start working.</p>
+
+    <p class="reg-q" id="wl-q">Do you have an EIN for your business?</p>
+    <div class="reg-choice" role="group" aria-labelledby="wl-q">
+      <button type="button" id="wl-yes" aria-pressed="false">Yes, I have one</button>
+      <button type="button" id="wl-no" aria-pressed="false">No, I do not</button>
+    </div>
+    <p class="reg-hint" id="wl-no-note" hidden>No EIN is fine. I will register you under your own name, and the carriers will text a code to your cell that I will ask you for.</p>
+
+    <form class="reg-fields" id="wl-form" hidden novalidate>
+      <div class="reg-field">
+        <label for="wl-legal"><span id="wl-legal-label">Legal business name</span> <span class="h" id="wl-legal-hint">(exactly as it appears on your IRS letter)</span></label>
+        <input id="wl-legal" type="text" autocomplete="off">
+      </div>
+      <div class="reg-field" id="wl-type-wrap">
+        <label for="wl-type">Business type</label>
+        <select id="wl-type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor</option></select>
+      </div>
+      <div class="reg-field" id="wl-ein-wrap">
+        <label for="wl-ein">EIN <span class="h">(9 digits)</span></label>
+        <input id="wl-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789">
+      </div>
+      <div class="reg-field">
+        <label for="wl-address"><span id="wl-address-label">Street address on your IRS letter</span></label>
+        <input id="wl-address" type="text" placeholder="Start typing your street address">
+        <div class="reg-list" id="wl-address-list" hidden></div>
+        <p class="reg-hint" id="wl-address-note" role="status" hidden></p>
+        <p class="reg-hint">Pick your address from the list as you type, because a P.O. box will not work for this registration. <button type="button" id="wl-address-typed">My address is not on the list</button></p>
+      </div>
+      <div class="reg-field">
+        <label for="wl-unit">Suite or unit <span class="h">(if you have one)</span></label>
+        <input id="wl-unit" type="text" autocomplete="off">
+      </div>
+      <p class="reg-private">Your details are kept private and used only for this registration. I delete your EIN as soon as your number is approved.</p>
+      <button class="reg-btn" type="submit" id="wl-send">Send my texting details</button>
+      <p class="reg-status" id="wl-status" role="alert" hidden></p>
+    </form>
+
+    <p class="reg-later" id="wl-later"><button type="button" id="wl-later-btn">I do not have my IRS letter with me</button></p>
+    <p class="reg-hint" id="wl-later-note" hidden>That is okay. This is the first question on your setup page, and I will remind you by text tomorrow so that it does not slip. <a href="#" id="wl-later-link" style="color:#f2a20c">Go to my setup page</a></p>
   </div>
 
-  <h1>You're in.</h1>
-  <p class="lead">We just texted you a link to your setup page. It takes about 5 minutes to fill in, and we start building your site the moment you finish.</p>
-
-  <div class="welcome-steps">
-    <div class="welcome-step">
-      <span class="welcome-step-num">1.</span>
-      <div class="welcome-step-text"><strong>Check your phone.</strong> You should have a text from us with your setup link. Open it and fill in the details about your business.</div>
-    </div>
-    <div class="welcome-step">
-      <span class="welcome-step-num">2.</span>
-      <div class="welcome-step-text"><strong>We build your site.</strong> Once you submit the form, we start right away. You will get a text when there is something to look at.</div>
-    </div>
-    <div class="welcome-step">
-      <span class="welcome-step-num">3.</span>
-      <div class="welcome-step-text"><strong>Launch call.</strong> We walk through everything together, make any changes you want, and put it live.</div>
-    </div>
+  <!-- DONE: registration details are in. -->
+  <div class="reg" id="wl-done" hidden>
+    <div class="welcome-check" style="margin-left:0"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h1>Got it. Your texting registration is on its way.</h1>
+    <p class="lead">Your setup page is next. It takes about five minutes, and I start building your site the moment you finish it.</p>
+    <a class="reg-btn" id="wl-next" href="#">Open my setup page</a>
+    <p class="reg-hint">I also texted you this link, so you can come back to it later from your phone.</p>
+    <p class="reg-sign">Talk soon, Maddie</p>
   </div>
 
-  <p class="welcome-fallback">Did not get the text? Give it a minute, then text me directly at <a href="sms:+17869338832">(786) 933-8832</a> or email <a href="mailto:hello@buildboosters.com">hello@buildboosters.com</a> and I will send you a fresh link.</p>
+  <!-- CHECK YOUR PHONE: shown when the page cannot tell who just paid. -->
+  <div id="wl-plain">
+    <div class="welcome-check">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+
+    <h1>You're in.</h1>
+    <p class="lead">I just texted you a link to your setup page. It takes about five minutes to fill in, and I start building your site the moment you finish.</p>
+
+    <div class="welcome-steps">
+      <div class="welcome-step">
+        <span class="welcome-step-num">1.</span>
+        <div class="welcome-step-text"><strong>Check your phone.</strong> You should have a text from me with your setup link, and the first thing it asks for is what the carriers need to turn on your texting number.</div>
+      </div>
+      <div class="welcome-step">
+        <span class="welcome-step-num">2.</span>
+        <div class="welcome-step-text"><strong>Finish your setup page.</strong> I start building as soon as you submit it, and then we walk through everything together on your launch call before it goes live.</div>
+      </div>
+    </div>
+
+    <p class="welcome-fallback">Did not get the text? Give it a minute, then text me directly at <a href="sms:+17869338832">(786) 933-8832</a> or email <a href="mailto:hello@buildboosters.com">hello@buildboosters.com</a> and I will send you a fresh link.</p>
+  </div>
 </div>
+<script src="/assets/js/address-lookup.js" defer></script>
+<script src="/assets/js/welcome.js" defer></script>
