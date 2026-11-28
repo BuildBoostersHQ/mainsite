@@ -68,6 +68,14 @@ So nobody who already left a review gets asked again.
 - Confirmed pairs are saved in `review_matches`, and `/api/review-queue` leaves those customers out of the review asks by phone number. A customer with no phone on the list is saved but cannot be skipped. Tagging the contact inside their HighLevel sub-account is not built yet (`tagReviewedContactsInSubAccount` in `api/review-match.js`).
 - `supabase/review_matches.sql` creates the table. Run it once in the Supabase SQL editor.
 
+## Welcome page and texting registration
+
+`/welcome` is where Stripe sends a buyer after payment. Each payment link's confirmation address has to be `https://buildboosters.com/welcome?session_id={CHECKOUT_SESSION_ID}`, so the page can tell who just paid. With that, the page asks for the texting registration details first: whether they have an EIN, legal name, business type, EIN and the street address on their IRS letter. Without it, or on a plan tagged `website`, the page shows the plain "check your phone" message. `/welcome?sample=1` shows the form and saves nothing.
+
+- `src/pages/welcome.html` and `assets/js/welcome.js` are the page.
+- `assets/js/address-lookup.js` is the address picker, shared with `/start`. It calls `/api/address`, which looks the address up through Google Maps with the same `GOOGLE_PLACES_KEY` as the business lookup, and turns away P.O. boxes. Switch on the Address Validation API for that key in Google Cloud to also catch rented mailboxes; the picker works without it.
+- The address is saved in the client's answers as `a2p_address`, `a2p_street`, `a2p_unit`, `a2p_city`, `a2p_state`, `a2p_zip` and `a2p_address_check` (`ok`, `mailbox_store` or `typed`).
+
 ## Preview locally
 
 ```

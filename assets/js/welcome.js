@@ -18,6 +18,10 @@
     answers: { business_name: 'Smith Plumbing', address: '1420 SW 8th St, Miami, FL 33135', place_id: 'sample' }
   };
 
+  /* The carriers send a code to the email, and they only take a personal address. */
+  var MAIL = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
+  var PUBLIC_MAIL = /@(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|comcast|att|verizon|bellsouth|sbcglobal|cox)\.(com|net|me)$/i;
+
   var answers = {};
   var state = { ein: false, birthday: false, address: false, google: false };
 
@@ -85,30 +89,47 @@
         .catch(function () { state.birthday = false; note('wl-birthday-status', 'That date did not save. Please check it and try again.'); });
     });
 
-    /* Address: checked with Google before it is saved, because the carriers refuse mailboxes. */
+    /* Address: picked from Google's list, so it is a real street address and not a P.O. box. */
     var addr = $('wl-a2p_address');
-    var WHY = {
-      mailbox: 'That looks like a P.O. box or a rented mailbox, and the carriers will turn it down. Please use the street address where the business is, and your home address is fine if you work from home.',
-      not_found: 'Google could not find that address. Please check the street number, the city and the ZIP code.',
-      not_specific: 'That needs a street number and a street name, so please type the full address.',
-      too_short: 'Please type the full street address, with the city, the state and the ZIP code.'
-    };
+    function addrLabel() { $('wl-address-label').textContent = /no EIN/i.test(type.value) ? 'Your street address' : 'Street address on your IRS letter'; }
+    type.addEventListener('change', addrLabel); addrLabel();
     if (answers.a2p_address) { addr.value = answers.a2p_address; state.address = true; }
-    addr.addEventListener('input', function () { state.address = false; });
-    addr.addEventListener('change', function () {
-      var text = addr.value.trim();
-      if (!text) return;
-      if (/\b(p\.?\s*o\.?\s*box|post\s+office\s+box|pmb|private\s+mail\s*box)\b/i.test(text)) { state.address = false; addr.classList.add('wl-bad'); note('wl-address-status', WHY.mailbox); return; }
-      note('wl-address-status', 'Checking that address.');
-      fetch('/api/business-lookup?address=' + encodeURIComponent(text)).then(function (r) { return r.json(); })
-        .catch(function () { return { ok: true, formatted: text }; })
-        .then(function (r) {
-          if (!r.ok) { state.address = false; addr.classList.add('wl-bad'); note('wl-address-status', WHY[r.reason] || WHY.not_found); return; }
-          addr.value = r.formatted || text; addr.classList.remove('wl-bad'); state.address = true;
-          note('wl-address-status', r.checked ? 'That address checks out.' : '');
-          save({ a2p_address: addr.value });
-        });
+    var picker = window.BBAddress(addr, {
+      list: $('wl-address-list'), note: $('wl-address-status'),
+      onPick: function (a) {
+        state.address = true; addr.classList.remove('wl-bad');
+        save({ a2p_address: a.formatted, a2p_street: a.street || '', a2p_city: a.city || '', a2p_state: a.state || '', a2p_zip: a.zip || '', a2p_address_check: a.check || '' });
+      },
+      onClear: function () { state.address = false; save({ a2p_address: '', a2p_address_check: '' }); }
     });
+    if (answers.a2p_address) picker.markPicked();
+    $('wl-address-typed').addEventListener('click', function () {
+      if (!picker.acceptTyped()) note('wl-address-status', 'Please type the full street address first, starting with the number.');
+    });
+
+    /* Cell and personal email: the carriers send a code to each one, and they only take a personal email. */
+    var cell = $('wl-cell'), mail = $('wl-a2p_email');
+    if (answers.cell) cell.value = answers.cell;
+    var known = answers.a2p_email || answers.email || '';
+    if (PUBLIC_MAIL.test(known)) mail.value = known;
+    cell.addEventListener('change', function () {
+      var n = cell.value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+      if (!n) return;
+      if (n.length !== 10) { cell.classList.add('wl-bad'); note('wl-contact-status', 'Please type your 10 digit cell number.'); return; }
+      cell.classList.remove('wl-bad'); note('wl-contact-status', ''); save({ cell: n });
+    });
+    mail.addEventListener('change', function () {
+      var v = mail.value.trim();
+      if (!v) return;
+      if (!MAIL.test(v)) { mail.classList.add('wl-bad'); note('wl-contact-status', 'Please type your email address.'); return; }
+      if (!PUBLIC_MAIL.test(v)) { mail.classList.add('wl-bad'); note('wl-contact-status', 'The carriers will not accept a work email for this step. Please use a personal one such as Gmail, Yahoo, Outlook or iCloud.'); return; }
+      mail.classList.remove('wl-bad'); note('wl-contact-status', ''); save({ a2p_email: v });
+    });
+
+    /* An EIN issued in the last two months can take the carriers longer to match. */
+    var recent = $('wl-ein-recent');
+    recent.checked = !!answers.a2p_ein_recent;
+    recent.addEventListener('change', function () { save({ a2p_ein_recent: recent.checked }); });
   }
 
   function google() {
@@ -181,8 +202,10 @@
       [!!$('wl-a2p_legal_name').value.trim(), 'wl-a2p_legal_name', 'Please add your legal business name.'],
       [!!$('wl-a2p_first_name').value.trim(), 'wl-a2p_first_name', 'Please add your legal first name.'],
       [!!$('wl-a2p_last_name').value.trim(), 'wl-a2p_last_name', 'Please add your legal last name.'],
-      [state.address, 'wl-a2p_address', 'Please add a street address for the business that is not a P.O. box.'],
       [state.birthday, 'wl-birthday', 'Please add your date of birth.'],
+      [$('wl-cell').value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '').length === 10, 'wl-cell', 'Please add your 10 digit cell number.'],
+      [PUBLIC_MAIL.test($('wl-a2p_email').value.trim()), 'wl-a2p_email', 'Please add a personal email such as Gmail, Yahoo, Outlook or iCloud.'],
+      [state.address, 'wl-a2p_address', 'Please pick a street address for the business that is not a P.O. box.'],
       [state.google, 'wl-find-q', 'Please pick your business on Google, or tap "I am not on Google yet".']
     ];
     for (var i = 0; i < checks.length; i++) {
@@ -208,6 +231,8 @@
     if (credit && !credit.earned) { $('wl-credit-title').textContent = credit.title; $('wl-credit-text').textContent = credit.text; $('wl-credit').hidden = false; }
     registration(d); google();
     $('wl-next').addEventListener('click', finish);
+    $('wl-later-link').href = demo ? '/start' : '/start/' + code;
+    $('wl-later-btn').addEventListener('click', function () { $('wl-later-note').hidden = false; });
     show('ready');
   }
 

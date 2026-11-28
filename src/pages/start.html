@@ -64,8 +64,13 @@ sitemap: false
 <div id="ob-ein-wrap"><label for="ob-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="ob-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
 <div><label for="ob-a2p_first_name">Your legal first name</label><input id="ob-a2p_first_name" data-key="a2p_first_name" type="text" autocomplete="given-name"></div>
 <div><label for="ob-a2p_last_name">Your legal last name</label><input id="ob-a2p_last_name" data-key="a2p_last_name" type="text" autocomplete="family-name"></div>
-<div class="ob-full"><label for="ob-a2p_address">Business street address <span class="ob-hint">(a real street address, because the carriers turn down P.O. boxes and rented mailboxes)</span></label><input id="ob-a2p_address" data-key="a2p_address" type="text" autocomplete="street-address"></div>
 <div><label for="ob-birthday">Your date of birth</label><input id="ob-birthday" type="date" autocomplete="bday"></div>
+<div><label for="ob-a2p_email">Personal email <span class="ob-hint">(Gmail, Yahoo, Outlook or iCloud, because the carriers email a code to it)</span></label><input id="ob-a2p_email" data-key="a2p_email" type="email" inputmode="email" autocomplete="email"></div>
+<div class="ob-full ob-narrow ob-addr"><label for="ob-a2p_address"><span id="ob-a2p-address-label">Street address on your IRS letter</span> <span class="ob-hint">(pick it from the list as you type)</span></label><input id="ob-a2p_address" type="text" placeholder="Start typing your street address">
+<div class="ob-addr-list" id="ob-a2p-address-list" hidden></div>
+<p class="ob-note" id="ob-a2p-address-note" role="status" hidden></p>
+<p class="ob-note ob-addr-help">A P.O. box will not work for this registration, even when the IRS has one on file. <button class="ob-linkbtn" type="button" id="ob-a2p-address-typed">My address is not on the list</button></p></div>
+<div class="ob-narrow"><label for="ob-a2p_unit">Suite or unit <span class="ob-hint">(if you have one)</span></label><input id="ob-a2p_unit" data-key="a2p_unit" type="text" autocomplete="off"></div>
 </div>
 <p class="ob-note" id="ob-birthday-status" role="status" hidden></p>
 <p class="ob-note" id="ob-ein-status" role="status" hidden></p>
@@ -214,4 +219,5 @@ sitemap: false
 </div>
 </div>
 <script src="/assets/js/credit.js" defer></script>
+<script src="/assets/js/address-lookup.js" defer></script>
 <script src="/assets/js/start.js" defer></script>

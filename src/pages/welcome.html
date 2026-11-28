@@ -54,16 +54,23 @@ sitemap: false
 <p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN and your date of birth are kept private, they are used only for that registration, and I delete them as soon as your number is approved.</p>
 <div class="ob-grid">
 <div><label for="wl-a2p_entity_type">Business type</label><select id="wl-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor</option><option>Sole proprietor with no EIN</option></select></div>
-<div id="wl-ein-wrap"><label for="wl-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="wl-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
+<div id="wl-ein-wrap"><label for="wl-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="wl-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789">
+<label class="ob-check ob-check-tight"><input id="wl-ein-recent" type="checkbox"> <span>I got this EIN within the last two months.</span></label></div>
 <div class="ob-full ob-narrow"><label for="wl-a2p_legal_name">Legal business name <span class="ob-hint" id="wl-legal-hint">(exactly as it appears on your IRS letter)</span></label><input id="wl-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
 <div><label for="wl-a2p_first_name">Your legal first name</label><input id="wl-a2p_first_name" data-key="a2p_first_name" type="text" autocomplete="given-name"></div>
 <div><label for="wl-a2p_last_name">Your legal last name</label><input id="wl-a2p_last_name" data-key="a2p_last_name" type="text" autocomplete="family-name"></div>
-<div class="ob-full"><label for="wl-a2p_address">Business street address <span class="ob-hint">(a real street address, because the carriers turn down P.O. boxes and rented mailboxes)</span></label><input id="wl-a2p_address" type="text" autocomplete="street-address" placeholder="1420 SW 8th St, Miami, FL 33135"></div>
 <div><label for="wl-birthday">Your date of birth</label><input id="wl-birthday" type="date" autocomplete="bday"></div>
+<div><label for="wl-cell">Your cell <span class="ob-hint">(the carriers text a code to it)</span></label><input id="wl-cell" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(305) 555-0199"></div>
+<div class="ob-full ob-narrow"><label for="wl-a2p_email">Personal email <span class="ob-hint">(Gmail, Yahoo, Outlook or iCloud, because the carriers email a code to it)</span></label><input id="wl-a2p_email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com"></div>
+<div class="ob-full ob-narrow ob-addr"><label for="wl-a2p_address"><span id="wl-address-label">Street address on your IRS letter</span> <span class="ob-hint">(pick it from the list as you type)</span></label><input id="wl-a2p_address" type="text" placeholder="Start typing your street address">
+<div class="ob-addr-list" id="wl-address-list" hidden></div>
+<p class="ob-note ob-addr-help">A P.O. box will not work for this registration, even when the IRS has one on file. <button class="ob-linkbtn" type="button" id="wl-address-typed">My address is not on the list</button></p></div>
+<div class="ob-narrow"><label for="wl-a2p_unit">Suite or unit <span class="ob-hint">(if you have one)</span></label><input id="wl-a2p_unit" data-key="a2p_unit" type="text" autocomplete="off"></div>
 </div>
 <p class="ob-note" id="wl-address-status" role="status" hidden></p>
 <p class="ob-note" id="wl-ein-status" role="status" hidden></p>
 <p class="ob-note" id="wl-birthday-status" role="status" hidden></p>
+<p class="ob-note" id="wl-contact-status" role="status" hidden></p>
 <p class="ob-note" id="wl-ein-none" hidden>No EIN is fine. I will register you as a sole proprietor under your own name, and the carriers will text a code to your cell that I will ask you for.</p>
 <p class="ob-note" id="wl-sole-note" hidden>A sole proprietor with an EIN registers under the name on the IRS letter, which is usually your own full name.</p>
 </section>
@@ -98,6 +105,8 @@ sitemap: false
 <div class="ob-end">
 <p class="ob-err" id="wl-err" role="alert" hidden></p>
 <button class="ob-btn ob-btn-navy ob-btn-big" type="button" id="wl-next">Save this and open my setup page</button>
+<p class="ob-note"><button class="ob-linkbtn" type="button" id="wl-later-btn">I do not have my IRS letter with me</button></p>
+<p class="ob-note" id="wl-later-note" hidden>That is okay. These same questions are at the top of your setup page, and I will remind you by text so it does not slip. <a href="/start" id="wl-later-link">Go to my setup page</a></p>
 </div>
 
 </main>
@@ -113,4 +122,5 @@ sitemap: false
 </div>
 </div>
 <script src="/assets/js/credit.js" defer></script>
+<script src="/assets/js/address-lookup.js" defer></script>
 <script src="/assets/js/welcome.js" defer></script>

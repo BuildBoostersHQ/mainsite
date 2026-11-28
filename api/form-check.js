@@ -129,6 +129,12 @@ function launchChecklist(r, a) {
     if (!has(a.a2p_legal_name)) items.push('Legal business name and business type for texting registration');
     if (!r.ein_provided_at && !r.ein_private) items.push('EIN for texting registration');
   }
+  if (!isWebsiteTier(r)) {
+    if (!has(a.a2p_first_name) || !has(a.a2p_last_name)) items.push('Owner legal first and last name for texting registration');
+    if (!r.dob_private && !r.a2p_registered_at) items.push('Owner date of birth for texting registration');
+    if (!has(a.a2p_email)) items.push('A personal email (Gmail, Yahoo, Outlook) for texting registration, because the carriers send a code to it');
+  }
+  if (!isWebsiteTier(r) && !has(a.a2p_address)) items.push('Street address for texting registration (the one on their IRS letter, never a P.O. box)');
   if (!isWebsiteTier(r)) items.push('Customer list for their free reactivation text');
   return items;
 }

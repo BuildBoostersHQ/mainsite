@@ -5,10 +5,10 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'a2p_first_name', 'a2p_last_name', 'a2p_address', 'trade', 'style', 'brand_color',
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'a2p_first_name', 'a2p_last_name', 'a2p_address', 'a2p_street', 'a2p_unit', 'a2p_city', 'a2p_state', 'a2p_zip', 'a2p_address_check', 'a2p_email', 'trade', 'style', 'brand_color',
   'city', 'place_id', 'website'];
 const LONG = ['site_notes'];  // free text for whoever builds the site
-const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
+const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out', 'a2p_ein_recent'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
 // How many services and towns a client can pick depends on their plan (see _plans.js).
@@ -17,6 +17,8 @@ const LISTS = { vibes: 2, badges: 12 };
 const SESSION = /^cs_[A-Za-z0-9_]{10,200}$/;
 const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at', welcome_done: 'welcome_done_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
+// The carriers turn down a registration whose address is a P.O. box.
+const PO_BOX = /\b(p\.?\s*o\.?\s*b(ox)?\.?|post\s+office\s+box|pob)\s*#?\s*\d+/i;
 const BUCKET = 'client-photos';
 const MAX_PHOTOS = 60;           // per client
 const MAX_PHOTO_BYTES = 3000000;  // after the phone has shrunk it
@@ -29,6 +31,9 @@ function clean(input, tier) {
   }
   for (const key of LONG) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 1500);
   if (out.brand_color && !/^#[0-9a-f]{6}$/i.test(out.brand_color)) out.brand_color = '';
+  // The personal email is kept only when it looks like one, and a P.O. box is never kept as the registration address.
+  if (out.a2p_email && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(out.a2p_email)) delete out.a2p_email;
+  if (PO_BOX.test(out.a2p_address || '') || PO_BOX.test(out.a2p_street || '')) for (const k of Object.keys(out)) if (/^a2p_(address|street|unit|city|state|zip)/.test(k)) delete out[k];
   for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
   for (const [key, max] of Object.entries({ ...limitsFor(tier), ...LISTS })) {
     if (Array.isArray(input[key])) {
@@ -161,6 +166,7 @@ module.exports = async function handler(req, res) {
       if (!body || !CODE.test(String(body.code || ''))) return res.status(404).json({ error: 'not_found' });
       const row = await find(body.code);
       if (!row) return res.status(404).json({ error: 'not_found' });
+      const code = row.code;
       const now = new Date().toISOString();
       const patch = { updated_at: now };
       const changes = clean(body.answers, row.tier);

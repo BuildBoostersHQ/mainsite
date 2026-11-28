@@ -237,6 +237,26 @@
       if (none) einStatus.hidden = true;
     }
     type.addEventListener('change', einMode); einMode();
+
+    /* Registration address: picked from Google's list, so it is a real street address and not a P.O. box. */
+    var addr = $('ob-a2p_address');
+    if (answers.a2p_address) addr.value = answers.a2p_address;
+    function addrLabel() { $('ob-a2p-address-label').textContent = /no EIN/i.test(type.value) ? 'Your street address' : 'Street address on your IRS letter'; }
+    type.addEventListener('change', addrLabel); addrLabel();
+    if (window.BBAddress) {
+      var picker = window.BBAddress(addr, {
+        list: $('ob-a2p-address-list'), note: $('ob-a2p-address-note'),
+        onPick: function (a) {
+          save('a2p_address', a.formatted); save('a2p_street', a.street || ''); save('a2p_city', a.city || '');
+          save('a2p_state', a.state || ''); save('a2p_zip', a.zip || ''); save('a2p_address_check', a.check || '', true);
+        },
+        onClear: function () { save('a2p_address', ''); save('a2p_address_check', ''); }
+      });
+      if (answers.a2p_address) picker.markPicked();
+      $('ob-a2p-address-typed').addEventListener('click', function () {
+        if (!picker.acceptTyped()) { var n = $('ob-a2p-address-note'); n.hidden = false; n.textContent = 'Please type the full street address first, starting with the number.'; }
+      });
+    }
     if (d.ein_on_file) { einStatus.textContent = 'Your EIN is on file. Type it again only if it has changed.'; einStatus.hidden = /no EIN/i.test(type.value); }
     ein.addEventListener('input', function () {
       var digits = ein.value.replace(/\D/g, '').slice(0, 9);
