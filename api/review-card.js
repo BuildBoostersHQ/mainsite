@@ -1,84 +1,129 @@
-// /api/review-card — generates a printable PDF of QR code review cards for a client.
+// /api/review-card — the printable QR code review cards a client hands to customers.
 //
-// GET /api/review-card?code=...  (internal, BB_INTERNAL_SECRET)
+// GET /api/review-card?code=...              → { ok, business, review_url, style, html }
+// GET /api/review-card?code=...&format=html  → the printable page itself
+// Add &link=https://... to point the code at a link of your choosing for this print run.
+// Internal only (BB_INTERNAL_SECRET).
 //
-// Each card has:
-//   - Front: the client's business name, "We'd love your feedback", and a QR code linking
-//     to their /review-us page (or their Google review link directly)
-//   - Back: the Build Boosters house mark and "powered by Build Boosters"
+// Two US Letter pages, 8 cards each (2 across, 4 down), every card 3.5 x 2 inches:
+//   Page 1, fronts: the business name, a one-line ask, and a QR code to their review link
+//   Page 2, backs:  the business name (or their logo), phone and website on their main color
+// Print double-sided, flipping on the long edge, then cut on the dashed lines. Open the page in
+// Chrome and print to PDF with margins set to "None" and background graphics on.
 //
-// Returns a PDF with 8 cards per page (2 columns, 4 rows), sized for standard business card
-// stock (3.5 x 2 inches per card on a US Letter sheet).
+// The QR code is drawn here by ./_qr.js, so the page needs no internet to print and the code is
+// sharp at any size. It is always printed near-black on white, whatever the brand color, because
+// that is what scans reliably off a card in a truck.
 //
-// The QR code is generated as an SVG using a minimal inline implementation, no external library.
-// The PDF is built with Playwright's page.pdf() from an HTML template.
+// Where the code points, first one found:
+//   1. ?link= on the request
+//   2. the client's Google review link (google_review_link in their answers)
+//   3. the /review-us page on their own domain
+// With none of these the endpoint says so and prints nothing. A card never points anywhere else.
 const { sb, allowed, configured } = require('./_sb');
+const { qrSvg } = require('./_qr');
 const CODE = /^[a-f0-9]{16,64}$/i;
 
-// Minimal QR code as a data URL using the Google Charts API pattern
-// Since we can't reach external URLs from Vercel, we use an inline SVG QR generator
-function qrSvg(text, size) {
-  // Use a simple encoding: the review link is short enough that a basic URL works
-  // In production this would use a real QR library. For now, return a placeholder
-  // that the PDF renderer can fill with a real QR from a JS library on the page.
-  return `<div class="qr" data-url="${text.replace(/"/g, '&quot;')}" style="width:${size}px;height:${size}px"></div>`;
+// The six site looks, mirrored from the client template's src/lib/styles.js.
+const LOOKS = {
+  classic: { main: '#0b2440', accent: '#f2a20c', head: '"Plus Jakarta Sans"', fonts: 'Plus+Jakarta+Sans:wght@500;800', weight: 800 },
+  fresh:   { main: '#1C77C3', accent: '#F39237', head: 'Archivo', fonts: 'Archivo:wght@500;900', weight: 900 },
+  bold:    { main: '#16191d', accent: '#ff6a13', head: 'Anton', fonts: 'Anton&family=Archivo:wght@500', weight: 400, upper: true },
+  freeze:  { main: '#1E293B', accent: '#4A7CBA', head: '"Playfair Display"', fonts: 'Playfair+Display:wght@500&family=DM+Sans:wght@500', weight: 500 },
+  edge:    { main: '#18181B', accent: '#22C55E', head: 'Sora', fonts: 'Sora:wght@500;700', weight: 700 },
+  earthy:  { main: '#2D5F4A', accent: '#C45D3E', head: 'Fraunces', fonts: 'Fraunces:wght@500;800', weight: 800 },
+};
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function cardHtml(business, reviewUrl, style) {
-  const accent = style === 'fresh' ? '#1a6b4a' : style === 'bold' ? '#1a1a1a' : style === 'freeze' ? '#1b3a5c' : style === 'edge' ? '#2d2d2d' : style === 'earthy' ? '#3e2f1c' : '#0b2440';
+function prettyPhone(p) {
+  const d = String(p || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+  return d.length === 10 ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : '';
+}
 
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-@page { size: letter; margin: 0.5in 0.75in; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-.sheet { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-.card { width: 3.5in; height: 2in; border: 0.5pt dashed #ccc; display: flex; align-items: center; justify-content: center; padding: 0.15in; break-inside: avoid; }
-.card-inner { text-align: center; width: 100%; }
-.card h2 { font-size: 11pt; font-weight: 800; color: ${accent}; margin-bottom: 4pt; line-height: 1.2; }
-.card p { font-size: 7.5pt; color: #5b6878; margin-bottom: 6pt; }
-.card .qr { margin: 0 auto; }
-.card .qr canvas { display: block; margin: 0 auto; }
-.card .scan { font-size: 6.5pt; color: #999; margin-top: 4pt; }
-.back { background: ${accent}; color: white; }
-.back-inner { text-align: center; }
-.back svg { width: 24pt; height: 24pt; margin-bottom: 4pt; }
-.back .bb { font-size: 7pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-</head>
-<body>
-<div class="sheet">
-${Array(8).fill(`
-<div class="card">
-  <div class="card-inner">
-    <h2>${business}</h2>
-    <p>We'd love your feedback.</p>
-    <div class="qr" id=""></div>
-    <p class="scan">Scan to leave a Google review</p>
+// Only a plain https link goes on a card.
+function cleanLink(u) {
+  const s = String(u || '').trim();
+  return /^https:\/\/[^\s"'<>]+$/i.test(s) ? s : '';
+}
+
+function cleanDomain(d) {
+  const s = String(d || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  return /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s) ? s : '';
+}
+
+function reviewUrlFor(row, override) {
+  const a = { ...(row.prefill || {}), ...(row.answers || {}) };
+  const domain = cleanDomain(row.site_domain || a.domain_own || a.domain_choice);
+  return cleanLink(override) || cleanLink(a.google_review_link) || (domain ? `https://${domain}/review-us` : '');
+}
+
+function cardHtml({ business, reviewUrl, style, brandColor, phone, domain, logo }) {
+  const look = LOOKS[style] || LOOKS.classic;
+  const main = /^#[0-9a-f]{6}$/i.test(String(brandColor || '')) ? brandColor : look.main;
+  const name = esc(business);
+  // A long name steps down in size so it never crowds the code.
+  const frontSize = business.length > 28 ? 12 : business.length > 18 ? 14 : 17;
+  const backSize = business.length > 28 ? 15 : business.length > 18 ? 18 : 22;
+  const qr = qrSvg(reviewUrl, { dark: '#111111', light: '#ffffff', quiet: 2 });
+  const contact = [prettyPhone(phone), domain].filter(Boolean).map(esc).join(' &nbsp;·&nbsp; ');
+
+  const front = `
+<div class="card front">
+  <div class="words">
+    <h2>${name}</h2>
+    <p class="ask">Happy with the work? A quick Google review helps our small business more than you know.</p>
+    <p class="how">Point your phone's camera at the code and tap the link.</p>
   </div>
-</div>
-`).join('')}
-</div>
-<div class="sheet" style="break-before: page">
-${Array(8).fill(`
+  <div class="code">${qr}</div>
+</div>`;
+
+  const back = `
 <div class="card back">
   <div class="back-inner">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
-    <div class="bb">powered by Build Boosters</div>
+    ${logo ? `<img src="${esc(logo)}" alt="${name}">` : `<div class="name">${name}</div>`}
+    ${contact ? `<div class="contact">${contact}</div>` : ''}
+    <div class="thanks">Thank you for your business.</div>
   </div>
+</div>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${name} review cards</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${look.fonts}&display=swap">
+<style>
+@page { size: letter; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 8.5in; }
+body { font-family: ${look.head}, "Helvetica Neue", Helvetica, Arial, sans-serif; color: #141b24; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.sheet { width: 8.5in; height: 11in; padding: 1.5in 0.75in; display: grid; grid-template-columns: 3.5in 3.5in; grid-template-rows: repeat(4, 2in); break-after: page; }
+.sheet:last-child { break-after: auto; }
+.card { width: 3.5in; height: 2in; outline: 0.5pt dashed #c9cfd8; outline-offset: -0.25pt; overflow: hidden; }
+.front { display: flex; align-items: center; gap: 0.14in; padding: 0.2in 0.2in 0.2in 0.26in; border-left: 0.09in solid ${main}; background: #fff; }
+.words { flex: 1; min-width: 0; }
+.front h2 { font-size: ${frontSize}pt; line-height: 1.12; font-weight: ${look.weight}; color: ${main}; ${look.upper ? 'text-transform: uppercase; letter-spacing: 0.01em;' : 'letter-spacing: -0.01em;'} margin-bottom: 0.09in; overflow-wrap: break-word; }
+.ask { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 8.4pt; line-height: 1.38; color: #2a3340; margin-bottom: 0.08in; }
+.how { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 6.8pt; line-height: 1.35; color: #6b7684; }
+.code { flex: none; width: 1.32in; height: 1.32in; }
+.code svg { display: block; width: 100%; height: 100%; }
+.back { background: ${main}; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0.2in; outline-color: rgba(255,255,255,.35); }
+.back img { max-width: 2.4in; max-height: 0.95in; display: block; margin: 0 auto 0.1in; }
+.back .name { font-size: ${backSize}pt; line-height: 1.1; font-weight: ${look.weight}; ${look.upper ? 'text-transform: uppercase; letter-spacing: 0.01em;' : 'letter-spacing: -0.01em;'} margin-bottom: 0.1in; overflow-wrap: break-word; }
+.back .contact { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 8.6pt; font-weight: 600; margin-bottom: 0.07in; }
+.back .thanks { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 7.4pt; opacity: 0.8; }
+.back-inner::before { content: ""; display: block; width: 0.42in; height: 0.035in; background: ${look.accent}; margin: 0 auto 0.11in; }
+@media screen { body { background: #e9edf2; } .sheet { background: #fff; margin: 0.25in auto; box-shadow: 0 6px 30px rgba(0,0,0,.12); } }
+</style>
+</head>
+<body>
+<div class="sheet">${front.repeat(8)}
 </div>
-`).join('')}
+<div class="sheet">${back.repeat(8)}
 </div>
-<script>
-document.querySelectorAll('.qr').forEach(function(el, i) {
-  el.id = 'qr-' + i;
-  new QRCode(el, { text: '${reviewUrl}', width: 80, height: 80, colorDark: '${accent}', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-});
-<\/script>
 </body>
 </html>`;
 }
@@ -97,30 +142,46 @@ module.exports = async function handler(req, res) {
     if (!rows.length) return res.status(404).json({ error: 'not_found' });
     const row = rows[0];
     const a = { ...(row.prefill || {}), ...(row.answers || {}) };
-    const business = a.business_name || row.owner_first_name || 'Your Business';
-    const style = a.style || 'classic';
+    const business = String(a.business_name || '').trim();
+    if (!business) return res.status(409).json({ error: 'no_business_name', reason: 'This client has no business name on file yet.' });
+    const style = LOOKS[a.style] ? a.style : 'classic';
+    const domain = cleanDomain(row.site_domain || a.domain_own || a.domain_choice);
 
-    // The review URL: prefer the client's own /review-us page, fall back to their Google review link
-    const domain = a.domain_choice || a.domain_own || '';
-    const reviewLink = domain ? `https://${domain}/review-us` : (row.review_link || `https://buildboosters.com/start/${code}`);
+    const reviewUrl = reviewUrlFor(row, req.query.link);
+    if (!reviewUrl) {
+      return res.status(409).json({
+        error: 'no_review_link',
+        reason: 'This client has no Google review link and no domain yet, so there is nothing for the code to point at. Add google_review_link to their answers, or pass ?link=.',
+      });
+    }
 
-    const html = cardHtml(business, reviewLink, style);
+    let html;
+    try {
+      html = cardHtml({
+        business, reviewUrl, style, domain,
+        brandColor: a.brand_color,
+        phone: row.ghl_phone_number || a.business_phone,
+        logo: cleanLink(a.logo_url),
+      });
+    } catch (e) {
+      if (e.message === 'qr_text_too_long') {
+        return res.status(409).json({ error: 'link_too_long', reason: 'The review link is over 106 characters, which is too long to scan well off a card. Use a shorter link.' });
+      }
+      throw e;
+    }
 
-    // Return the HTML for now. In production with Playwright available, this would render to PDF.
-    // The caller can open this HTML in a browser and print to PDF.
     if (req.query.format === 'html') {
-      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.status(200).send(html);
     }
 
-    // Return the card data and HTML as JSON so the caller can render it
     return res.status(200).json({
       ok: true,
       business,
-      review_url: reviewLink,
+      review_url: reviewUrl,
       style,
-      card_count: 8,
-      note: 'Use ?format=html to get the printable page. Open it in Chrome and print to PDF, or use Ctrl+P.',
+      cards_per_sheet: 8,
+      note: 'Add &format=html for the printable page. Print from Chrome to PDF with margins "None" and background graphics on, double-sided, flipping on the long edge.',
       html,
     });
   } catch (e) {
@@ -128,3 +189,6 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'server_error', reason: e.hint || 'unknown' });
   }
 };
+
+module.exports.cardHtml = cardHtml;
+module.exports.reviewUrlFor = reviewUrlFor;

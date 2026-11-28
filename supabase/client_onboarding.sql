@@ -171,6 +171,16 @@ create table if not exists public.job_events (
 );
 alter table public.job_events enable row level security;
 
+-- Added for /api/send-asks: a job that is closed out without an ask (a quote, a repeat customer, no phone)
+-- is marked here so it is not looked at again every hour.
+alter table public.job_events
+  add column if not exists ask_skipped_at timestamptz,
+  add column if not exists ask_note text;
+
+-- Added for /api/photo-reminders: when this client was last asked for photos.
+alter table public.client_onboarding
+  add column if not exists last_photo_ask_at timestamptz;
+
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()
 --   where ein_private is not null and ein_provided_at < now() - interval '60 days';

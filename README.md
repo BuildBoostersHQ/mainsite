@@ -44,6 +44,18 @@ Photos a client adds on the page are shrunk on their phone, then saved to the pr
 
 The EIN a client enters is saved in its own column (`ein_private`), is never sent back to the page, and is deleted by the database as soon as you fill in `a2p_registered_at` on their row. Filling in `a2p_registered_at` also switches the client's website from the thin compliance site to the full one: the database calls the Vercel deploy hook saved in `site_deploy_hook`, and the site's build asks `/api/onboarding?view=site&code=...` whether the registration is approved. The date gets filled in on its own: `tools/a2p-gmail-script.gs` runs in the Gmail inbox that receives HighLevel's A2P emails and posts them to `/api/a2p-inbox` twice a day, which reads the status, saves it to `a2p_events` and fills in the date on a campaign approval. `/api/launch` lists every client's stage for the dashboard. Both need `BB_INTERNAL_SECRET` in Vercel. Both onboarding pages set `tracking: false`, so no analytics, pixel or session recording runs on them.
 
+## After a job is finished
+
+`/api/jobber-webhook`, `/api/hcp-webhook` and `/api/job-done` write each finished job to `job_events`. `/api/send-asks` runs every hour and, from 10 AM up to 5 PM Eastern, hands each due job to the client's HighLevel sub-account by putting the tag `job-done` on the customer. That tag is what starts the client's own review request and "Photo Request After Job" workflows, so the texts come from the contractor's number. A job waits while the client's texting registration is pending, and a customer who was handed over in the last 30 days is skipped. `POST /api/send-asks` with `{ "dry_run": true }` shows what it would do.
+
+`/api/photo-reminders` runs once a day and texts each client who is due for the recurring photo ask (weekly for the first month, then monthly) from the Build Boosters line. `POST` with no body lists who is due and sends nothing.
+
+Both need the two new columns blocks at the end of the `job_events` section in `supabase/client_onboarding.sql` run once in the Supabase SQL editor.
+
+## Review cards
+
+`/api/review-card?code=...&format=html` is the printable sheet of QR code review cards: 8 fronts on page 1, 8 backs on page 2, each 3.5 x 2 inches. Print from Chrome to PDF with margins "None" and background graphics on, double-sided on the long edge. The QR code is drawn by `api/_qr.js` with no outside script. It points at the client's `google_review_link` when their answers have one, otherwise at `/review-us` on their domain, and `&link=` overrides both for one print run.
+
 ## Preview locally
 
 ```

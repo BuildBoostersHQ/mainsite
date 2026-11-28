@@ -7,7 +7,8 @@
 // Header: x-jobber-secret must match JOBBER_WEBHOOK_SECRET in Vercel.
 //
 // Events stored in the job_events table. Review asks queue at completed_at + 3h,
-// photo asks at completed_at + 6h. Nothing sends a text from here; the review-queue
+// photo asks at completed_at + 6h. Nothing sends a text from here; /api/send-asks hands each
+// finished job to the client's sub-account when it comes due, and the review-queue
 // endpoint serves the queue to whatever sends them.
 const { sb, configured } = require('./_sb');
 const { sendAlert } = require('./alert');
