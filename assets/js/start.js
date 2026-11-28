@@ -221,6 +221,23 @@
     }
     type.addEventListener('change', einMode); einMode();
 
+    /* Date of birth: saved once it is a full, real date, and never sent back to this page. */
+    var dob = $('ob-a2p_dob'), dobStatus = $('ob-dob-status');
+    if (d.dob_on_file) { dobStatus.textContent = 'Your date of birth is on file. Type it again only if it was wrong.'; dobStatus.hidden = false; }
+    dob.addEventListener('input', function () {
+      var n = dob.value.replace(/\D/g, '').slice(0, 8);
+      dob.value = n.length > 4 ? n.slice(0, 2) + '/' + n.slice(2, 4) + '/' + n.slice(4) : n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n;
+    });
+    dob.addEventListener('change', function () {
+      if (!dob.value) return;
+      dobStatus.hidden = false;
+      var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dob.value), when = m ? new Date(Date.UTC(+m[3], +m[1] - 1, +m[2])) : null;
+      var age = when ? (Date.now() - when.getTime()) / (365.25 * 24 * 3600 * 1000) : 0;
+      if (!when || when.getUTCMonth() !== +m[1] - 1 || age < 18 || age > 100) { dobStatus.textContent = 'Please type it as month, day and year, like 03/02/1985.'; return; }
+      save('a2p_dob', m[3] + '-' + m[1] + '-' + m[2], true); dob.value = '';
+      dobStatus.textContent = 'Your date of birth is saved and kept private.';
+    });
+
     /* Registration address: picked from Google's list, so it is a real street address and not a P.O. box. */
     var addr = $('ob-a2p_address');
     if (answers.a2p_address) addr.value = answers.a2p_address;

@@ -57,11 +57,16 @@ sitemap: false
 <section class="ob-sec" id="ob-a2p">
 <div class="ob-eyebrow ob-eyebrow-dark">Start here</div>
 <h2>For your texting number</h2>
-<p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN is kept private, it is used only for that registration, and I delete it as soon as your number is approved.</p>
+<p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN and date of birth are kept private, they are used only for that registration, and I delete them as soon as your number is approved.</p>
 <div class="ob-grid">
 <div class="ob-full ob-narrow"><label for="ob-a2p_legal_name">Legal business name <span class="ob-hint">(exactly as it appears on your IRS letter)</span></label><input id="ob-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
 <div><label for="ob-a2p_entity_type">Business type</label><select id="ob-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor</option><option>Sole proprietor with no EIN</option></select></div>
 <div id="ob-ein-wrap"><label for="ob-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="ob-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
+<div><label for="ob-a2p_first_name">Your legal first name</label><input id="ob-a2p_first_name" data-key="a2p_first_name" type="text" autocomplete="given-name"></div>
+<div><label for="ob-a2p_last_name">Your legal last name</label><input id="ob-a2p_last_name" data-key="a2p_last_name" type="text" autocomplete="family-name"></div>
+<div><label for="ob-a2p_dob">Date of birth <span class="ob-hint">(month, day, year)</span></label><input id="ob-a2p_dob" type="text" inputmode="numeric" autocomplete="bday" maxlength="10" placeholder="MM/DD/YYYY">
+<p class="ob-note" id="ob-dob-status" role="status" hidden></p></div>
+<div><label for="ob-a2p_email">Personal email <span class="ob-hint">(Gmail, Yahoo, Outlook or iCloud, because the carriers email a code to it)</span></label><input id="ob-a2p_email" data-key="a2p_email" type="email" inputmode="email" autocomplete="email"></div>
 <div class="ob-full ob-narrow ob-addr"><label for="ob-a2p_address"><span id="ob-a2p-address-label">Street address on your IRS letter</span> <span class="ob-hint">(pick it from the list as you type)</span></label><input id="ob-a2p_address" type="text" placeholder="Start typing your street address">
 <div class="ob-addr-list" id="ob-a2p-address-list" hidden></div>
 <p class="ob-note" id="ob-a2p-address-note" role="status" hidden></p>

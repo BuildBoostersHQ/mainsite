@@ -78,7 +78,11 @@ module.exports = async function handler(req, res) {
       if (!saved.length) { out.push({ id: gmailId, result: 'already_seen' }); continue; }
       if (client && trusted && got.status !== 'unknown') {
         const patch = { a2p_status: `${got.type === 'unknown' ? 'registration' : got.type}_${got.status}`, a2p_status_at: new Date().toISOString(), a2p_reason: got.status === 'rejected' ? got.reason : '' };
-        if (flips && !client.a2p_registered_at) { patch.a2p_registered_at = new Date().toISOString(); client.a2p_registered_at = patch.a2p_registered_at; }
+        if (flips && !client.a2p_registered_at) {
+          patch.a2p_registered_at = new Date().toISOString(); client.a2p_registered_at = patch.a2p_registered_at;
+          // The database deletes the EIN at this point. The date of birth goes with it.
+          if (client.answers && client.answers.a2p_dob) { const kept = { ...client.answers }; delete kept.a2p_dob; patch.answers = kept; client.answers = kept; }
+        }
         await sb(`client_onboarding?id=eq.${client.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
       }
       out.push({ id: gmailId, result: flips ? 'approved_site_going_full' : needsLook ? 'needs_look' : 'saved', type: got.type, status: got.status, matched: !!client });

@@ -114,6 +114,10 @@ body {
 .reg-later { margin-top: 22px; font-size: 14px; line-height: 1.6; color: #93b4d4; text-align: center; }
 .reg-later button { font: inherit; color: #93b4d4; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
 .reg-sign { margin-top: 28px; font-size: 15px; color: #c8ddf0; }
+.reg-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.reg-about { margin: 4px 0 20px; }
+.reg-check { display: flex !important; gap: 10px; align-items: flex-start; margin: 12px 0 0 !important; font-weight: 400 !important; color: #c8ddf0 !important; }
+.reg-check input { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; padding: 0; accent-color: #f2a20c; }
 [hidden] { display: none !important; }
 </style>
 
@@ -135,11 +139,11 @@ body {
       <button type="button" id="wl-yes" aria-pressed="false">Yes, I have one</button>
       <button type="button" id="wl-no" aria-pressed="false">No, I do not</button>
     </div>
-    <p class="reg-hint" id="wl-no-note" hidden>No EIN is fine. I will register you under your own name, and the carriers will text a code to your cell that I will ask you for.</p>
+    <p class="reg-hint" id="wl-no-note" hidden>No EIN is fine. I will register you under your own name, and the carriers will send you a code that I will ask you for.</p>
 
     <form class="reg-fields" id="wl-form" hidden novalidate>
-      <div class="reg-field">
-        <label for="wl-legal"><span id="wl-legal-label">Legal business name</span> <span class="h" id="wl-legal-hint">(exactly as it appears on your IRS letter)</span></label>
+      <div class="reg-field" id="wl-legal-wrap">
+        <label for="wl-legal">Legal business name <span class="h">(exactly as it appears on your IRS letter)</span></label>
         <input id="wl-legal" type="text" autocomplete="off">
       </div>
       <div class="reg-field" id="wl-type-wrap">
@@ -149,6 +153,32 @@ body {
       <div class="reg-field" id="wl-ein-wrap">
         <label for="wl-ein">EIN <span class="h">(9 digits)</span></label>
         <input id="wl-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789">
+        <label class="reg-check"><input id="wl-ein-recent" type="checkbox"> <span>I got this EIN within the last two months.</span></label>
+      </div>
+      <p class="reg-hint reg-about">The carriers also ask who is filing, so these next few are about you as the owner.</p>
+      <div class="reg-two">
+        <div class="reg-field">
+          <label for="wl-first">Legal first name</label>
+          <input id="wl-first" type="text" autocomplete="given-name">
+        </div>
+        <div class="reg-field">
+          <label for="wl-last">Legal last name</label>
+          <input id="wl-last" type="text" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="reg-field">
+        <label for="wl-dob">Date of birth <span class="h">(month, day, year)</span></label>
+        <input id="wl-dob" type="text" inputmode="numeric" autocomplete="bday" maxlength="10" placeholder="MM/DD/YYYY">
+      </div>
+      <div class="reg-field">
+        <label for="wl-cell">Your cell</label>
+        <input id="wl-cell" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(305) 555-0199">
+        <p class="reg-hint">This has to be a real cell phone, because the carriers text a code to it and a Google Voice number will not receive it.</p>
+      </div>
+      <div class="reg-field">
+        <label for="wl-email">Personal email</label>
+        <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com">
+        <p class="reg-hint">The carriers email a code here too, and they only accept a personal address such as Gmail, Yahoo, Outlook or iCloud.</p>
       </div>
       <div class="reg-field">
         <label for="wl-address"><span id="wl-address-label">Street address on your IRS letter</span></label>
@@ -161,7 +191,7 @@ body {
         <label for="wl-unit">Suite or unit <span class="h">(if you have one)</span></label>
         <input id="wl-unit" type="text" autocomplete="off">
       </div>
-      <p class="reg-private">Your details are kept private and used only for this registration. I delete your EIN as soon as your number is approved.</p>
+      <p class="reg-private">Your details are kept private and used only for this registration. I delete your EIN and your date of birth as soon as your number is approved.</p>
       <button class="reg-btn" type="submit" id="wl-send">Send my texting details</button>
       <p class="reg-status" id="wl-status" role="alert" hidden></p>
     </form>

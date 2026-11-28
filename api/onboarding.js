@@ -7,9 +7,11 @@ const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
   'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color',
   // The registration address, picked from Google's list on /welcome or /start. a2p_address_check is what /api/address said about it.
-  'a2p_address', 'a2p_street', 'a2p_unit', 'a2p_city', 'a2p_state', 'a2p_zip', 'a2p_address_check'];
+  'a2p_address', 'a2p_street', 'a2p_unit', 'a2p_city', 'a2p_state', 'a2p_zip', 'a2p_address_check',
+  // The person the registration is filed under: legal first and last name, a personal email the carriers accept, and a date of birth.
+  'a2p_first_name', 'a2p_last_name', 'a2p_email', 'a2p_dob'];
 const LONG = ['site_notes'];  // free text for whoever builds the site
-const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
+const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out', 'a2p_ein_recent'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
 // 12 services and 10 towns is what the client site template builds pages for.
@@ -24,6 +26,15 @@ const BUCKET = 'client-photos';
 const MAX_PHOTOS = 60;           // per client
 const MAX_PHOTO_BYTES = 3000000;  // after the phone has shrunk it
 
+function validDob(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
+  if (!m) return false;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (d.getUTCMonth() !== +m[2] - 1 || d.getUTCDate() !== +m[3]) return false;
+  const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+  return age >= 18 && age <= 100;
+}
+
 function clean(input) {
   const out = {};
   if (!input || typeof input !== 'object' || Array.isArray(input)) return out;
@@ -32,6 +43,9 @@ function clean(input) {
   }
   for (const key of LONG) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 1500);
   if (out.brand_color && !/^#[0-9a-f]{6}$/i.test(out.brand_color)) out.brand_color = '';
+  // A date of birth is kept only as a real date for an adult, and an email only when it looks like one.
+  if ('a2p_dob' in out && !validDob(out.a2p_dob)) delete out.a2p_dob;
+  if (out.a2p_email && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(out.a2p_email)) delete out.a2p_email;
   if (PO_BOX.test(out.a2p_address || '') || PO_BOX.test(out.a2p_street || '')) for (const k of Object.keys(out)) if (/^a2p_(address|street|unit|city|state|zip)/.test(k)) delete out[k];
   for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
   for (const [key, max] of Object.entries(LISTS)) {
@@ -134,8 +148,10 @@ module.exports = async function handler(req, res) {
         // The $30 thank-you runs out 24 hours after the client's page was created.
         credit_deadline: row.created_at ? new Date(new Date(row.created_at).getTime() + 24 * 3600 * 1000).toISOString() : '',
         options: row.options || {},
+        // Like the EIN, the date of birth is never sent back to the page, only whether we have one.
+        dob_on_file: !!(row.answers || {}).a2p_dob,
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
-        answers: { ...(row.prefill || {}), ...(row.answers || {}) },
+        answers: { ...(row.prefill || {}), ...(row.answers || {}), a2p_dob: undefined },
       });
     }
     if (req.method === 'POST') {
@@ -247,3 +263,4 @@ module.exports = async function handler(req, res) {
   }
 };
 module.exports.clean = clean;
+module.exports.validDob = validDob;
