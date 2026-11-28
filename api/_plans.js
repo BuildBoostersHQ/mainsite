@@ -5,7 +5,8 @@
 //   all_in_one   $279 a month, up to 8 services and 10 towns
 //   dominance    $497 a month, up to 12 services and 14 towns
 // Every one of them includes texting, so every one of them needs a texting registration.
-// 'website' is the old $79 website-only plan and is the one plan with no texting.
+// 'website' is the old $79 website-only plan. It is asked for the same registration details as the
+// others, so a client on it can be moved to a texting plan without going back for them.
 //
 // Setup credit: $50 off when setup is finished on the same calendar day as the payment, $20 when it
 // is finished the next day. Days are Eastern time. A payment at 8 PM or later counts as the next day,
@@ -73,7 +74,19 @@ function creditFor(paidIso, doneIso) {
   return 0;
 }
 
-const noEinNeeded = (row, answers) => isWebsiteOnly(row.tier) || /no EIN/i.test((answers || {}).a2p_entity_type || '');
+// Every plan owes an EIN, the old website plan included. The one exception is a sole proprietor who has none.
+const noEin = (answers) => /no EIN/i.test((answers || {}).a2p_entity_type || '');
+const noEinNeeded = (row, answers) => noEin(answers);
+
+// A sole proprietor with no EIN registers under his own name, so he owes his full legal name and a real
+// street address in its place.
+const PO_BOX = /\b(p\.?\s*o\.?\s*box|post\s+office\s+box|pmb\s*#?\s*\d)/i;
+function soleDetailsDone(answers) {
+  const a = answers || {};
+  const name = String(a.a2p_legal_name || [a.a2p_first_name, a.a2p_last_name].filter(Boolean).join(' ')).trim();
+  const addr = String(a.a2p_address || '').trim();
+  return name.split(/\s+/).length >= 2 && /\d/.test(addr) && addr.length >= 8 && !PO_BOX.test(addr);
+}
 
 // When this client finished setup: the form, the Google step and the EIN are all in. Returns '' until then.
 function setupDoneAt(row, answers) {
@@ -87,4 +100,4 @@ function setupDoneAt(row, answers) {
   return new Date(Math.max(...times.map((t) => new Date(t).getTime()))).toISOString();
 }
 
-module.exports = { CREDITS, MOST, limitsFor, isWebsiteOnly, easternParts, creditDeadlines, creditFor, noEinNeeded, setupDoneAt };
+module.exports = { CREDITS, MOST, limitsFor, isWebsiteOnly, easternParts, creditDeadlines, creditFor, noEin, noEinNeeded, soleDetailsDone, setupDoneAt };

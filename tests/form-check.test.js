@@ -12,8 +12,15 @@ ok('eastern hour', easternHour(at(9)) === 9 && easternHour(at(20)) === 20);
 ok('unsubmitted client is on the form track only', openTracks({ tier: 'all_in_one' }, {}).join() === 'form');
 ok('form track closes after a basics build', openTracks({ site_final_basics_at: 'x' }, {}).length === 0);
 ok('submitted, nothing else: ein and gmb', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, {}).join() === 'ein,gmb');
-ok('website tier is never asked for an EIN', openTracks({ submitted_at: 'x', tier: 'website' }, {}).join() === 'gmb');
-ok('sole proprietor with no EIN is not asked', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, { a2p_entity_type: 'Sole proprietor with no EIN' }).join() === 'gmb');
+ok('the old website tier is asked for an EIN like every other plan', openTracks({ submitted_at: 'x', tier: 'website' }, {}).join() === 'ein,gmb');
+const SOLE = { a2p_entity_type: 'Sole proprietor with no EIN' };
+ok('sole proprietor with no EIN is reminded for his own details, not an EIN', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, SOLE).join() === 'sole,gmb');
+ok('his reminders stop once his legal name and street address are in', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, { ...SOLE, a2p_legal_name: 'Dave Smith', a2p_address: '12 Oak St, Tampa, FL 33602' }).join() === 'gmb');
+ok('first and last name count as the legal name', openTracks({ submitted_at: 'x' }, { ...SOLE, a2p_first_name: 'Dave', a2p_last_name: 'Smith', a2p_address: '12 Oak St, Tampa, FL 33602' }).join() === 'gmb');
+ok('a P.O. box does not count as his address', openTracks({ submitted_at: 'x' }, { ...SOLE, a2p_legal_name: 'Dave Smith', a2p_address: 'P.O. Box 1234, Tampa, FL' }).join() === 'sole,gmb');
+ok('he is not reminded once he is registered', openTracks({ submitted_at: 'x', a2p_registered_at: 'x' }, SOLE).join() === 'gmb');
+ok('the sole track has three texts', TEXTS.sole.length === 3 && TEXTS.sole.every((t) => /Automated Maddie|Real Maddie/.test(t('Dave', 'https://x'))));
+ok('his launch checklist asks for the details, not an EIN', (() => { const l = launchChecklist({ tier: 'all_in_one' }, SOLE); return l.some((x) => /Sole proprietor registration/.test(x)) && !l.some((x) => /^EIN/.test(x)); })());
 ok('all done: no tracks', openTracks({ submitted_at: 'x', tier: 'all_in_one', ein_provided_at: 'x', google_requested_at: 'x' }, {}).length === 0);
 
 let now = at(14);
@@ -35,7 +42,7 @@ const list = launchChecklist({ tier: 'all_in_one', photo_count: 1 }, { business_
 ok('checklist asks for services', list.some((x) => /services/.test(x)));
 ok('checklist asks for the EIN', list.some((x) => /^EIN/.test(x)));
 ok('checklist skips hours when Google had them', !list.some((x) => /hours/.test(x)));
-ok('website tier has no EIN or customer list', !launchChecklist({ tier: 'website' }, {}).some((x) => /EIN|Customer list/.test(x)));
+ok('the old website tier is asked for an EIN and has no customer list', (() => { const l = launchChecklist({ tier: 'website' }, {}); return l.some((x) => /^EIN/.test(x)) && !l.some((x) => /Customer list/.test(x)); })());
 
 const all = [...TEXTS.form, ...TEXTS.ein, ...TEXTS.gmb, TEXTS.basics, TEXTS.customerList].map((f) => f('Dave', 'https://buildboosters.com/start/abc'));
 ok('every text is signed Automated Maddie or is a last-one text', all.every((t) => /Automated Maddie|Last one from me/.test(t)));
