@@ -18,10 +18,10 @@ const TABLE = 'client_onboarding';
 // Fallback only, for a payment whose link has no tier tag: the plan worked out from the amount in cents.
 // A monthly amount includes the $297 setup fee charged on the first payment.
 const TIERS = {
-  // Plans from November 2026 (Essentials is the website plan)
-  44400:  { tier: 'website',         billing_cycle: 'monthly' },
-  42700:  { tier: 'website',         billing_cycle: 'quarterly' },
-  147000: { tier: 'website',         billing_cycle: 'annual' },
+  // Plans from November 2026. Essentials includes texting, so it is never saved as 'website'.
+  44400:  { tier: 'essentials',      billing_cycle: 'monthly' },
+  42700:  { tier: 'essentials',      billing_cycle: 'quarterly' },
+  147000: { tier: 'essentials',      billing_cycle: 'annual' },
   57600:  { tier: 'all_in_one',      billing_cycle: 'monthly' },
   82900:  { tier: 'all_in_one',      billing_cycle: 'quarterly' },
   279000: { tier: 'all_in_one',      billing_cycle: 'annual' },
@@ -37,6 +37,13 @@ const TIERS = {
   197000: { tier: 'all_in_one',      billing_cycle: 'annual' },
   997000: { tier: 'all_in_one_ads',  billing_cycle: 'annual' },
 };
+
+// The Essentials payment links in Stripe are tagged 'website', from before Essentials included texting.
+// Nothing is sold through Stripe as website-only, so that tag always means Essentials.
+function planTier(tag) {
+  const t = String(tag || '').trim().toLowerCase();
+  return t === 'website' ? 'essentials' : t;
+}
 
 function tierFromAmount(cents) {
   return TIERS[cents] || { tier: 'unknown', billing_cycle: 'monthly' };
@@ -153,7 +160,7 @@ module.exports = async function handler(req, res) {
     const amount = session.amount_total || 0;
 
     const { tier, billing_cycle } = meta.tier
-      ? { tier: meta.tier, billing_cycle: meta.billing_cycle || 'monthly' }
+      ? { tier: planTier(meta.tier), billing_cycle: meta.billing_cycle || 'monthly' }
       : tierFromAmount(amount);
 
     // Check for an existing row by email to avoid duplicates.
@@ -289,5 +296,6 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.tierFromAmount = tierFromAmount;
+module.exports.planTier = planTier;
 module.exports.verifySignature = verifySignature;
 module.exports.readRawBody = readRawBody;

@@ -34,11 +34,11 @@ Create `src/pages/my-page.html` with front matter and push. It's served at `/my-
 `/start/<code>` is the setup page a new client fills in. `/start` on its own shows a sample client and saves nothing.
 
 - `src/pages/start.html`, `assets/css/start.css`, `assets/js/start.js` are the page.
-- `src/pages/start-thank-you.html` and `assets/js/start-thanks.js` are the page they land on after finishing: what is left for the $30, the launch call with add-to-calendar buttons, and what happens next.
+- `src/pages/start-thank-you.html` and `assets/js/start-thanks.js` are the page they land on after finishing: what is left for the setup credit ($50 for finishing the day they pay, $20 for the next day), the launch call with add-to-calendar buttons, and what happens next.
 - `api/onboarding.js` is the only thing that talks to Supabase. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in Vercel.
 - `supabase/client_onboarding.sql` creates the table. Run it once in the Supabase SQL editor.
 
-Each client is one row. Put what you pulled from Google in `prefill`, the chips and domain choices to offer in `options`, and send them `buildboosters.com/start/<their code>`. Set `tier` to `website` to hide the texting registration section. Set `billing_cycle` to `quarterly`, `six_month` or `annual` to show the Google updates note. Set `launch_call_start` to get calendar buttons, and fill `google_approved_at` yourself once their Google access comes through.
+Each client is one row. Put what you pulled from Google in `prefill`, the chips and domain choices to offer in `options`, and send them `buildboosters.com/start/<their code>`. `tier` is `essentials`, `all_in_one` or `dominance`, and it sets how many services and towns the form allows (4 and 5, 8 and 10, 12 and 14). Every plan is asked for texting registration details. The old `website` tier is the one exception. Set `billing_cycle` to `quarterly`, `six_month` or `annual` to show the Google updates note. Set `launch_call_start` to get calendar buttons, and fill `google_approved_at` yourself once their Google access comes through.
 
 Photos a client adds on the page are shrunk on their phone, then saved to the private `client-photos` storage bucket in a folder named with their row id. `photo_count` on their row says how many have arrived.
 

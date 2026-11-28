@@ -87,7 +87,7 @@ function schema(name, fm, body) {
 function render(name, fm, body) {
   const urlPath = name === 'index' ? '/' : '/' + name;
   const layout = fm.layout || 'site';
-  const usesCheckout = /payment-link\//.test(body);
+  const usesCheckout = /buy\.stripe\.com\//.test(body) && !/^payment-links$/.test(name || '');
   let head = partial.head
     .replace(/{{title}}/g, esc(fm.title || 'Build Boosters'))
     .replace('{{description_tag}}', fm.description ? `<meta name="description" content="${esc(fm.description)}">\n` : '')

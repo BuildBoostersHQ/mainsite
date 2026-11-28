@@ -20,7 +20,7 @@
   ];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
-    first_name: 'Dave', billing_cycle: 'quarterly', ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
+    first_name: 'Dave', billing_cycle: 'quarterly', tier: 'all_in_one', limits: { services: 8, areas: 10 }, ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
     google_requested: false, text_link_requested: false, submitted: false, sms_consent: false,
     options: {
       services: ['Drain cleaning', 'Water heaters', 'Leak repair', 'Repiping', 'Toilets and faucets', 'Sewer lines', 'Garbage disposals', 'Emergency calls'],
@@ -145,6 +145,22 @@
       el.addEventListener('blur', function () { clearTimeout(timer); flush(); });
     });
 
+    /* How many services and towns this client's plan holds. */
+    var limits = d.limits || {};
+    ['services', 'areas'].forEach(function (key) {
+      if (!limits[key]) return;
+      root.querySelectorAll('[data-limit-for="' + key + '"]').forEach(function (el) { el.textContent = String(limits[key]); });
+      var box = root.querySelector('[data-chips="' + key + '"]');
+      if (box) box.setAttribute('data-limit', String(limits[key]));
+    });
+
+    /* The setup credit: $50 today, $20 tomorrow, nothing shown once both have passed. */
+    var credit = window.bbCredit ? window.bbCredit(d) : null;
+    if (!demo) {
+      if (credit) { $('ob-credit-title').textContent = credit.title; $('ob-credit-text').textContent = credit.text; }
+      else $('ob-credit').hidden = true;
+    }
+
     root.querySelectorAll('[data-chips]').forEach(function (box) {
       var key = box.getAttribute('data-chips');
       var list = key === 'vibes' ? VIBES : key === 'badges' ? BADGES : (Array.isArray(opts[key]) ? opts[key] : []);
@@ -217,6 +233,7 @@
     function einMode() {
       var none = /no EIN/i.test(type.value);
       $('ob-ein-wrap').hidden = none; $('ob-ein-none').hidden = !none;
+      $('ob-sole-note').hidden = !/^sole proprietor$/i.test(type.value);
       if (none) einStatus.hidden = true;
     }
     type.addEventListener('change', einMode); einMode();
@@ -234,6 +251,18 @@
       einStatus.textContent = 'Saving.';
       api('POST', { ein: digits }).then(function () { ein.value = ''; einStatus.textContent = 'Your EIN is saved and kept private. Type it again only if it has changed.'; })
         .catch(function () { einStatus.textContent = 'That did not save. Please try again.'; });
+    });
+
+    /* Date of birth: saved on its own like the EIN, kept private, and never sent back to this page. */
+    var bday = $('ob-birthday'), bdayStatus = $('ob-birthday-status');
+    if (d.birthday_on_file) { bdayStatus.textContent = 'Your date of birth is on file. Enter it again only if it was wrong.'; bdayStatus.hidden = false; }
+    bday.addEventListener('change', function () {
+      if (!bday.value) return;
+      bdayStatus.hidden = false;
+      if (demo) { bdayStatus.textContent = 'Sample page, nothing is saved.'; return; }
+      bdayStatus.textContent = 'Saving.';
+      api('POST', { birthday: bday.value }).then(function () { bday.value = ''; bdayStatus.textContent = 'Your date of birth is saved and kept private.'; })
+        .catch(function () { bdayStatus.textContent = 'That date did not save. Please check it and try again.'; });
     });
 
     var gDone = function () { $('ob-gsteps').hidden = true; $('ob-ghelp').hidden = true; $('ob-google-done').hidden = false; };
@@ -384,6 +413,8 @@
               if (biz.weekday_hours) data.answers.weekday_hours = biz.weekday_hours;
               if (biz.weekends) data.answers.weekends = biz.weekends;
               if (biz.city) data.answers.city = biz.city;
+              if (biz.place_id) data.answers.place_id = biz.place_id;
+              if (biz.website) data.answers.website = biz.website;
               /* Save the prefill to the server */
               if (!demo) api('POST', { answers: data.answers }).catch(function () {});
               findBox.hidden = true;

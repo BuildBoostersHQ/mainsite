@@ -5,20 +5,23 @@
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'a2p_first_name', 'a2p_last_name', 'a2p_address', 'trade', 'style', 'brand_color',
+  'city', 'place_id', 'website'];
 const LONG = ['site_notes'];  // free text for whoever builds the site
 const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
 const SMS_CONSENT = 'I agree to receive service texts from Build Boosters at the cell number I gave above, about my account, my website and my setup. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.';
-// 12 services and 10 towns is what the client site template builds pages for.
-const LISTS = { services: 12, areas: 10, vibes: 2, badges: 12 };
-const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at' };
+// How many services and towns a client can pick depends on their plan (see _plans.js).
+const { limitsFor, creditDeadlines, CREDITS } = require('./_plans');
+const LISTS = { vibes: 2, badges: 12 };
+const SESSION = /^cs_[A-Za-z0-9_]{10,200}$/;
+const ACTIONS = { request_google: 'google_requested_at', text_link: 'text_link_requested_at', submit: 'submitted_at', welcome_done: 'welcome_done_at' };
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
 const BUCKET = 'client-photos';
 const MAX_PHOTOS = 60;           // per client
 const MAX_PHOTO_BYTES = 3000000;  // after the phone has shrunk it
 
-function clean(input) {
+function clean(input, tier) {
   const out = {};
   if (!input || typeof input !== 'object' || Array.isArray(input)) return out;
   for (const key of TEXT) {
@@ -27,7 +30,7 @@ function clean(input) {
   for (const key of LONG) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 1500);
   if (out.brand_color && !/^#[0-9a-f]{6}$/i.test(out.brand_color)) out.brand_color = '';
   for (const key of FLAGS) if (typeof input[key] === 'boolean') out[key] = input[key];
-  for (const [key, max] of Object.entries(LISTS)) {
+  for (const [key, max] of Object.entries({ ...limitsFor(tier), ...LISTS })) {
     if (Array.isArray(input[key])) {
       out[key] = [...new Set(input[key].filter((v) => typeof v === 'string').map((v) => v.trim().slice(0, 80)).filter(Boolean))].slice(0, max);
     }
@@ -84,6 +87,23 @@ async function storePhoto(row, base64) {
   return name;
 }
 
+// A real date of birth for an adult, written as 1985-07-04.
+function validBirthday(value, nowIso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return false;
+  const date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (date.getUTCFullYear() !== +m[1] || date.getUTCMonth() !== +m[2] - 1 || date.getUTCDate() !== +m[3]) return false;
+  const age = (new Date(nowIso).getTime() - date.getTime()) / (365.25 * 24 * 3600 * 1000);
+  return age >= 18 && age <= 110;
+}
+
+function creditInfo(row) {
+  const deadlines = row.created_at ? creditDeadlines(row.created_at) : null;
+  const earned = row.setup_credit_amount || (row.credit_30_earned_at ? 30 : 0);
+  if (!deadlines) return { earned, amounts: CREDITS };
+  return { earned, amounts: CREDITS, same_day_until: new Date(deadlines.sameDay).toISOString(), next_day_until: new Date(deadlines.nextDay).toISOString() };
+}
+
 const find = async (code) => (await supabase(`${TABLE}?code=eq.${encodeURIComponent(code)}&select=*&limit=1`))[0] || null;
 
 module.exports = async function handler(req, res) {
@@ -93,6 +113,15 @@ module.exports = async function handler(req, res) {
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(baseUrl())) return res.status(500).json({ error: 'server_error', reason: 'wrong_project_url' });
   try {
     if (req.method === 'GET') {
+      // The page a buyer lands on after paying only knows their Stripe checkout id. Trade it for their code.
+      // The row is made by the Stripe webhook, which can land a few seconds after the buyer does.
+      const session = String((req.query && req.query.session) || '');
+      if (session) {
+        if (!SESSION.test(session)) return res.status(404).json({ error: 'not_found' });
+        const found = await supabase(`${TABLE}?stripe_session_id=eq.${encodeURIComponent(session)}&select=code&limit=1`);
+        if (!found.length) return res.status(404).json({ error: 'not_ready' });
+        return res.status(200).json({ code: found[0].code });
+      }
       const code = String((req.query && req.query.code) || '');
       if (!CODE.test(code)) return res.status(404).json({ error: 'not_found' });
       const row = await find(code);
@@ -115,8 +144,12 @@ module.exports = async function handler(req, res) {
         sms_consent: !!row.sms_consent_at,
         google_approved: !!row.google_approved_at,
         launch_call_start: row.launch_call_start || '',
-        // The $30 thank-you runs out 24 hours after the client's page was created.
-        credit_deadline: row.created_at ? new Date(new Date(row.created_at).getTime() + 24 * 3600 * 1000).toISOString() : '',
+        birthday_on_file: !!row.dob_private,
+        welcome_done: !!row.welcome_done_at,
+        // How many services and towns their plan holds.
+        limits: limitsFor(row.tier),
+        // The setup credit: $50 for finishing on the day they paid, $20 for the next day.
+        credit: creditInfo(row),
         options: row.options || {},
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
         answers: { ...(row.prefill || {}), ...(row.answers || {}) },
@@ -130,7 +163,7 @@ module.exports = async function handler(req, res) {
       if (!row) return res.status(404).json({ error: 'not_found' });
       const now = new Date().toISOString();
       const patch = { updated_at: now };
-      const changes = clean(body.answers);
+      const changes = clean(body.answers, row.tier);
       if (Object.keys(changes).length) patch.answers = { ...(row.answers || {}), ...changes };
       if (body.photo !== undefined) {
         if ((row.photo_count || 0) >= MAX_PHOTOS) return res.status(400).json({ error: 'photo_limit' });
@@ -143,6 +176,12 @@ module.exports = async function handler(req, res) {
         const ein = String(body.ein).replace(/\D/g, '');
         if (ein.length !== 9) return res.status(400).json({ error: 'ein_invalid' });
         patch.ein_private = ein; patch.ein_provided_at = now; patch.ein_deleted_at = null;
+      }
+      if (body.birthday !== undefined) {
+        // Asked for by the carriers on a texting registration. Kept beside the EIN and wiped with it.
+        const birthday = String(body.birthday).trim();
+        if (!validBirthday(birthday, now)) return res.status(400).json({ error: 'birthday_invalid' });
+        patch.dob_private = birthday;
       }
       const column = ACTIONS[body.action];
       if (body.action && !column) return res.status(400).json({ error: 'unknown_action' });
@@ -230,3 +269,5 @@ module.exports = async function handler(req, res) {
   }
 };
 module.exports.clean = clean;
+module.exports.validBirthday = validBirthday;
+module.exports.creditInfo = creditInfo;

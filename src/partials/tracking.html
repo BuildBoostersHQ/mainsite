@@ -11,7 +11,7 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','2336762067164370');fbq('track','PageView');
 (function(){
-var PLANS={'6af64c63906a8b62055d610d':['All-In-One Monthly',197],'6af8a48f21a48a3872d26115':['All-In-One Yearly',1970],'6af8a16121a48a3872d2610c':['90-Day Prepay',591]};
+var PLANS={'14AbJ19TSfwiaIacnS1wY07':['Essentials Monthly',147],'eVq8wP0jiese3fI9bG1wY05':['Essentials Quarterly',427],'bJe28r1nmgAm5nQew01wY06':['Essentials Yearly',1470],'fZu6oH3vufwi7vYafK1wY0a':['All In One Monthly',279],'8x25kD8PObg217A73y1wY09':['All In One Quarterly',829],'8x228r1nmck6g2u0Fa1wY08':['All In One Yearly',2790],'8x214ngigabY4jM5Zu1wY02':['Dominance Monthly',497],'28E8wP5DC6ZM03w9bG1wY03':['Dominance Quarterly',1425],'6oUbJ1fec97U3fI0Fa1wY04':['Dominance Yearly',4970]};
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){}}
 /* Lead: call-request forms, demo builder, demo "text me the link" */
 document.addEventListener('submit',function(e){var f=e.target;if(!f||f.tagName!=='FORM')return;
@@ -23,7 +23,7 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f||f.tagName!=
 /* InitiateCheckout: when a visitor actually heads to a checkout (not when the monthly upsell box opens) */
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';
  for(var id in PLANS){if(h.indexOf(id)>=0){
-  if(id==='6af64c63906a8b62055d610d'&&!a.closest('#bb-up'))return;
+  if(/^(14AbJ|fZu6o|8x214)/.test(id)&&!a.closest('#bb-up'))return;
   fbq('track','InitiateCheckout',{content_name:PLANS[id][0],value:PLANS[id][1],currency:'USD'});if(window.gtag)gtag('event','begin_checkout',{value:PLANS[id][1],currency:'USD',items:[{item_id:id,item_name:PLANS[id][0],price:PLANS[id][1]}]});ss('bbPlan',id);return;}}
 },true);
 /* Purchase: thank-you page after checkout */

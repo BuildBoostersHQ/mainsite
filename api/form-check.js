@@ -14,7 +14,9 @@
 //
 // Also, once per client:
 //   - with the first form text, Maddie gets the client's name and number so she can call
-//   - a form finished inside 24 hours (Google step included) is flagged for the $30 credit
+//   - setup finished (form, Google step and EIN) on the day of payment earns $50 off, the next day earns $20.
+//     On a monthly plan the credit goes onto the client's Stripe balance, so it comes off their next bill
+//     with nobody touching it. On a quarterly or yearly plan Maddie is told to add it by hand.
 //   - at 72 hours with no form, the site is built from the Google profile ("final with basics")
 //     and everything still missing goes on the launch call checklist
 //   - once the site is built, a text asking them to bring their customer list to the launch call
@@ -24,6 +26,7 @@
 const { sb, allowed, configured, isCron } = require('./_sb');
 const { sendAlert } = require('./alert');
 const { textClient, digits } = require('./_text');
+const { limitsFor, isWebsiteOnly, creditFor, setupDoneAt } = require('./_plans');
 
 const TABLE = 'client_onboarding';
 const HOUR = 3600000;
@@ -60,7 +63,7 @@ const TEXTS = {
   customerList: (n) => `Hey ${n}, Automated Maddie here. Your plan comes with one free text to all of your past customers to bring in repeat work. Bring your customer list to your launch call. A spreadsheet or an export from your invoicing app both work.`,
 };
 
-const isWebsiteTier = (r) => /^website/i.test(String(r.tier || '').trim());
+const isWebsiteTier = (r) => isWebsiteOnly(r.tier);
 
 // Which reminder tracks are still open for this client.
 function openTracks(r, a) {
@@ -70,6 +73,31 @@ function openTracks(r, a) {
   if (!noEinNeeded && !r.ein_provided_at && !r.ein_private && !r.a2p_registered_at) tracks.push('ein');
   if (!r.google_requested_at && !r.google_approved_at) tracks.push('gmb');
   return tracks;
+}
+
+// Puts the setup credit on the client's Stripe balance, which Stripe takes off their next invoice.
+// Only for monthly plans: a quarterly or yearly client has no bill coming for months, so that credit
+// goes on their HighLevel account by hand instead. The Idempotency-Key means a repeat never credits twice.
+async function applyCredit(r, dollars) {
+  if (!/^monthly$/i.test(String(r.billing_cycle || 'monthly').trim())) {
+    return { applied: false, note: `They pay ${r.billing_cycle}, so add it to their HighLevel account credit.` };
+  }
+  const key = String(process.env.STRIPE_SECRET_KEY || '').trim();
+  const customer = String(r.stripe_customer_id || '');
+  if (!key) return { applied: false, note: 'STRIPE_SECRET_KEY is not set in Vercel, so take it off their next bill in Stripe.' };
+  if (!/^cus_[A-Za-z0-9]+$/.test(customer)) return { applied: false, note: 'There is no Stripe customer on their record, so take it off their next bill in Stripe.' };
+  try {
+    const res = await fetch(`https://api.stripe.com/v1/customers/${customer}/balance_transactions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/x-www-form-urlencoded', 'Idempotency-Key': `setup-credit-${r.id}` },
+      body: new URLSearchParams({ amount: String(-dollars * 100), currency: 'usd', description: `Setup credit: $${dollars} for finishing setup ${dollars === 50 ? 'the same day' : 'the next day'}` }).toString(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.id) return { applied: true, id: data.id };
+    return { applied: false, note: `Stripe said no (${(data.error && data.error.message) || res.status}), so take it off their next bill in Stripe.` };
+  } catch (e) {
+    return { applied: false, note: `Stripe could not be reached (${e.message}), so take it off their next bill in Stripe.` };
+  }
 }
 
 // Is this track's next text due right now? `sent` is the list of times its earlier texts went out.
@@ -84,9 +112,10 @@ function due(track, sent, anchorIso, now) {
 // Everything the launch call has to cover because the form never came in (or came in with gaps).
 function launchChecklist(r, a) {
   const items = [];
+  const limits = limitsFor(r.tier);
   const has = (v) => (Array.isArray(v) ? v.length > 0 : !!String(v || '').trim());
-  if (!has(a.services) && !has(a.services_other)) items.push('Pick their services (up to 12)');
-  if (!has(a.areas) && !has(a.areas_other)) items.push('Pick the towns they work in (up to 10)');
+  if (!has(a.services) && !has(a.services_other)) items.push(`Pick their services (up to ${limits.services})`);
+  if (!has(a.areas) && !has(a.areas_other)) items.push(`Pick the towns they work in (up to ${limits.areas})`);
   if (!has(a.vibes) && !has(a.vibes_other)) items.push('How customers would describe them (brand voice for the copy)');
   if (!has(a.badges) && !has(a.license) && !has(a.years_in_business)) items.push('What sets them apart: license, years in business, badges');
   if (!has(a.style)) items.push('Choose one of the six site looks and a brand color');
@@ -116,15 +145,27 @@ async function check(r, now, origin, out) {
   const hour = easternHour(now);
   const daytime = hour >= 9 && hour < 19;
 
-  // The $30 credit: form and Google step both finished inside 24 hours of payment.
-  if (r.submitted_at && !r.credit_30_earned_at && r.created_at) {
-    const deadline = new Date(r.created_at).getTime() + 24 * HOUR;
-    const googleAt = r.google_requested_at || r.google_approved_at;
-    if (new Date(r.submitted_at).getTime() <= deadline && googleAt && new Date(googleAt).getTime() <= deadline) {
-      patch.credit_30_earned_at = stamp;
-      await sendAlert('$30 credit earned', `${business} finished setup inside 24 hours. Take $30 off their next bill.`).catch(() => {});
-      out.credits.push(business);
+  // The day setup was finished, saved once so there is a record of it.
+  const doneAt = setupDoneAt(r, a);
+  if (doneAt && !r.setup_done_at) patch.setup_done_at = doneAt;
+
+  // The setup credit: $50 for finishing on the day of payment, $20 for the next day. Worked out once.
+  if (doneAt && r.created_at && r.setup_credit_amount == null && !r.credit_30_earned_at) {
+    patch.setup_credit_amount = creditFor(r.created_at, doneAt);
+    if (patch.setup_credit_amount) patch.setup_credit_earned_at = stamp;
+  }
+  const owed = Number(patch.setup_credit_amount ?? r.setup_credit_amount ?? 0);
+  if (owed > 0 && !r.setup_credit_applied_at && !nudges.credit_by_hand) {
+    const result = await applyCredit(r, owed);
+    if (result.applied) {
+      patch.setup_credit_applied_at = stamp;
+      patch.setup_credit_stripe_id = result.id || null;
+      await sendAlert(`$${owed} setup credit applied`, `${business} finished setup ${owed === 50 ? 'the same day' : 'the next day'}. $${owed} is on their Stripe balance and comes off their next bill.`).catch(() => {});
+    } else {
+      nudges.credit_by_hand = stamp;
+      await sendAlert(`$${owed} setup credit to add by hand`, `${business} earned $${owed} for finishing setup. ${result.note}`).catch(() => {});
     }
+    out.credits.push({ client: business, amount: owed, applied: !!result.applied });
   }
 
   // The three reminder tracks.
@@ -218,4 +259,4 @@ module.exports = async function handler(req, res) {
 };
 
 // Exported for testing
-Object.assign(module.exports, { openTracks, due, launchChecklist, easternHour, TEXTS });
+Object.assign(module.exports, { openTracks, due, launchChecklist, easternHour, applyCredit, check, TEXTS });
