@@ -1,7 +1,7 @@
 ---
 layout: bare
-title: More Jobs for Contractors, $197/mo | Build Boosters
-description: We help contractors get more jobs with smart websites, instant follow-up and 5-star reviews, for just $197/mo.
+title: More Jobs for Contractors, $279/mo | Build Boosters
+description: We help contractors get more jobs with smart websites, instant follow-up and 5-star reviews, for just $279/mo.
 robots: noindex
 ---
 <style>/* welcome + grow: booking & form embeds */.wl .w{max-width:880px!important}.wl .card{padding:26px 24px!important}.wl .cal,.wl .frm{margin:0!important;padding:20px!important;background:#f4f6f9;border-radius:14px!important;overflow:hidden;min-height:0!important}.wl .cal{padding-bottom:32px!important}.wl .cal iframe,.wl .frm iframe{zoom:.82;width:100%!important;min-height:0!important;border:0!important;border-radius:10px;display:block}.wl .cal iframe{clip-path:inset(0 0 40px 0 round 10px);margin-bottom:-40px!important}.wl .st{margin-bottom:18px}@media (max-width:600px){.wl .card{padding:20px 14px!important}.wl .cal,.wl .frm{padding:12px 10px!important}.wl .cal{padding-bottom:24px!important}.wl .cal iframe,.wl .frm iframe{zoom:.92}.wl .cal iframe{clip-path:inset(0 0 26px 0 round 10px);margin-bottom:-26px!important}.wl .cal{padding-bottom:16px!important}}.q .cal{margin:4px -24px 0}.q .cal iframe{width:100%!important}</style>
@@ -96,7 +96,7 @@ padding:28px max(18px,env(safe-area-inset-left)) 40px max(18px,env(safe-area-ins
 <a class="logo" href="/" aria-label="Build Boosters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>BUILD BOOSTERS</a>
 <h1>We help contractors get <span>more jobs</span></h1>
 <p class="sub">with smart websites, instant follow&#x2011;up and 5&#x2011;star reviews for just</p>
-<p class="price">$197/mo &#x1f447;</p>
+<p class="price">$279/mo &#x1f447;</p>
 <div class="stage">
 <div class="ph" aria-hidden="true"><div class="scr">
 <div class="b n"><b>Missed call</b>(305) 555-0142 &#xb7; 2:14 PM</div>
@@ -125,7 +125,7 @@ padding:28px max(18px,env(safe-area-inset-left)) 40px max(18px,env(safe-area-ins
 <h2>Set up for you. No tech skills needed.</h2>
 <div class="tr">
 <div><b>~2 weeks</b><span>to get your new site live</span></div>
-<div><b>$197/mo</b><span>one plan, everything included</span></div>
+<div><b>$279/mo</b><span>the All In One plan</span></div>
 <div><b>No contract</b><span>stay because it works</span></div>
 </div>
 <a class="demo" href="/demo">Or tap around a live demo site first &#x2192;</a>
@@ -138,7 +138,7 @@ padding:28px max(18px,env(safe-area-inset-left)) 40px max(18px,env(safe-area-ins
 <button class="x" type="button" data-close aria-label="Close">&#xd7;</button>
 <button class="bk" type="button" data-back hidden>&#x2190; Back</button>
 <h3 id="q-t">We help contractors get more jobs for just</h3>
-<p class="pr">$197/month</p>
+<p class="pr">$279/month</p>
 <div class="bar"><i></i></div>
 <fieldset data-s="0"><legend>What kind of work do you do?</legend>
 <label class="op"><input type="radio" name="contracting_type" value="Residential"><span>Residential</span></label>
@@ -184,8 +184,8 @@ padding:28px max(18px,env(safe-area-inset-left)) 40px max(18px,env(safe-area-ins
 <div class="cal" id="g-cal"></div>
 <div class="or"><span>or</span></div>
 <p class="rd"><b>Ready now?</b> Skip the call and start today.</p>
-<a class="go" data-buy href="#">Start today for $197/mo &#x2192;</a>
-<p class="fine">No long-term contract.</p>
+<a class="go" data-buy href="#">Start today for $279/mo &#x2192;</a>
+<p class="fine">One-time $297 setup fee on monthly billing. No long-term contract.</p>
 <a class="lnk" data-demo href="/demo">Or see a demo for my trade first</a>
 </div>
 <div class="done" data-s="7" hidden>
@@ -215,7 +215,7 @@ var g=function(n){return(f.elements[n].value||'').trim()},er=f.querySelector('.e
 f.querySelector('.go[type=submit]').addEventListener('click',function(e){var d=g('phone').replace(/\D/g,''),m='';
 if(!g('full_name'))m='Please enter your name.';else if(d.length<10)m='Please enter a valid mobile number.';else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(g('email')))m='Please enter a valid email.';
 er.textContent=m;if(m)e.preventDefault()});
-var CAL='DZSSJ3lHJmNBFktCBTGA',BUY='https://api.buildboosters.com/payment-link/6af64c63906a8b62055d610d';
+var CAL='DZSSJ3lHJmNBFktCBTGA',BUY='https://buy.stripe.com/fZu6oH3vufwi7vYafK1wY0a';
 f.addEventListener('submit',function(e){e.preventDefault();var tr=g('trade');f.querySelector('[data-demo]').href='/demo'+(tr&&tr!=='other'?'?trade='+tr:'');
 var n=g('full_name').split(/\s+/),pq=new URLSearchParams({first_name:n[0]||'',last_name:n.slice(1).join(' '),email:g('email'),phone:g('phone')});
 var b=f.querySelector('[data-buy]');b.href=BUY+(BUY.indexOf('?')<0?'?':'&')+pq;

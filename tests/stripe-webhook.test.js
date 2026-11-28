@@ -181,7 +181,7 @@ function signEvent(event) {
     const { body, sig } = signPretty(paid());
     const res = makeRes(); await handler(vercelReq(body, sig), res);
     must('indented payload from the stream verifies', res.code === 200 && res.data.ok === true);
-    must('tier comes from the link tags', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly');
+    must('the website tag on an Essentials link is saved as essentials', lastInsert.tier === 'essentials' && lastInsert.billing_cycle === 'monthly');
     must('business name from checkout is used', lastInsert.prefill.business_name === 'Smith Pressure Washing');
     must('first name is the person, not the business', lastInsert.owner_first_name === 'Dave'); }
 
@@ -204,13 +204,43 @@ function signEvent(event) {
     const res = makeRes(); await handler(vercelReq(body, sig, { stream: false }), res);
     global.fetch = realFetch; delete process.env.STRIPE_SECRET_KEY;
     must('falls back to fetching the event from Stripe', res.code === 200 && res.data.ok === true);
-    must('untagged $444 payment is the website plan, monthly', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly'); }
+    must('untagged $444 payment is Essentials, monthly', lastInsert.tier === 'essentials' && lastInsert.billing_cycle === 'monthly'); }
 
   for (const [cents, tier, cycle] of [[57600, 'all_in_one', 'monthly'], [82900, 'all_in_one', 'quarterly'], [279000, 'all_in_one', 'annual'],
-    [79400, 'dominance', 'monthly'], [142500, 'dominance', 'quarterly'], [497000, 'dominance', 'annual'], [42700, 'website', 'quarterly'], [147000, 'website', 'annual']]) {
+    [79400, 'dominance', 'monthly'], [142500, 'dominance', 'quarterly'], [497000, 'dominance', 'annual'], [42700, 'essentials', 'quarterly'], [147000, 'essentials', 'annual']]) {
     const r = tierFromAmount(cents);
     must(`$${cents / 100} -> ${tier}/${cycle}`, r.tier === tier && r.billing_cycle === cycle);
   }
 
   console.log('All tests passed.');
 })();
+
+// ---- addonFromSession ----
+console.log('addonFromSession:');
+{
+  const { addonFromSession } = require('../api/stripe-webhook');
+  const code = 'a'.repeat(32);
+  const checks = [
+    ['plan payment is not an add-on', addonFromSession({ metadata: { tier: 'all_in_one' } }) === null],
+    ['no metadata is not an add-on', addonFromSession({}) === null],
+    ['add-on with a code', (() => { const a = addonFromSession({ id: 'cs_1', amount_total: 34900, client_reference_id: code, metadata: { addon: 'gbp_optimization' } }); return a && a.addon === 'gbp_optimization' && a.code === code && a.amount === 34900 && a.session_id === 'cs_1'; })()],
+    ['add-on with a bad code keeps the add-on and drops the code', (() => { const a = addonFromSession({ client_reference_id: 'nope', metadata: { addon: 'GBP_Optimization' } }); return a && a.addon === 'gbp_optimization' && a.code === ''; })()],
+    ['a strange add-on name is ignored', addonFromSession({ metadata: { addon: 'x y;drop' } }) === null],
+  ];
+  for (const [label, ok] of checks) { console.log(ok ? '  PASS' : '  FAIL', label); if (!ok) process.exit(1); }
+}
+
+// ---- seoOfferText ----
+console.log('seoOfferText:');
+{
+  const { seoOfferText } = require('../api/launch');
+  const full = seoOfferText('Dave', 'Handy Danny', 'Palm Beach');
+  const bare = seoOfferText('', '', '');
+  const checks = [
+    ['uses the name, business and city', /^Hey Dave, it's Maddie/.test(full) && full.includes('Handy Danny') && full.includes('in Palm Beach')],
+    ['works with nothing known', /^Hey, it's Maddie/.test(bare) && bare.includes('your business') && !bare.includes(' in  ')],
+    ['carries no link and no dash', !/https?:|—/.test(full)],
+    ['fits in two text segments', full.length <= 306],
+  ];
+  for (const [label, ok] of checks) { console.log(ok ? '  PASS' : '  FAIL', label); if (!ok) process.exit(1); }
+}

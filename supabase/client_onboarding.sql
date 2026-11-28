@@ -4,7 +4,7 @@ create table if not exists public.client_onboarding (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
-  tier text,                      -- 'website', 'all_in_one' or 'ads'. Website clients are not asked for texting registration details
+  tier text,                      -- 'essentials', 'all_in_one' or 'dominance'. 'website' is the old website-only plan, the one plan with no texting registration
   billing_cycle text,             -- 'monthly', 'quarterly', 'six_month' or 'annual'. Everyone but monthly sees the Google updates note
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
   launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
@@ -78,16 +78,25 @@ alter table public.client_onboarding
   add column if not exists nudges_sent jsonb not null default '{}'::jsonb,
   add column if not exists ghl_phone_number text,
   add column if not exists ghl_review_widget_id text,
-  add column if not exists credit_30_earned_at timestamptz,   -- form and Google step done inside 24 hours: take $30 off their next bill
+  add column if not exists credit_30_earned_at timestamptz,   -- the old $30 credit, kept for clients who earned it before the $50 and $20 credit replaced it
   add column if not exists site_final_basics_at timestamptz,  -- no form after 72 hours, so the site was built from their Google profile
   add column if not exists site_rebuilt_at timestamptz,       -- the form came in after a basics build and the site was built again
-  add column if not exists launch_checklist jsonb;            -- what the launch call still has to cover
+  add column if not exists launch_checklist jsonb,            -- what the launch call still has to cover
+  add column if not exists dob_private text,                  -- the owner's date of birth, for texting registration only. Never sent back to the page
+  add column if not exists welcome_done_at timestamptz,       -- they finished the page they land on after paying
+  add column if not exists setup_done_at timestamptz,         -- the day setup was finished: form, Google step and EIN all in
+  add column if not exists setup_credit_amount integer,       -- 50 for finishing on the day they paid, 20 for the next day, 0 for later
+  add column if not exists setup_credit_earned_at timestamptz,
+  add column if not exists setup_credit_applied_at timestamptz, -- when the credit went onto their Stripe balance
+  add column if not exists setup_credit_stripe_id text,       -- the Stripe balance transaction, so it can be found again
+  add column if not exists addons jsonb not null default '{}'::jsonb;  -- paid add-ons and offers: { gbp_optimization: { paid_at, session_id, amount }, seo_upsell_sent_at }
 
--- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
+-- The EIN and the date of birth are deleted the moment a2p_registered_at is filled in, so they never outlive the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
 begin
-  if new.a2p_registered_at is not null and new.ein_private is not null then
+  if new.a2p_registered_at is not null and (new.ein_private is not null or new.dob_private is not null) then
     new.ein_private := null;
+    new.dob_private := null;
     new.ein_deleted_at := now();
   end if;
   return new;
@@ -170,6 +179,41 @@ create table if not exists public.job_events (
   created_at timestamptz not null default now()
 );
 alter table public.job_events enable row level security;
+
+-- Every new Google review a client gets, as posted by the "Review Received" workflow in their sub-account
+-- to /api/review-inbox, with the reply drafted for it and what became of that reply.
+create table if not exists public.review_replies (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references public.client_onboarding(id) on delete set null,
+  ghl_location_id text,
+  source text not null default 'google',
+  rating integer not null,
+  reviewer text,
+  review_text text,
+  review_id text unique,                   -- the review's id from HighLevel, so the same review is never handled twice
+  review_url text,                         -- where the contractor reads and answers it
+  google_review_name text,                 -- accounts/.../locations/.../reviews/..., needed to post a reply through Google
+  draft text,                              -- the reply written for him
+  final_reply text,                        -- what was approved: the draft, or his own wording
+  approved_by text,                        -- yes, own_words or silence_48h
+  status text not null default 'held',     -- held, reviews_ai, unmatched, pending, texted, link_sent, queued, posted
+  texted_at timestamptz,
+  answered_at timestamptz,
+  posted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.review_replies enable row level security;
+create index if not exists review_replies_status_idx on public.review_replies (status);
+
+-- Added for /api/send-asks: a job that is closed out without an ask (a quote, a repeat customer, no phone)
+-- is marked here so it is not looked at again every hour.
+alter table public.job_events
+  add column if not exists ask_skipped_at timestamptz,
+  add column if not exists ask_note text;
+
+-- Added for /api/photo-reminders: when this client was last asked for photos.
+alter table public.client_onboarding
+  add column if not exists last_photo_ask_at timestamptz;
 
 -- Safety net: once a week, check for an EIN that has sat for more than 60 days and delete it by hand:
 --   update public.client_onboarding set ein_private = null, ein_deleted_at = now()

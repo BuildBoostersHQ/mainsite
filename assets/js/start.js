@@ -20,7 +20,7 @@
   ];
   var BADGES = ['Women owned', 'Veteran owned', 'Family owned', 'Licensed and insured', 'Free estimates', 'Se habla español'];
   var SAMPLE = {
-    first_name: 'Dave', billing_cycle: 'quarterly', ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
+    first_name: 'Dave', billing_cycle: 'quarterly', tier: 'all_in_one', limits: { services: 8, areas: 10 }, ein_on_file: false, launch_call_at: 'Thursday at 2:00 PM', video_url: '', photo_folder_url: '',
     google_requested: false, text_link_requested: false, submitted: false, sms_consent: false,
     options: {
       services: ['Drain cleaning', 'Water heaters', 'Leak repair', 'Repiping', 'Toilets and faucets', 'Sewer lines', 'Garbage disposals', 'Emergency calls'],
@@ -145,6 +145,22 @@
       el.addEventListener('blur', function () { clearTimeout(timer); flush(); });
     });
 
+    /* How many services and towns this client's plan holds. */
+    var limits = d.limits || {};
+    ['services', 'areas'].forEach(function (key) {
+      if (!limits[key]) return;
+      root.querySelectorAll('[data-limit-for="' + key + '"]').forEach(function (el) { el.textContent = String(limits[key]); });
+      var box = root.querySelector('[data-chips="' + key + '"]');
+      if (box) box.setAttribute('data-limit', String(limits[key]));
+    });
+
+    /* The setup credit: $50 today, $20 tomorrow, nothing shown once both have passed. */
+    var credit = window.bbCredit ? window.bbCredit(d) : null;
+    if (!demo) {
+      if (credit) { $('ob-credit-title').textContent = credit.title; $('ob-credit-text').textContent = credit.text; }
+      else $('ob-credit').hidden = true;
+    }
+
     root.querySelectorAll('[data-chips]').forEach(function (box) {
       var key = box.getAttribute('data-chips');
       var list = key === 'vibes' ? VIBES : key === 'badges' ? BADGES : (Array.isArray(opts[key]) ? opts[key] : []);
@@ -202,6 +218,19 @@
     /* Clients who prepay (quarterly, six months or annual) also get their Google profile kept in step with the site. */
     if (/^(quarterly|six[_ -]?months?|6[_ -]?months?|annual|annually|yearly)$/i.test(String(d.billing_cycle || '').trim())) $('ob-gupd').hidden = false;
 
+    /* One optional add-on, offered to clients on the website plan. The Stripe payment link goes in GBP_ADDON_LINK
+       (or in options.gbp_addon_link for one client). It needs the tag addon = gbp_optimization, and the client's
+       code rides along so the payment lands on their record. With no link set, the section stays hidden. */
+    var GBP_ADDON_LINK = '';
+    var addonLink = String((d.options && d.options.gbp_addon_link) || GBP_ADDON_LINK || '').trim();
+    var addonPaid = (d.addons_paid || []).indexOf('gbp_optimization') > -1;
+    if (addonPaid) {
+      $('ob-addon').hidden = false; $('ob-addon-btn').hidden = true; $('ob-addon-note').hidden = true; $('ob-addon-done').hidden = false;
+    } else if (code && /^https:\/\/buy\.stripe\.com\//.test(addonLink) && /^(website|essentials)/i.test(String(d.tier || '').trim())) {
+      $('ob-addon').hidden = false;
+      $('ob-addon-btn').href = addonLink + (addonLink.indexOf('?') > -1 ? '&' : '?') + 'client_reference_id=' + encodeURIComponent(code);
+    }
+
     /* Plain yes or no checkboxes. */
     root.querySelectorAll('[data-flag]').forEach(function (box) {
       var key = box.getAttribute('data-flag');
@@ -217,9 +246,30 @@
     function einMode() {
       var none = /no EIN/i.test(type.value);
       $('ob-ein-wrap').hidden = none; $('ob-ein-none').hidden = !none;
+      $('ob-sole-note').hidden = !/^sole proprietor$/i.test(type.value);
       if (none) einStatus.hidden = true;
     }
     type.addEventListener('change', einMode); einMode();
+
+    /* Registration address: picked from Google's list, so it is a real street address and not a P.O. box. */
+    var addr = $('ob-a2p_address');
+    if (answers.a2p_address) addr.value = answers.a2p_address;
+    function addrLabel() { $('ob-a2p-address-label').textContent = /no EIN/i.test(type.value) ? 'Your street address' : 'Street address on your IRS letter'; }
+    type.addEventListener('change', addrLabel); addrLabel();
+    if (window.BBAddress) {
+      var picker = window.BBAddress(addr, {
+        list: $('ob-a2p-address-list'), note: $('ob-a2p-address-note'),
+        onPick: function (a) {
+          save('a2p_address', a.formatted); save('a2p_street', a.street || ''); save('a2p_city', a.city || '');
+          save('a2p_state', a.state || ''); save('a2p_zip', a.zip || ''); save('a2p_address_check', a.check || '', true);
+        },
+        onClear: function () { save('a2p_address', ''); save('a2p_address_check', ''); }
+      });
+      if (answers.a2p_address) picker.markPicked();
+      $('ob-a2p-address-typed').addEventListener('click', function () {
+        if (!picker.acceptTyped()) { var n = $('ob-a2p-address-note'); n.hidden = false; n.textContent = 'Please type the full street address first, starting with the number.'; }
+      });
+    }
     if (d.ein_on_file) { einStatus.textContent = 'Your EIN is on file. Type it again only if it has changed.'; einStatus.hidden = /no EIN/i.test(type.value); }
     ein.addEventListener('input', function () {
       var digits = ein.value.replace(/\D/g, '').slice(0, 9);
@@ -234,6 +284,18 @@
       einStatus.textContent = 'Saving.';
       api('POST', { ein: digits }).then(function () { ein.value = ''; einStatus.textContent = 'Your EIN is saved and kept private. Type it again only if it has changed.'; })
         .catch(function () { einStatus.textContent = 'That did not save. Please try again.'; });
+    });
+
+    /* Date of birth: saved on its own like the EIN, kept private, and never sent back to this page. */
+    var bday = $('ob-birthday'), bdayStatus = $('ob-birthday-status');
+    if (d.birthday_on_file) { bdayStatus.textContent = 'Your date of birth is on file. Enter it again only if it was wrong.'; bdayStatus.hidden = false; }
+    bday.addEventListener('change', function () {
+      if (!bday.value) return;
+      bdayStatus.hidden = false;
+      if (demo) { bdayStatus.textContent = 'Sample page, nothing is saved.'; return; }
+      bdayStatus.textContent = 'Saving.';
+      api('POST', { birthday: bday.value }).then(function () { bday.value = ''; bdayStatus.textContent = 'Your date of birth is saved and kept private.'; })
+        .catch(function () { bdayStatus.textContent = 'That date did not save. Please check it and try again.'; });
     });
 
     var gDone = function () { $('ob-gsteps').hidden = true; $('ob-ghelp').hidden = true; $('ob-google-done').hidden = false; };
@@ -384,6 +446,8 @@
               if (biz.weekday_hours) data.answers.weekday_hours = biz.weekday_hours;
               if (biz.weekends) data.answers.weekends = biz.weekends;
               if (biz.city) data.answers.city = biz.city;
+              if (biz.place_id) data.answers.place_id = biz.place_id;
+              if (biz.website) data.answers.website = biz.website;
               /* Save the prefill to the server */
               if (!demo) api('POST', { answers: data.answers }).catch(function () {});
               findBox.hidden = true;

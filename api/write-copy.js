@@ -10,7 +10,7 @@ const { sb, allowed, configured } = require('./_sb');
 
 const TABLE = 'client_onboarding';
 const CODE = /^[A-Za-z0-9_-]{12,64}$/;
-const MODEL = 'claude-sonnet-4-20250514';
+const MODEL = 'claude-haiku-5-5';
 const MAX_TOKENS = 4096;
 
 const apiKey = () => String(process.env.ANTHROPIC_API_KEY || '').trim();

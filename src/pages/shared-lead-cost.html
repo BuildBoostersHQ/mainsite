@@ -80,7 +80,7 @@ html,body{margin:0!important;padding:0!important;background:#0b1a2e!important}
 <div class="grid">
 <div class="m"><div class="k">What each shared lead cost</div><div class="v" id="bbc_cpl">&ndash;</div><div class="n" id="bbc_cpl_n"></div></div>
 <div class="m"><div class="k">Your close rate</div><div class="v" id="bbc_cr">&ndash;</div><div class="n" id="bbc_cr_n"></div></div>
-<div class="m wide"><div class="k">What one more booked job a month is worth</div><div class="v" id="bbc_job_v">&ndash;</div><div class="n" id="bbc_job_n">Put in your average job size to compare it with the $197 a month plan.</div></div>
+<div class="m wide"><div class="k">What one more booked job a month is worth</div><div class="v" id="bbc_job_v">&ndash;</div><div class="n" id="bbc_job_n">Put in your average job size to compare it with the $279 a month plan.</div></div>
 <div class="m wide hot" id="bbc_miss_box" style="display:none"><div class="k">Spent on shared leads you never really competed for</div><div class="v" id="bbc_miss_v">&ndash;</div><div class="n" id="bbc_miss_n"></div></div>
 </div>
 </section>
@@ -92,7 +92,7 @@ html,body{margin:0!important;padding:0!important;background:#0b1a2e!important}
 
 <section class="card">
 <h2>What we'd do about it</h2>
-<p class="me">At Build Boosters, we set up websites and phone systems for contractors who want more of their own customers and less dependence on shared leads. Our main plan is $197 a month with no contract, and it texts every missed call back right away, follows up on every quote and asks your happy customers for Google reviews automatically.</p>
+<p class="me">At Build Boosters, we set up websites and phone systems for contractors who want more of their own customers and less dependence on shared leads. Our main plan is $279 a month with no contract, and it texts every missed call back right away, follows up on every quote and asks your happy customers for Google reviews automatically.</p>
 <a class="cta" href="sms:+17869338832?&body=Hi%2C%20I%20used%20your%20shared%20lead%20calculator.">Text us at (786) 933-8832</a>
 <p class="me" style="margin:14px 0 0;text-align:center;font-size:15px;color:#5b6878">Text us your number and we'll show you what this would look like on your phone.</p>
 </section>
@@ -124,12 +124,12 @@ html,body{margin:0!important;padding:0!important;background:#0b1a2e!important}
   // close rate
   if(leads===null||booked===null||leads===0||bad){set('bbc_cr','–');set('bbc_cr_n','')}
   else{var cr=booked/leads*100;set('bbc_cr',(cr<10&&cr>0?cr.toFixed(1):Math.round(cr))+'%');set('bbc_cr_n',booked+' out of '+leads+' turned into jobs.')}
-  // one more job vs $197
-  if(job===null||job===0){set('bbc_job_v','–');set('bbc_job_n','Put in your average job size to compare it with the $197 a month plan.')}
-  else{set('bbc_job_v',money(job));var x=job/197;
-   if(x>=2)set('bbc_job_n','One extra job a month covers the $197 plan '+Math.floor(x)+' times over.');
-   else if(x>=1)set('bbc_job_n','One extra job a month covers the $197 plan with '+money(job-197)+' left over.');
-   else set('bbc_job_n','One extra job a month covers about '+Math.round(x*100)+'% of the $197 plan, so it would take '+Math.ceil(197/job)+' extra jobs to cover it.')}
+  // one more job vs $279
+  if(job===null||job===0){set('bbc_job_v','–');set('bbc_job_n','Put in your average job size to compare it with the $279 a month plan.')}
+  else{set('bbc_job_v',money(job));var x=job/279;
+   if(x>=2)set('bbc_job_n','One extra job a month covers the $279 plan '+Math.floor(x)+' times over.');
+   else if(x>=1)set('bbc_job_n','One extra job a month covers the $279 plan with '+money(job-279)+' left over.');
+   else set('bbc_job_n','One extra job a month covers about '+Math.round(x*100)+'% of the $279 plan, so it would take '+Math.ceil(279/job)+' extra jobs to cover it.')}
   // missed
   if(missed===null||missed===0||cpl===null||bad){$('bbc_miss_box').style.display='none'}
   else{$('bbc_miss_box').style.display='block';set('bbc_miss_v',money(missed*cpl));set('bbc_miss_n','That’s '+missed+' shared lead'+(missed===1?'':'s')+' at '+money(cpl)+' each that you paid for but didn’t get to answer in time, and that customer may well have gone with one of the other pros who got the same request.')}

@@ -1,4 +1,4 @@
-/* Thank-you page after the onboarding form (/start-thank-you/<code>). Shows what is left for the $30,
+/* Thank-you page after the onboarding form (/start-thank-you/<code>). Shows what is left for the setup credit,
    the launch call with add-to-calendar buttons, and what happens next. No code shows a sample client. */
 (function () {
   var root = document.getElementById('ob-ty');
@@ -12,7 +12,8 @@
     var start = new Date(); start.setDate(start.getDate() + 3); start.setHours(14, 0, 0, 0);
     return { first_name: 'Dave', launch_call_at: '', launch_call_start: start.toISOString(), photo_folder_url: '',
       google_requested: true, google_approved: false, submitted: true,
-      credit_deadline: new Date(Date.now() + 20 * 3600 * 1000).toISOString() };
+      ein_on_file: true, billing_cycle: 'monthly',
+      credit: { earned: 0, same_day_until: new Date(Date.now() + 6 * 3600 * 1000).toISOString(), next_day_until: new Date(Date.now() + 30 * 3600 * 1000).toISOString() } };
   }
   var stamp = function (d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
   var nice = function (d) {
@@ -21,23 +22,27 @@
   };
 
   function credit(d) {
+    var a = d.answers || {};
+    var noEin = /^website/i.test(String(d.tier || '').trim()) || /no EIN/i.test(a.a2p_entity_type || '');
     var missing = [];
     if (!d.submitted) missing.push('Finish your setup page and tap the button at the bottom.');
+    if (!noEin && !d.ein_on_file) missing.push('Go back to your setup page and add your EIN for your texting number.');
     if (!d.google_requested) missing.push('Go back to your setup page and add me as a manager on your Google profile.');
-    var deadline = d.credit_deadline ? new Date(d.credit_deadline) : null;
-    var open = deadline && !isNaN(deadline) && deadline.getTime() > Date.now();
-    if (!missing.length) {
+    var c = window.bbCredit ? window.bbCredit(d) : null;
+    if (!c) return;
+    if (c.earned || !missing.length) {
+      var n = c.earned || c.amount;
+      var monthly = !d.billing_cycle || /^monthly$/i.test(String(d.billing_cycle).trim());
       $('ty-credit-eyebrow').textContent = 'A little thank you';
-      $('ty-credit-title').textContent = 'You earned $30 off your next bill';
-      $('ty-credit-text').textContent = 'Everything is in, so I will take it off automatically.';
-      $('ty-credit').hidden = false;
-    } else if (open) {
+      $('ty-credit-title').textContent = monthly ? 'You earned $' + n + ' off your next bill' : 'You earned a $' + n + ' credit';
+      $('ty-credit-text').textContent = monthly ? 'Everything is in, so it comes off automatically.' : 'Everything is in, so I will add it to your account.';
+    } else {
       $('ty-credit-eyebrow').textContent = missing.length === 1 ? 'One thing left' : 'A couple of things left';
-      $('ty-credit-title').textContent = "Let's get you that $30 off";
-      $('ty-credit-text').textContent = 'Finish this by ' + nice(deadline) + ' and I will take $30 off your next bill.';
+      $('ty-credit-title').textContent = "Let's get you that $" + c.amount + ' off';
+      $('ty-credit-text').textContent = c.text;
       missing.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; $('ty-credit-list').appendChild(li); });
-      $('ty-credit').hidden = false;
     }
+    $('ty-credit').hidden = false;
   }
 
   function call(d) {

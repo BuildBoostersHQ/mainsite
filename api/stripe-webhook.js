@@ -18,10 +18,10 @@ const TABLE = 'client_onboarding';
 // Fallback only, for a payment whose link has no tier tag: the plan worked out from the amount in cents.
 // A monthly amount includes the $297 setup fee charged on the first payment.
 const TIERS = {
-  // Plans from November 2026 (Essentials is the website plan)
-  44400:  { tier: 'website',         billing_cycle: 'monthly' },
-  42700:  { tier: 'website',         billing_cycle: 'quarterly' },
-  147000: { tier: 'website',         billing_cycle: 'annual' },
+  // Plans from November 2026. Essentials includes texting, so it is never saved as 'website'.
+  44400:  { tier: 'essentials',      billing_cycle: 'monthly' },
+  42700:  { tier: 'essentials',      billing_cycle: 'quarterly' },
+  147000: { tier: 'essentials',      billing_cycle: 'annual' },
   57600:  { tier: 'all_in_one',      billing_cycle: 'monthly' },
   82900:  { tier: 'all_in_one',      billing_cycle: 'quarterly' },
   279000: { tier: 'all_in_one',      billing_cycle: 'annual' },
@@ -37,6 +37,13 @@ const TIERS = {
   197000: { tier: 'all_in_one',      billing_cycle: 'annual' },
   997000: { tier: 'all_in_one_ads',  billing_cycle: 'annual' },
 };
+
+// The Essentials payment links in Stripe are tagged 'website', from before Essentials included texting.
+// Nothing is sold through Stripe as website-only, so that tag always means Essentials.
+function planTier(tag) {
+  const t = String(tag || '').trim().toLowerCase();
+  return t === 'website' ? 'essentials' : t;
+}
 
 function tierFromAmount(cents) {
   return TIERS[cents] || { tier: 'unknown', billing_cycle: 'monthly' };
@@ -117,6 +124,45 @@ async function loadEvent(req, webhookSecret) {
   return { event: null, reason: 'raw_body_unavailable' };
 }
 
+// An add-on bought from the setup page. The payment link carries the tag addon (for example
+// gbp_optimization) and the setup page passes the client's code as client_reference_id.
+// Returns null for an ordinary plan payment.
+function addonFromSession(session) {
+  const meta = (session && session.metadata) || {};
+  const addon = String(meta.addon || '').trim().toLowerCase();
+  if (!/^[a-z0-9_]{2,40}$/.test(addon)) return null;
+  const code = String(session.client_reference_id || meta.code || '').trim();
+  return { addon, code: /^[a-f0-9]{32}$/.test(code) ? code : '', amount: session.amount_total || 0, session_id: session.id || '' };
+}
+
+// Records a paid add-on on the client's row. Maddie is alerted first, so a payment is never lost
+// even when the row cannot be found or the addons column has not been added yet.
+async function recordAddon(a, who) {
+  const { sendAlert } = require('./alert');
+  const dollars = `$${(a.amount / 100).toFixed(0)}`;
+  let saved = false;
+  let business = '';
+  try {
+    if (a.code) {
+      const rows = await sb(`${TABLE}?code=eq.${a.code}&select=prefill,answers,addons&limit=1`);
+      if (rows.length) {
+        business = ({ ...(rows[0].prefill || {}), ...(rows[0].answers || {}) }).business_name || '';
+        const addons = { ...(rows[0].addons || {}), [a.addon]: { paid_at: new Date().toISOString(), session_id: a.session_id, amount: a.amount } };
+        await sb(`${TABLE}?code=eq.${a.code}`, { method: 'PATCH', body: JSON.stringify({ addons }) });
+        saved = true;
+      }
+    }
+  } catch (e) {
+    console.error('stripe-webhook: add-on not saved:', e.message);
+  }
+  try {
+    await sendAlert('Add-on paid', `${business || who || 'A client'} paid ${dollars} for ${a.addon.replace(/_/g, ' ')}.${saved ? '' : ' It could not be saved to their record, so note it by hand.'}`);
+  } catch (e) {
+    console.error('stripe-webhook: add-on alert failed:', e.message);
+  }
+  return saved;
+}
+
 function firstName(full) {
   return String(full || '').trim().split(/\s+/)[0] || '';
 }
@@ -141,6 +187,14 @@ module.exports = async function handler(req, res) {
     const session = event.data && event.data.object;
     if (!session) return res.status(200).json({ ok: true, skipped: 'no_session_object' });
 
+    // A paid add-on belongs to a client who already exists, so it never creates a new one.
+    const addon = addonFromSession(session);
+    if (addon) {
+      const d = session.customer_details || {};
+      const saved = await recordAddon(addon, d.business_name || d.name || d.email || '');
+      return res.status(200).json({ ok: true, addon: addon.addon, saved });
+    }
+
     const meta = session.metadata || {};
     const details = session.customer_details || {};
     const email = String(details.email || session.customer_email || meta.email || '').trim().toLowerCase();
@@ -153,7 +207,7 @@ module.exports = async function handler(req, res) {
     const amount = session.amount_total || 0;
 
     const { tier, billing_cycle } = meta.tier
-      ? { tier: meta.tier, billing_cycle: meta.billing_cycle || 'monthly' }
+      ? { tier: planTier(meta.tier), billing_cycle: meta.billing_cycle || 'monthly' }
       : tierFromAmount(amount);
 
     // Check for an existing row by email to avoid duplicates.
@@ -289,5 +343,7 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.tierFromAmount = tierFromAmount;
+module.exports.planTier = planTier;
 module.exports.verifySignature = verifySignature;
 module.exports.readRawBody = readRawBody;
+module.exports.addonFromSession = addonFromSession;

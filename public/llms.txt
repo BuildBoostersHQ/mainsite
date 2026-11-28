@@ -18,9 +18,10 @@
 
 ## Key facts
 
-- Website plan: $79/month (site, hosting, domain name, quote forms, tap-to-call, unlimited updates within 72 hours)
-- All-In-One plan: $197/month (adds missed-call text-back, spam call blocking, automated follow-up, AI chat and booking, review requests, one inbox)
-- All-In-One + Google Ads: $997/month plus ad spend
+- Essentials plan: $147/month (site with up to 4 services and 5 towns, hosting, domain name, local business number, missed-call text-back, review requests, one inbox)
+- All In One plan: $279/month (bigger site with up to 8 services and 10 towns, adds chat widget, spam call blocking, review replies, referral asks, Google Business Profile optimization)
+- Dominance plan: $497/month (site with up to 12 services and 14 towns, adds monthly blog posts, ranking reports, weekly Google Business Profile posts, monthly performance report)
+- Monthly billing has a one-time $297 setup fee. Quarterly and yearly billing have no setup fee, and yearly is 10 months for 12.
 - Build time: website in 2 to 5 days, full system in 7 to 10 days, after the client sends their details
 - Free 15-minute call; phone or text (786) 933-8832
 - Based in Miami, Florida; serves contractors across the United States
