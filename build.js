@@ -84,6 +84,13 @@ function schema(name, fm, body) {
   return out.map((o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>\n`).join('');
 }
 
+// Each question in a FAQ block becomes a row the visitor taps to open. The pages keep their plain
+// <div><h3>question</h3><p>answer</p></div> markup, and the FAQ data for Google is read from that.
+function collapseFaqs(body) {
+  return body.replace(/<div class="faqs">([\s\S]*?)<\/div>\s*<\/div>\s*<\/section>/g, (block) =>
+    block.replace(/<div>\s*(<h3[^>]*>[\s\S]*?<\/h3>)([\s\S]*?)<\/div>/g, '<details><summary>$1</summary>$2</details>'));
+}
+
 function render(name, fm, body) {
   const urlPath = name === 'index' ? '/' : '/' + name;
   const layout = fm.layout || 'site';
@@ -118,7 +125,7 @@ function render(name, fm, body) {
     header = header.replace(`<a href="${urlPath}">`, `<a href="${urlPath}" aria-current="page">`);
     let footer = partial.footer.replace('{{year}}', year);
   if (name === 'index') { header = header.replace(/href="\/#build"/g, 'href="#build"'); footer = footer.replace(/href="\/#build"/g, 'href="#build"'); }
-    html += header + '\n' + body + '\n' + footer + '\n';
+    html += header + '\n' + collapseFaqs(body) + '\n' + footer + '\n';
   } else {
     html += body + '\n';
   }
