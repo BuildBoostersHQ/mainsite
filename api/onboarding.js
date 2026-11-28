@@ -3,9 +3,10 @@
 // private code in their link, and only accepts the fields listed below. No dependencies.
 //
 // Needs two environment variables in Vercel: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+const credit = require('./_credit');
 const TABLE = 'client_onboarding';
 const TEXT = ['business_name', 'business_phone', 'address', 'weekday_hours', 'weekends', 'services_other', 'areas_other',
-  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'trade', 'style', 'brand_color'];
+  'vibes_other', 'years_in_business', 'years_experience', 'license', 'preferred_name', 'cell', 'job_software', 'domain_choice', 'domain_own', 'email', 'a2p_legal_name', 'a2p_entity_type', 'a2p_address', 'trade', 'style', 'brand_color'];
 const LONG = ['site_notes'];  // free text for whoever builds the site
 const FLAGS = ['photo_reminders', 'show_address', 'google_updates_opt_out'];
 // The exact words the client agreed to on the page. Saved with the time, so there is a record of the consent.
@@ -115,8 +116,17 @@ module.exports = async function handler(req, res) {
         sms_consent: !!row.sms_consent_at,
         google_approved: !!row.google_approved_at,
         launch_call_start: row.launch_call_start || '',
-        // The $30 thank-you runs out 24 hours after the client's page was created.
-        credit_deadline: row.created_at ? new Date(new Date(row.created_at).getTime() + 24 * 3600 * 1000).toISOString() : '',
+        // The setup credit: what he can still earn and until when, what is still missing, and what he earned.
+        setup_credit: (() => {
+          const a = { ...(row.prefill || {}), ...(row.answers || {}) };
+          const earned = row.onboarding_completed_at ? { done: true, amount: Number(row.setup_credit_amount || 0) } : credit.setupCredit(row, a);
+          return {
+            ...credit.offer(row.created_at, Date.now()),
+            missing: credit.missing(row, a),
+            done: earned.done, earned: earned.done ? earned.amount : 0,
+            to: credit.destination(row),
+          };
+        })(),
         options: row.options || {},
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
         answers: { ...(row.prefill || {}), ...(row.answers || {}) },
@@ -153,8 +163,22 @@ module.exports = async function handler(req, res) {
         if (body.sms_consent !== true && !row.sms_consent_at) return res.status(400).json({ error: 'consent_required' });
         if (!row.sms_consent_at) { patch.sms_consent_at = now; patch.sms_consent_text = SMS_CONSENT; patch.sms_consent_cell = cell; }
       }
-      // First time only, so the 24 hour clock and "who asked first" stay honest.
+      // First time only, so the credit clock and "who asked first" stay honest.
       if (column && !row[column]) patch[column] = now;
+      // A sole proprietor with no EIN registers under his own name. Note when those details are first complete.
+      const merged = { ...(row.prefill || {}), ...(row.answers || {}), ...changes };
+      if (!row.a2p_details_at && credit.noEin(merged) && credit.soleDetailsDone(merged)) patch.a2p_details_at = now;
+      // The moment the last step comes in, save the day setup was finished and what that earned.
+      // The hourly check (form-check) is what puts the credit on his Stripe balance or HighLevel wallet.
+      if (!row.onboarding_completed_at) {
+        const c = credit.setupCredit({ ...row, ...patch }, merged);
+        if (c.done) {
+          patch.onboarding_completed_at = c.finished_at;
+          patch.onboarding_date = c.onboarding_date;
+          patch.setup_credit_amount = row.credit_30_earned_at ? 0 : c.amount;
+          if (patch.setup_credit_amount) patch.setup_credit_earned_at = now;
+        }
+      }
       await supabase(`${TABLE}?id=eq.${row.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
 
       // On first submit: send a thank-you text with the personalized video (if set)
@@ -197,7 +221,7 @@ module.exports = async function handler(req, res) {
           }
           // Alert Maddie
           const { sendAlert } = require('./alert');
-          const bizName = a.business_name || ownerName || code.slice(0, 8);
+          const bizName = a.business_name || ownerName || row.code.slice(0, 8);
           await sendAlert('Form submitted', `${bizName} just finished their setup form. Ready to build.`).catch(() => {});
         } catch (e) {
           console.error('onboarding: thank-you text failed:', e.message);
@@ -214,7 +238,7 @@ module.exports = async function handler(req, res) {
             method: 'POST',
             headers: { 'x-bb-secret': process.env.BB_INTERNAL_SECRET, 'Content-Type': 'application/json' },
             // rebuild: a client who went 72 hours without the form already has a basics site.
-            body: JSON.stringify({ code, rebuild: true }),
+            body: JSON.stringify({ code: row.code, rebuild: true }),
           }).catch((e) => console.error('onboarding: build-site trigger failed:', e.message));
         }
       }

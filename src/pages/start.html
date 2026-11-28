@@ -48,10 +48,10 @@ sitemap: false
 <p class="ob-lead" id="ob-lead-manual" hidden>Tell me about your business and which services you offer, and I'll take it from here.</p>
 <p class="ob-meta">It takes about six minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
 
-<div class="ob-thanks ob-thanks-top">
-<div class="ob-eyebrow ob-eyebrow-dark">A little thank you</div>
-<div class="ob-thirty">$30 off your next bill</div>
-<p>Finish your setup and add me to your Google profile within 24 hours. I'll apply $30 off your next bill.</p>
+<div class="ob-thanks ob-thanks-top" id="ob-credit">
+<div class="ob-eyebrow ob-eyebrow-dark" id="ob-credit-eyebrow">A little thank you</div>
+<div class="ob-thirty" id="ob-credit-title">$50 credit when you finish today</div>
+<p id="ob-credit-text">Finish this whole page today, including your texting registration and the Google step, and I will credit $50 to your account. Finishing tomorrow still gets you $20.</p>
 </div>
 
 <section class="ob-sec" id="ob-a2p">
@@ -59,12 +59,15 @@ sitemap: false
 <h2>For your texting number</h2>
 <p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN is kept private, it is used only for that registration, and I delete it as soon as your number is approved.</p>
 <div class="ob-grid">
-<div class="ob-full ob-narrow"><label for="ob-a2p_legal_name">Legal business name <span class="ob-hint">(exactly as it appears on your IRS letter)</span></label><input id="ob-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
-<div><label for="ob-a2p_entity_type">Business type</label><select id="ob-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor with no EIN</option></select></div>
+<div><label for="ob-a2p_entity_type">Business type</label><select id="ob-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor with an EIN</option><option>Sole proprietor with no EIN</option></select></div>
 <div id="ob-ein-wrap"><label for="ob-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="ob-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
+<div class="ob-full ob-narrow"><label for="ob-a2p_legal_name"><span id="ob-legal-label">Legal business name</span> <span class="ob-hint" id="ob-legal-hint">(exactly as it appears on your IRS letter)</span></label><input id="ob-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
+<div class="ob-full"><label for="ob-a2p_address"><span id="ob-regaddr-label">Business street address</span> <span class="ob-hint">(a real street address, because the carriers turn down P.O. boxes and mailbox services)</span></label><input id="ob-a2p_address" data-key="a2p_address" type="text" autocomplete="street-address" placeholder="1420 SW 8th St, Miami, FL 33135"></div>
 </div>
 <p class="ob-note" id="ob-ein-status" role="status" hidden></p>
-<p class="ob-note" id="ob-ein-none" hidden>No EIN is fine. I will register you as a sole proprietor, and the carriers will text a code to your cell that I will ask you for.</p>
+<p class="ob-note" id="ob-addr-status" role="status" hidden>That looks like a P.O. box or a mailbox service, and the carriers will reject it. Please use the street address where you live or work. It is only used for the registration and never shown on your website.</p>
+<p class="ob-note" id="ob-sole-ein" hidden>For a sole proprietor, the name on your IRS letter is usually your own first and last name, so use that one.</p>
+<p class="ob-note" id="ob-ein-none" hidden>No EIN is fine. I will register your number under your own name, so I need your full legal name and the street address where you live or work. The carriers will text a code to the cell number you give me further down, and I will ask you for it. A number registered this way has a lower daily texting limit, so tell me if you would rather get a free EIN from the IRS first.</p>
 </section>
 
 <section class="ob-google" aria-labelledby="ob-g-h">

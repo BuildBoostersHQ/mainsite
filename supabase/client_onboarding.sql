@@ -78,10 +78,18 @@ alter table public.client_onboarding
   add column if not exists nudges_sent jsonb not null default '{}'::jsonb,
   add column if not exists ghl_phone_number text,
   add column if not exists ghl_review_widget_id text,
-  add column if not exists credit_30_earned_at timestamptz,   -- form and Google step done inside 24 hours: take $30 off their next bill
+  add column if not exists credit_30_earned_at timestamptz,   -- the old $30 credit, replaced by setup_credit_amount
   add column if not exists site_final_basics_at timestamptz,  -- no form after 72 hours, so the site was built from their Google profile
   add column if not exists site_rebuilt_at timestamptz,       -- the form came in after a basics build and the site was built again
-  add column if not exists launch_checklist jsonb;            -- what the launch call still has to cover
+  add column if not exists launch_checklist jsonb,            -- what the launch call still has to cover
+  add column if not exists a2p_details_at timestamptz,        -- sole proprietor with no EIN: when his legal name and street address were first complete
+  add column if not exists onboarding_completed_at timestamptz, -- when the last setup step came in: form, texting registration and Google step
+  add column if not exists onboarding_date date,              -- that same moment as a calendar day, Eastern time
+  add column if not exists setup_credit_amount integer,       -- dollars earned: 50 same day, 20 next day, 0 after that
+  add column if not exists setup_credit_earned_at timestamptz,
+  add column if not exists setup_credit_applied_at timestamptz, -- when it went on his Stripe balance or HighLevel wallet
+  add column if not exists setup_credit_applied_to text,      -- stripe (monthly plans) or ghl_wallet (quarterly and yearly)
+  add column if not exists setup_credit_ref text;             -- the Stripe balance transaction or HighLevel wallet it went to
 
 -- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$

@@ -12,8 +12,10 @@ ok('eastern hour', easternHour(at(9)) === 9 && easternHour(at(20)) === 20);
 ok('unsubmitted client is on the form track only', openTracks({ tier: 'all_in_one' }, {}).join() === 'form');
 ok('form track closes after a basics build', openTracks({ site_final_basics_at: 'x' }, {}).length === 0);
 ok('submitted, nothing else: ein and gmb', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, {}).join() === 'ein,gmb');
-ok('website tier is never asked for an EIN', openTracks({ submitted_at: 'x', tier: 'website' }, {}).join() === 'gmb');
-ok('sole proprietor with no EIN is not asked', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, { a2p_entity_type: 'Sole proprietor with no EIN' }).join() === 'gmb');
+ok('every plan is asked for an EIN, the website tag included', openTracks({ submitted_at: 'x', tier: 'website' }, {}).join() === 'ein,gmb');
+ok('sole proprietor with no EIN is asked for his details instead', openTracks({ submitted_at: 'x', tier: 'all_in_one' }, { a2p_entity_type: 'Sole proprietor with no EIN' }).join() === 'sole,gmb');
+ok('...and not once they are in', openTracks({ submitted_at: 'x', a2p_details_at: 'x' }, { a2p_entity_type: 'Sole proprietor with no EIN' }).join() === 'gmb');
+ok('sole proprietor with an EIN is asked for it', openTracks({ submitted_at: 'x' }, { a2p_entity_type: 'Sole proprietor with an EIN' }).join() === 'ein,gmb');
 ok('all done: no tracks', openTracks({ submitted_at: 'x', tier: 'all_in_one', ein_provided_at: 'x', google_requested_at: 'x' }, {}).length === 0);
 
 let now = at(14);
@@ -35,9 +37,9 @@ const list = launchChecklist({ tier: 'all_in_one', photo_count: 1 }, { business_
 ok('checklist asks for services', list.some((x) => /services/.test(x)));
 ok('checklist asks for the EIN', list.some((x) => /^EIN/.test(x)));
 ok('checklist skips hours when Google had them', !list.some((x) => /hours/.test(x)));
-ok('website tier has no EIN or customer list', !launchChecklist({ tier: 'website' }, {}).some((x) => /EIN|Customer list/.test(x)));
+ok('website tag still owes an EIN but has no customer list', launchChecklist({ tier: 'website' }, {}).some((x) => /^EIN/.test(x)) && !launchChecklist({ tier: 'website' }, {}).some((x) => /Customer list/.test(x)));
 
-const all = [...TEXTS.form, ...TEXTS.ein, ...TEXTS.gmb, TEXTS.basics, TEXTS.customerList].map((f) => f('Dave', 'https://buildboosters.com/start/abc'));
+const all = [...TEXTS.form, ...TEXTS.ein, ...TEXTS.sole, ...TEXTS.gmb, TEXTS.basics, TEXTS.customerList].map((f) => f('Dave', 'https://buildboosters.com/start/abc'));
 ok('every text is signed Automated Maddie or is a last-one text', all.every((t) => /Automated Maddie|Last one from me/.test(t)));
 ok('no em dashes or semicolons', all.every((t) => !/[—;]/.test(t)));
 ok('texts fit in two segments', all.every((t) => t.length <= 306));

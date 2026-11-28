@@ -34,7 +34,7 @@ Create `src/pages/my-page.html` with front matter and push. It's served at `/my-
 `/start/<code>` is the setup page a new client fills in. `/start` on its own shows a sample client and saves nothing.
 
 - `src/pages/start.html`, `assets/css/start.css`, `assets/js/start.js` are the page.
-- `src/pages/start-thank-you.html` and `assets/js/start-thanks.js` are the page they land on after finishing: what is left for the $30, the launch call with add-to-calendar buttons, and what happens next.
+- `src/pages/start-thank-you.html` and `assets/js/start-thanks.js` are the page they land on after finishing: what is left for the setup credit ($50 for finishing the day they paid, $20 for the day after, see `api/_credit.js`), the launch call with add-to-calendar buttons, and what happens next.
 - `api/onboarding.js` is the only thing that talks to Supabase. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in Vercel.
 - `supabase/client_onboarding.sql` creates the table. Run it once in the Supabase SQL editor.
 

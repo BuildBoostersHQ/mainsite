@@ -209,17 +209,38 @@
       box.addEventListener('change', function () { save(key, box.checked, true); });
     });
 
-    /* Website-only clients do not get a texting number, so they are not asked for registration details. */
-    if (/^website/i.test(String(d.tier || '').trim())) { $('ob-a2p').hidden = true; document.querySelector('.ob-google .ob-eyebrow').textContent = 'Start here'; }
+    /* The setup credit: $50 for finishing the day he paid, $20 for the day after, nothing after that. */
+    (function () {
+      var c = d.setup_credit, box = $('ob-credit');
+      if (!c) return;  /* the sample page keeps the wording that is already on it */
+      var acct = c.to === 'ghl_wallet' ? 'I will add it to your account as credit toward your texts.' : 'I will take it off your next bill automatically.';
+      if (c.done && c.earned) {
+        $('ob-credit-title').textContent = 'You earned a $' + c.earned + ' credit';
+        $('ob-credit-text').textContent = 'Everything came in on time, so ' + acct.charAt(0).toLowerCase() + acct.slice(1);
+      } else if (!c.done && c.amount) {
+        var until = new Date(new Date(c.until).getTime() - 60000);
+        var day = until.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric' });
+        $('ob-credit-title').textContent = '$' + c.amount + ' credit when you finish by ' + day.split(',')[0];
+        $('ob-credit-text').textContent = 'Finish this whole page by the end of the day on ' + day + ', including your texting registration and the Google step, and I will credit $' + c.amount + ' to your account.' +
+          (c.amount === 50 ? ' Finishing the day after still gets you $20.' : '');
+      } else box.hidden = true;
+    })();
 
     /* EIN: sent once it is complete, kept in its own private column, and never sent back to this page. */
     var ein = $('ob-ein'), einStatus = $('ob-ein-status'), type = $('ob-a2p_entity_type');
+    var regAddr = $('ob-a2p_address');
     function einMode() {
-      var none = /no EIN/i.test(type.value);
-      $('ob-ein-wrap').hidden = none; $('ob-ein-none').hidden = !none;
+      var none = /no EIN/i.test(type.value), sole = /^sole/i.test(type.value);
+      $('ob-ein-wrap').hidden = none; $('ob-ein-none').hidden = !none; $('ob-sole-ein').hidden = !sole || none;
       if (none) einStatus.hidden = true;
+      /* A sole proprietor registers under his own name, so the labels say so. */
+      $('ob-legal-label').textContent = none ? 'Your full legal name' : sole ? 'Legal name' : 'Legal business name';
+      $('ob-legal-hint').textContent = none ? '(first and last, as on your tax return)' : '(exactly as it appears on your IRS letter)';
+      $('ob-regaddr-label').textContent = sole ? 'Your street address' : 'Business street address';
     }
     type.addEventListener('change', einMode); einMode();
+    function addrCheck() { $('ob-addr-status').hidden = !/\b(p\.?\s*o\.?\s*box|post\s+office\s+box|pmb|private\s+mailbox)\b/i.test(regAddr.value); }
+    regAddr.addEventListener('input', addrCheck); addrCheck();
     if (d.ein_on_file) { einStatus.textContent = 'Your EIN is on file. Type it again only if it has changed.'; einStatus.hidden = /no EIN/i.test(type.value); }
     ein.addEventListener('input', function () {
       var digits = ein.value.replace(/\D/g, '').slice(0, 9);

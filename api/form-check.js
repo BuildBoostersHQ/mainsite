@@ -4,7 +4,8 @@
 //
 // Three reminder tracks, each with its own texts:
 //   form  the setup form has not been submitted
-//   ein   the form is in, but there is no EIN (texting plans only)
+//   ein   the form is in, but there is no EIN (every plan needs one, unless he is a sole proprietor with none)
+//   sole  the form is in, he has no EIN, and his sole proprietor details are not complete
 //   gmb   the form is in, but they have not added us to their Google profile
 //
 // Timing for each track:
@@ -14,7 +15,8 @@
 //
 // Also, once per client:
 //   - with the first form text, Maddie gets the client's name and number so she can call
-//   - a form finished inside 24 hours (Google step included) is flagged for the $30 credit
+//   - the day setup is finished is saved, and finishing the same day or the next day earns the setup
+//     credit ($50 or $20), which is applied on its own (see _credit.js)
 //   - at 72 hours with no form, the site is built from the Google profile ("final with basics")
 //     and everything still missing goes on the launch call checklist
 //   - once the site is built, a text asking them to bring their customer list to the launch call
@@ -24,6 +26,7 @@
 const { sb, allowed, configured, isCron } = require('./_sb');
 const { sendAlert } = require('./alert');
 const { textClient, digits } = require('./_text');
+const { setupCredit, applyCredit, destination, noEin } = require('./_credit');
 
 const TABLE = 'client_onboarding';
 const HOUR = 3600000;
@@ -49,6 +52,11 @@ const TEXTS = {
     (n, url) => `${n}, Automated Maddie here about your EIN again. It's on the letter the IRS sent when you set up the business, and your accountant will have it too: ${url}`,
     (n, url) => `Last one from me about the EIN, ${n}. Real Maddie is going to call you about it next, and she is a lot harder to ignore than I am: ${url}`,
   ],
+  sole: [
+    (n, url) => `Hey ${n}, Automated Maddie here. Since you have no EIN, I register your texting number under your own name. I still need your full legal name and a street address that is not a P.O. box: ${url}`,
+    (n, url) => `Good morning ${n}, Automated Maddie again. The phone carriers turn down P.O. boxes and mailbox services, so I need a real street address with your legal name before your texts can turn on: ${url}`,
+    (n) => `Last one from me about your registration, ${n}. Real Maddie is going to call you about it next, and she is a lot harder to ignore than I am.`,
+  ],
   gmb: [
     (n) => `Hey ${n}, Automated Maddie here. I still need you to add me as a manager on your Google profile so I can post your job photos and keep your hours right. It takes 2 minutes and here are the steps with pictures: ${GOOGLE_STEPS}`,
     (n) => `Good morning ${n}, Automated Maddie again. You stay the owner of your Google profile and you can remove me any time. I just need manager access to do my job: ${GOOGLE_STEPS}`,
@@ -66,8 +74,9 @@ const isWebsiteTier = (r) => /^website/i.test(String(r.tier || '').trim());
 function openTracks(r, a) {
   if (!r.submitted_at) return r.site_final_basics_at ? [] : ['form'];
   const tracks = [];
-  const noEinNeeded = isWebsiteTier(r) || /no EIN/i.test(a.a2p_entity_type || '');
-  if (!noEinNeeded && !r.ein_provided_at && !r.ein_private && !r.a2p_registered_at) tracks.push('ein');
+  // Every plan needs the texting registration. A sole proprietor with no EIN owes his own details in its place.
+  if (noEin(a)) { if (!r.a2p_details_at && !r.a2p_registered_at) tracks.push('sole'); }
+  else if (!r.ein_provided_at && !r.ein_private && !r.a2p_registered_at) tracks.push('ein');
   if (!r.google_requested_at && !r.google_approved_at) tracks.push('gmb');
   return tracks;
 }
@@ -96,7 +105,9 @@ function launchChecklist(r, a) {
   if (!has(a.cell)) items.push('Get their cell number');
   if (!r.sms_consent_at) items.push('Get their yes to service texts');
   if (!r.google_requested_at && !r.google_approved_at) items.push('Add buildboostersgmb@gmail.com as a manager on their Google profile');
-  if (!isWebsiteTier(r) && !/no EIN/i.test(a.a2p_entity_type || '')) {
+  if (noEin(a)) {
+    if (!r.a2p_details_at) items.push('Sole proprietor registration: full legal name and a street address that is not a P.O. box');
+  } else {
     if (!has(a.a2p_legal_name)) items.push('Legal business name and business type for texting registration');
     if (!r.ein_provided_at && !r.ein_private) items.push('EIN for texting registration');
   }
@@ -116,14 +127,36 @@ async function check(r, now, origin, out) {
   const hour = easternHour(now);
   const daytime = hour >= 9 && hour < 19;
 
-  // The $30 credit: form and Google step both finished inside 24 hours of payment.
-  if (r.submitted_at && !r.credit_30_earned_at && r.created_at) {
-    const deadline = new Date(r.created_at).getTime() + 24 * HOUR;
-    const googleAt = r.google_requested_at || r.google_approved_at;
-    if (new Date(r.submitted_at).getTime() <= deadline && googleAt && new Date(googleAt).getTime() <= deadline) {
-      patch.credit_30_earned_at = stamp;
-      await sendAlert('$30 credit earned', `${business} finished setup inside 24 hours. Take $30 off their next bill.`).catch(() => {});
-      out.credits.push(business);
+  // The day setup was finished, and the setup credit that earned. Usually saved the moment the last step
+  // comes in (see onboarding.js). This catches the ones finished another way, like Google access approved by hand.
+  let amount = Number(r.setup_credit_amount || 0);
+  if (!r.onboarding_completed_at) {
+    const c = setupCredit(r, a);
+    if (c.done) {
+      // A client already flagged for the old $30 keeps that and does not earn a second credit.
+      amount = r.credit_30_earned_at ? 0 : c.amount;
+      patch.onboarding_completed_at = c.finished_at;
+      patch.onboarding_date = c.onboarding_date;
+      patch.setup_credit_amount = amount;
+      if (amount) patch.setup_credit_earned_at = stamp;
+    }
+  }
+
+  // Apply an earned credit that is not applied yet. Safe to retry every hour: Stripe and HighLevel both
+  // ignore a repeat of the same request.
+  if (amount > 0 && !r.setup_credit_applied_at) {
+    const where = destination(r) === 'stripe' ? 'Stripe balance' : 'HighLevel wallet';
+    const result = await applyCredit(r, amount);
+    if (result.ok) {
+      patch.setup_credit_applied_at = stamp;
+      patch.setup_credit_applied_to = destination(r);
+      patch.setup_credit_ref = result.ref || null;
+      await sendAlert(`$${amount} setup credit applied`, `${business} earned $${amount} and it is on their ${where}.${destination(r) === 'stripe' ? ' It comes off their next invoice.' : ` Check the first one of these: their complimentary credits should now show $${amount} more${result.balance != null ? ` (HighLevel reports ${result.balance})` : ''}.`}`).catch(() => {});
+      out.credits.push({ client: business, amount, to: destination(r) });
+    } else if (!result.waiting && !nudges.credit_alert) {
+      await sendAlert(`$${amount} setup credit not applied`, `${business} earned $${amount} but it could not go on their ${where}: ${result.reason}. I will keep trying every hour.`).catch(() => {});
+      nudges.credit_alert = stamp;
+      out.failed.push({ client: business, track: 'credit', reason: result.reason });
     }
   }
 
@@ -147,7 +180,8 @@ async function check(r, now, origin, out) {
     }
     // The last EIN or Google text promises a call from the real Maddie.
     if (track !== 'form' && index === TEXTS[track].length - 1 && result.sent) {
-      await sendAlert('Call this client', `${first} at ${business} still owes ${track === 'ein' ? 'their EIN' : 'Google profile access'} after four texts. ${phone ? `Call ${phone}.` : ''}`).catch(() => {});
+      const owed = track === 'ein' ? 'their EIN' : track === 'sole' ? 'their sole proprietor registration details' : 'Google profile access';
+      await sendAlert('Call this client', `${first} at ${business} still owes ${owed} after ${TEXTS[track].length} texts. ${phone ? `Call ${phone}.` : ''}`).catch(() => {});
     }
   }
 
