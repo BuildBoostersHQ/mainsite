@@ -81,7 +81,8 @@ alter table public.client_onboarding
   add column if not exists credit_30_earned_at timestamptz,   -- form and Google step done inside 24 hours: take $30 off their next bill
   add column if not exists site_final_basics_at timestamptz,  -- no form after 72 hours, so the site was built from their Google profile
   add column if not exists site_rebuilt_at timestamptz,       -- the form came in after a basics build and the site was built again
-  add column if not exists launch_checklist jsonb;            -- what the launch call still has to cover
+  add column if not exists launch_checklist jsonb,            -- what the launch call still has to cover
+  add column if not exists addons jsonb not null default '{}'::jsonb;  -- paid add-ons and offers: { gbp_optimization: { paid_at, session_id, amount }, seo_upsell_sent_at }
 
 -- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$

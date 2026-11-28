@@ -118,6 +118,8 @@ module.exports = async function handler(req, res) {
         // The $30 thank-you runs out 24 hours after the client's page was created.
         credit_deadline: row.created_at ? new Date(new Date(row.created_at).getTime() + 24 * 3600 * 1000).toISOString() : '',
         options: row.options || {},
+        // Names of the add-ons this client has already paid for, so the page does not offer them again.
+        addons_paid: Object.keys(row.addons || {}).filter((k) => row.addons[k] && row.addons[k].paid_at),
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
         answers: { ...(row.prefill || {}), ...(row.answers || {}) },
       });

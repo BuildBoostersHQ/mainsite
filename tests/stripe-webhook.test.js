@@ -214,3 +214,33 @@ function signEvent(event) {
 
   console.log('All tests passed.');
 })();
+
+// ---- addonFromSession ----
+console.log('addonFromSession:');
+{
+  const { addonFromSession } = require('../api/stripe-webhook');
+  const code = 'a'.repeat(32);
+  const checks = [
+    ['plan payment is not an add-on', addonFromSession({ metadata: { tier: 'all_in_one' } }) === null],
+    ['no metadata is not an add-on', addonFromSession({}) === null],
+    ['add-on with a code', (() => { const a = addonFromSession({ id: 'cs_1', amount_total: 34900, client_reference_id: code, metadata: { addon: 'gbp_optimization' } }); return a && a.addon === 'gbp_optimization' && a.code === code && a.amount === 34900 && a.session_id === 'cs_1'; })()],
+    ['add-on with a bad code keeps the add-on and drops the code', (() => { const a = addonFromSession({ client_reference_id: 'nope', metadata: { addon: 'GBP_Optimization' } }); return a && a.addon === 'gbp_optimization' && a.code === ''; })()],
+    ['a strange add-on name is ignored', addonFromSession({ metadata: { addon: 'x y;drop' } }) === null],
+  ];
+  for (const [label, ok] of checks) { console.log(ok ? '  PASS' : '  FAIL', label); if (!ok) process.exit(1); }
+}
+
+// ---- seoOfferText ----
+console.log('seoOfferText:');
+{
+  const { seoOfferText } = require('../api/launch');
+  const full = seoOfferText('Dave', 'Handy Danny', 'Palm Beach');
+  const bare = seoOfferText('', '', '');
+  const checks = [
+    ['uses the name, business and city', /^Hey Dave, it's Maddie/.test(full) && full.includes('Handy Danny') && full.includes('in Palm Beach')],
+    ['works with nothing known', /^Hey, it's Maddie/.test(bare) && bare.includes('your business') && !bare.includes(' in  ')],
+    ['carries no link and no dash', !/https?:|—/.test(full)],
+    ['fits in two text segments', full.length <= 306],
+  ];
+  for (const [label, ok] of checks) { console.log(ok ? '  PASS' : '  FAIL', label); if (!ok) process.exit(1); }
+}

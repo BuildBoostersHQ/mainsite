@@ -117,6 +117,45 @@ async function loadEvent(req, webhookSecret) {
   return { event: null, reason: 'raw_body_unavailable' };
 }
 
+// An add-on bought from the setup page. The payment link carries the tag addon (for example
+// gbp_optimization) and the setup page passes the client's code as client_reference_id.
+// Returns null for an ordinary plan payment.
+function addonFromSession(session) {
+  const meta = (session && session.metadata) || {};
+  const addon = String(meta.addon || '').trim().toLowerCase();
+  if (!/^[a-z0-9_]{2,40}$/.test(addon)) return null;
+  const code = String(session.client_reference_id || meta.code || '').trim();
+  return { addon, code: /^[a-f0-9]{32}$/.test(code) ? code : '', amount: session.amount_total || 0, session_id: session.id || '' };
+}
+
+// Records a paid add-on on the client's row. Maddie is alerted first, so a payment is never lost
+// even when the row cannot be found or the addons column has not been added yet.
+async function recordAddon(a, who) {
+  const { sendAlert } = require('./alert');
+  const dollars = `$${(a.amount / 100).toFixed(0)}`;
+  let saved = false;
+  let business = '';
+  try {
+    if (a.code) {
+      const rows = await sb(`${TABLE}?code=eq.${a.code}&select=prefill,answers,addons&limit=1`);
+      if (rows.length) {
+        business = ({ ...(rows[0].prefill || {}), ...(rows[0].answers || {}) }).business_name || '';
+        const addons = { ...(rows[0].addons || {}), [a.addon]: { paid_at: new Date().toISOString(), session_id: a.session_id, amount: a.amount } };
+        await sb(`${TABLE}?code=eq.${a.code}`, { method: 'PATCH', body: JSON.stringify({ addons }) });
+        saved = true;
+      }
+    }
+  } catch (e) {
+    console.error('stripe-webhook: add-on not saved:', e.message);
+  }
+  try {
+    await sendAlert('Add-on paid', `${business || who || 'A client'} paid ${dollars} for ${a.addon.replace(/_/g, ' ')}.${saved ? '' : ' It could not be saved to their record, so note it by hand.'}`);
+  } catch (e) {
+    console.error('stripe-webhook: add-on alert failed:', e.message);
+  }
+  return saved;
+}
+
 function firstName(full) {
   return String(full || '').trim().split(/\s+/)[0] || '';
 }
@@ -140,6 +179,14 @@ module.exports = async function handler(req, res) {
 
     const session = event.data && event.data.object;
     if (!session) return res.status(200).json({ ok: true, skipped: 'no_session_object' });
+
+    // A paid add-on belongs to a client who already exists, so it never creates a new one.
+    const addon = addonFromSession(session);
+    if (addon) {
+      const d = session.customer_details || {};
+      const saved = await recordAddon(addon, d.business_name || d.name || d.email || '');
+      return res.status(200).json({ ok: true, addon: addon.addon, saved });
+    }
 
     const meta = session.metadata || {};
     const details = session.customer_details || {};
@@ -291,3 +338,4 @@ module.exports = async function handler(req, res) {
 module.exports.tierFromAmount = tierFromAmount;
 module.exports.verifySignature = verifySignature;
 module.exports.readRawBody = readRawBody;
+module.exports.addonFromSession = addonFromSession;

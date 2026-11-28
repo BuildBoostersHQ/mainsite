@@ -202,6 +202,19 @@
     /* Clients who prepay (quarterly, six months or annual) also get their Google profile kept in step with the site. */
     if (/^(quarterly|six[_ -]?months?|6[_ -]?months?|annual|annually|yearly)$/i.test(String(d.billing_cycle || '').trim())) $('ob-gupd').hidden = false;
 
+    /* One optional add-on, offered to clients on the website plan. The Stripe payment link goes in GBP_ADDON_LINK
+       (or in options.gbp_addon_link for one client). It needs the tag addon = gbp_optimization, and the client's
+       code rides along so the payment lands on their record. With no link set, the section stays hidden. */
+    var GBP_ADDON_LINK = '';
+    var addonLink = String((d.options && d.options.gbp_addon_link) || GBP_ADDON_LINK || '').trim();
+    var addonPaid = (d.addons_paid || []).indexOf('gbp_optimization') > -1;
+    if (addonPaid) {
+      $('ob-addon').hidden = false; $('ob-addon-btn').hidden = true; $('ob-addon-note').hidden = true; $('ob-addon-done').hidden = false;
+    } else if (code && /^https:\/\/buy\.stripe\.com\//.test(addonLink) && /^(website|essentials)/i.test(String(d.tier || '').trim())) {
+      $('ob-addon').hidden = false;
+      $('ob-addon-btn').href = addonLink + (addonLink.indexOf('?') > -1 ? '&' : '?') + 'client_reference_id=' + encodeURIComponent(code);
+    }
+
     /* Plain yes or no checkboxes. */
     root.querySelectorAll('[data-flag]').forEach(function (box) {
       var key = box.getAttribute('data-flag');
