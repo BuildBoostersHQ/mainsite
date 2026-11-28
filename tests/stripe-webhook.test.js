@@ -181,7 +181,7 @@ function signEvent(event) {
     const { body, sig } = signPretty(paid());
     const res = makeRes(); await handler(vercelReq(body, sig), res);
     must('indented payload from the stream verifies', res.code === 200 && res.data.ok === true);
-    must('tier comes from the link tags', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly');
+    must('the website tag on an Essentials link is saved as essentials', lastInsert.tier === 'essentials' && lastInsert.billing_cycle === 'monthly');
     must('business name from checkout is used', lastInsert.prefill.business_name === 'Smith Pressure Washing');
     must('first name is the person, not the business', lastInsert.owner_first_name === 'Dave'); }
 
@@ -204,10 +204,10 @@ function signEvent(event) {
     const res = makeRes(); await handler(vercelReq(body, sig, { stream: false }), res);
     global.fetch = realFetch; delete process.env.STRIPE_SECRET_KEY;
     must('falls back to fetching the event from Stripe', res.code === 200 && res.data.ok === true);
-    must('untagged $444 payment is the website plan, monthly', lastInsert.tier === 'website' && lastInsert.billing_cycle === 'monthly'); }
+    must('untagged $444 payment is Essentials, monthly', lastInsert.tier === 'essentials' && lastInsert.billing_cycle === 'monthly'); }
 
   for (const [cents, tier, cycle] of [[57600, 'all_in_one', 'monthly'], [82900, 'all_in_one', 'quarterly'], [279000, 'all_in_one', 'annual'],
-    [79400, 'dominance', 'monthly'], [142500, 'dominance', 'quarterly'], [497000, 'dominance', 'annual'], [42700, 'website', 'quarterly'], [147000, 'website', 'annual']]) {
+    [79400, 'dominance', 'monthly'], [142500, 'dominance', 'quarterly'], [497000, 'dominance', 'annual'], [42700, 'essentials', 'quarterly'], [147000, 'essentials', 'annual']]) {
     const r = tierFromAmount(cents);
     must(`$${cents / 100} -> ${tier}/${cycle}`, r.tier === tier && r.billing_cycle === cycle);
   }

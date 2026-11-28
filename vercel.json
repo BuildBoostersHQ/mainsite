@@ -22,6 +22,10 @@
   ],
   "rewrites": [
     {
+      "source": "/welcome/:code",
+      "destination": "/welcome"
+    },
+    {
       "source": "/start/:code",
       "destination": "/start"
     },

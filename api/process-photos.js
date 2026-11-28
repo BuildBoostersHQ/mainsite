@@ -15,7 +15,7 @@ const { sendAlert } = require('./alert');
 
 const BUCKET = 'client-photos';
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-const HAIKU_MODEL = 'claude-haiku-4-20250514';
+const HAIKU_MODEL = 'claude-haiku-5-5';
 
 const baseUrl = () => String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 const secret = () => String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();

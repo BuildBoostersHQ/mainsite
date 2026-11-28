@@ -1,7 +1,7 @@
 ---
 layout: bare
 title: Welcome | Build Boosters
-description: You are in. Check your phone for your setup link.
+description: You are in. Two quick things and your setup page is ready.
 robots: noindex
 chat: false
 tracking: false
@@ -9,103 +9,108 @@ sitemap: false
 ---
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Dancing+Script:wght@600&family=Barlow+Condensed:wght@700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/start.css">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
-  background: #0b2440;
-  color: #c8ddf0;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.welcome {
-  max-width: 540px;
-  margin: 0 auto;
-  padding: 60px 24px;
-  text-align: center;
-}
-.welcome-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  margin-bottom: 48px;
-}
-.welcome-logo svg {
-  width: 28px; height: 28px;
-  stroke: #f2a20c; stroke-width: 2; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-.welcome-logo b {
-  font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.01em;
-}
-.welcome-check {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(242, 162, 12, 0.12);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 28px;
-}
-.welcome-check svg {
-  width: 28px; height: 28px;
-  stroke: #f2a20c; stroke-width: 2.5; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-.welcome h1 {
-  font-size: 32px; font-weight: 800; color: #fff;
-  letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 16px;
-}
-.welcome .lead {
-  font-size: 17px; line-height: 1.7; color: #93b4d4; margin-bottom: 40px;
-}
-.welcome-steps { text-align: left; margin-bottom: 40px; }
-.welcome-step {
-  display: flex; gap: 16px; align-items: flex-start;
-  padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.welcome-step:last-child { border-bottom: none; }
-.welcome-step-num {
-  font-size: 15px; font-weight: 800; color: #f2a20c; flex-shrink: 0; padding-top: 1px;
-}
-.welcome-step-text { font-size: 15px; line-height: 1.6; color: #c8ddf0; }
-.welcome-step-text strong { color: #fff; font-weight: 700; }
-.welcome-fallback {
-  font-size: 14px; color: rgba(147, 180, 212, 0.6); line-height: 1.6;
-}
-.welcome-fallback a { color: #f2a20c; text-decoration: none; }
-.welcome-fallback a:hover { text-decoration: underline; }
+.wl-req{color:#8a5a00;font-weight:700}
+.wl-picked{display:flex;align-items:center;gap:16px;padding:16px 18px;border:1.5px solid #0b2440;border-radius:8px;background:#f4f6f9;margin-top:16px}
+.wl-picked .ob-biz-name,.wl-picked .ob-biz-addr{white-space:normal}
+.wl-bad{border-color:#b3261e!important}
+.wl-search{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.wl-search>div{min-width:0}
 </style>
 
-<div class="welcome">
-  <a class="welcome-logo" href="/" aria-label="Build Boosters home">
-    <svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
-    <b>Build Boosters</b>
-  </a>
+<div class="ob" id="wl" data-state="loading">
+<div class="ob-w">
 
-  <div class="welcome-check">
-    <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-  </div>
+<a class="ob-logo" href="/" aria-label="Build Boosters home">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20V10l7-6 7 6v10"/><path d="M9 15l3-3 3 3"/><path d="M12 12v8"/></svg>
+<span><b>Build Boosters</b><small>Systems for contractors</small></span>
+</a>
 
-  <h1>You're in.</h1>
-  <p class="lead">We just texted you a link to your setup page. It takes about 5 minutes to fill in, and we start building your site the moment you finish.</p>
+<p class="ob-msg" id="wl-loading" role="status">Thank you! I am pulling up your account, and it only takes a few seconds.</p>
 
-  <div class="welcome-steps">
-    <div class="welcome-step">
-      <span class="welcome-step-num">1.</span>
-      <div class="welcome-step-text"><strong>Check your phone.</strong> You should have a text from us with your setup link. Open it and fill in the details about your business.</div>
-    </div>
-    <div class="welcome-step">
-      <span class="welcome-step-num">2.</span>
-      <div class="welcome-step-text"><strong>We build your site.</strong> Once you submit the form, we start right away. You will get a text when there is something to look at.</div>
-    </div>
-    <div class="welcome-step">
-      <span class="welcome-step-num">3.</span>
-      <div class="welcome-step-text"><strong>Launch call.</strong> We walk through everything together, make any changes you want, and put it live.</div>
-    </div>
-  </div>
-
-  <p class="welcome-fallback">Did not get the text? Give it a minute, then text me directly at <a href="sms:+17869338832">(786) 933-8832</a> or email <a href="mailto:hello@buildboosters.com">hello@buildboosters.com</a> and I will send you a fresh link.</p>
+<!-- Shown when the account cannot be found from this page, so the buyer still knows what to do. -->
+<div class="ob-msg" id="wl-phone" hidden>
+<h2>You're in.</h2>
+<p>I just texted you a link to your setup page. Open it on your phone, and the first thing it asks for is your EIN, because your texting number is the part that takes the carriers the longest to approve.</p>
+<p>If the text has not arrived in a couple of minutes, text me at <a href="sms:+17869338832">(786) 933-8832</a> or email <a href="mailto:hello@buildboosters.com">hello@buildboosters.com</a> and I will send you a fresh link.</p>
 </div>
+
+<div class="ob-cols" id="wl-main" hidden>
+<main class="ob-main">
+
+<h1>You're in, <span data-fill="first_name">friend</span>! I need two quick things from you.</h1>
+<p class="ob-lead">Your texting number is the part that takes the phone carriers the longest to approve, so I ask for those details right now. After that I find your Google profile, which fills in half of your setup page for you.</p>
+<p class="ob-meta">It takes about two minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
+
+<div class="ob-thanks ob-thanks-top" id="wl-credit" hidden>
+<div class="ob-thirty" id="wl-credit-title"></div>
+<p id="wl-credit-text"></p>
+</div>
+
+<section class="ob-sec" id="wl-a2p">
+<h2>For your texting number <span class="wl-req">(required)</span></h2>
+<p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN and your date of birth are kept private, they are used only for that registration, and I delete them as soon as your number is approved.</p>
+<div class="ob-grid">
+<div><label for="wl-a2p_entity_type">Business type</label><select id="wl-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor</option><option>Sole proprietor with no EIN</option></select></div>
+<div id="wl-ein-wrap"><label for="wl-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="wl-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
+<div class="ob-full ob-narrow"><label for="wl-a2p_legal_name">Legal business name <span class="ob-hint" id="wl-legal-hint">(exactly as it appears on your IRS letter)</span></label><input id="wl-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
+<div><label for="wl-a2p_first_name">Your legal first name</label><input id="wl-a2p_first_name" data-key="a2p_first_name" type="text" autocomplete="given-name"></div>
+<div><label for="wl-a2p_last_name">Your legal last name</label><input id="wl-a2p_last_name" data-key="a2p_last_name" type="text" autocomplete="family-name"></div>
+<div class="ob-full"><label for="wl-a2p_address">Business street address <span class="ob-hint">(a real street address, because the carriers turn down P.O. boxes and rented mailboxes)</span></label><input id="wl-a2p_address" type="text" autocomplete="street-address" placeholder="1420 SW 8th St, Miami, FL 33135"></div>
+<div><label for="wl-birthday">Your date of birth</label><input id="wl-birthday" type="date" autocomplete="bday"></div>
+</div>
+<p class="ob-note" id="wl-address-status" role="status" hidden></p>
+<p class="ob-note" id="wl-ein-status" role="status" hidden></p>
+<p class="ob-note" id="wl-birthday-status" role="status" hidden></p>
+<p class="ob-note" id="wl-ein-none" hidden>No EIN is fine. I will register you as a sole proprietor under your own name, and the carriers will text a code to your cell that I will ask you for.</p>
+<p class="ob-note" id="wl-sole-note" hidden>A sole proprietor with an EIN registers under the name on the IRS letter, which is usually your own full name.</p>
+</section>
+
+<section class="ob-sec" id="wl-google">
+<h2>Find your business on Google</h2>
+<p class="ob-sub">Pick your Google profile and I will pull your name, phone, address and hours from it, so you only have to check them on your setup page.</p>
+
+<div id="wl-found" hidden>
+<div class="wl-picked"><div class="ob-biz-info"><div class="ob-biz-name" id="wl-found-name"></div><div class="ob-biz-addr" id="wl-found-addr"></div></div></div>
+<p class="ob-note" id="wl-found-note">Is this your business?</p>
+<div class="ob-row" id="wl-found-row">
+<button class="ob-btn ob-btn-navy" type="button" id="wl-found-yes">Yes, that is us</button>
+<button class="ob-btn ob-btn-line" type="button" id="wl-found-no">No, let me search</button>
+</div>
+</div>
+
+<div id="wl-find" hidden>
+<div class="wl-search">
+<div style="flex:2 1 220px"><label for="wl-find-q">Business name</label><input id="wl-find-q" type="text" placeholder="Smith Plumbing" autocomplete="off"></div>
+<div style="flex:1 1 140px"><label for="wl-find-city">City</label><input id="wl-find-city" type="text" placeholder="Miami" autocomplete="off"></div>
+</div>
+<div class="ob-row">
+<button class="ob-btn ob-btn-navy" type="button" id="wl-find-btn">Search Google</button>
+<button class="ob-btn ob-btn-line" type="button" id="wl-find-skip">I am not on Google yet</button>
+</div>
+<p class="ob-note" id="wl-find-status" role="status" hidden></p>
+<div id="ob-find-results" hidden></div>
+</div>
+</section>
+
+<div class="ob-end">
+<p class="ob-err" id="wl-err" role="alert" hidden></p>
+<button class="ob-btn ob-btn-navy ob-btn-big" type="button" id="wl-next">Save this and open my setup page</button>
+</div>
+
+</main>
+
+<aside class="ob-side">
+<p>Thank you for trusting me with your business. The sooner these two things are in, the sooner your texting number gets approved and your full website goes live.</p>
+<p>I also texted you a link to your setup page, so you can always pick this back up from your phone.</p>
+<div class="ob-sig">Maddie</div>
+<p class="ob-help">If you get stuck on anything, text me at (786) 933-8832 and I will walk you through it.</p>
+</aside>
+</div>
+
+</div>
+</div>
+<script src="/assets/js/credit.js" defer></script>
+<script src="/assets/js/welcome.js" defer></script>

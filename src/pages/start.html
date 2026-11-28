@@ -48,23 +48,29 @@ sitemap: false
 <p class="ob-lead" id="ob-lead-manual" hidden>Tell me about your business and which services you offer, and I'll take it from here.</p>
 <p class="ob-meta">It takes about six minutes, and your answers save as you go. <span id="ob-saved" role="status" aria-live="polite"></span></p>
 
-<div class="ob-thanks ob-thanks-top">
+<div class="ob-thanks ob-thanks-top" id="ob-credit">
 <div class="ob-eyebrow ob-eyebrow-dark">A little thank you</div>
-<div class="ob-thirty">$30 off your next bill</div>
-<p>Finish your setup and add me to your Google profile within 24 hours. I'll apply $30 off your next bill.</p>
+<div class="ob-thirty" id="ob-credit-title">$50 off your next bill</div>
+<p id="ob-credit-text">Finish your setup and add me to your Google profile the same day you sign up, and $50 comes off your next bill automatically. If it takes you until the next day, it is $20.</p>
 </div>
 
 <section class="ob-sec" id="ob-a2p">
 <div class="ob-eyebrow ob-eyebrow-dark">Start here</div>
 <h2>For your texting number</h2>
-<p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN is kept private, it is used only for that registration, and I delete it as soon as your number is approved.</p>
+<p class="ob-sub">The phone carriers make every business register before it can send texts, and these are the details they ask for. Your EIN and your date of birth are kept private, they are used only for that registration, and I delete them as soon as your number is approved.</p>
 <div class="ob-grid">
 <div class="ob-full ob-narrow"><label for="ob-a2p_legal_name">Legal business name <span class="ob-hint">(exactly as it appears on your IRS letter)</span></label><input id="ob-a2p_legal_name" data-key="a2p_legal_name" type="text" autocomplete="off"></div>
-<div><label for="ob-a2p_entity_type">Business type</label><select id="ob-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor with no EIN</option></select></div>
+<div><label for="ob-a2p_entity_type">Business type</label><select id="ob-a2p_entity_type" data-key="a2p_entity_type"><option value="">Choose one</option><option>LLC</option><option>Corporation</option><option>Partnership</option><option>Sole proprietor</option><option>Sole proprietor with no EIN</option></select></div>
 <div id="ob-ein-wrap"><label for="ob-ein">EIN <span class="ob-hint">(9 digits)</span></label><input id="ob-ein" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="12-3456789"></div>
+<div><label for="ob-a2p_first_name">Your legal first name</label><input id="ob-a2p_first_name" data-key="a2p_first_name" type="text" autocomplete="given-name"></div>
+<div><label for="ob-a2p_last_name">Your legal last name</label><input id="ob-a2p_last_name" data-key="a2p_last_name" type="text" autocomplete="family-name"></div>
+<div class="ob-full"><label for="ob-a2p_address">Business street address <span class="ob-hint">(a real street address, because the carriers turn down P.O. boxes and rented mailboxes)</span></label><input id="ob-a2p_address" data-key="a2p_address" type="text" autocomplete="street-address"></div>
+<div><label for="ob-birthday">Your date of birth</label><input id="ob-birthday" type="date" autocomplete="bday"></div>
 </div>
+<p class="ob-note" id="ob-birthday-status" role="status" hidden></p>
 <p class="ob-note" id="ob-ein-status" role="status" hidden></p>
-<p class="ob-note" id="ob-ein-none" hidden>No EIN is fine. I will register you as a sole proprietor, and the carriers will text a code to your cell that I will ask you for.</p>
+<p class="ob-note" id="ob-ein-none" hidden>No EIN is fine. I will register you as a sole proprietor under your own name, and the carriers will text a code to your cell that I will ask you for.</p>
+<p class="ob-note" id="ob-sole-note" hidden>A sole proprietor with an EIN registers under the name on the IRS letter, which is usually your own full name.</p>
 </section>
 
 <section class="ob-google" aria-labelledby="ob-g-h">
@@ -101,17 +107,17 @@ sitemap: false
 
 <section class="ob-sec">
 <h2>What work do you do?</h2>
-<p class="ob-sub">Choose every service you offer, up to 12. I'll give each one its own page on your website.</p>
+<p class="ob-sub">Choose every service you offer, up to <span data-limit-for="services">12</span>. I'll give each one its own page on your website.</p>
 <div class="ob-chips" data-chips="services" data-limit="12" role="group" aria-label="Services"></div>
-<p class="ob-cap" id="ob-cap-services" role="status" hidden>That is 12, which is the most your site can hold. Untap one if you want to swap it for another.</p>
+<p class="ob-cap" id="ob-cap-services" role="status" hidden>That is <span data-limit-for="services">12</span> services, which is the most your plan holds. Untap one if you want to swap it for another.</p>
 <div class="ob-one"><label for="ob-services_other">Anything we missed?</label><input id="ob-services_other" data-key="services_other" type="text" placeholder="Old-house repiping, tankless installs"></div>
 </section>
 
 <section class="ob-sec">
 <h2>Where will you drive for a job?</h2>
-<p class="ob-sub">Tap the towns you cover, up to 10, and your site gets a page for each one so people nearby can find you.</p>
+<p class="ob-sub">Tap the towns you cover, up to <span data-limit-for="areas">14</span>, and your site gets a page for each one so people nearby can find you.</p>
 <div class="ob-chips" data-chips="areas" data-limit="10" role="group" aria-label="Service areas"></div>
-<p class="ob-cap" id="ob-cap-areas" role="status" hidden>That is 10 towns, which is the most your site can hold. Untap one if you want to swap it for another.</p>
+<p class="ob-cap" id="ob-cap-areas" role="status" hidden>That is <span data-limit-for="areas">14</span> towns, which is the most your plan holds. Untap one if you want to swap it for another.</p>
 <div class="ob-one"><label for="ob-areas_other">Service more areas?</label><input id="ob-areas_other" data-key="areas_other" type="text" placeholder="Key Biscayne, South Miami"></div>
 </section>
 
@@ -207,4 +213,5 @@ sitemap: false
 
 </div>
 </div>
+<script src="/assets/js/credit.js" defer></script>
 <script src="/assets/js/start.js" defer></script>

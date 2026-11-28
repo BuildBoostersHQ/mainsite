@@ -124,7 +124,7 @@ module.exports = async function handler(req, res) {
         a2p_status: r.a2p_status || '', a2p_status_at: r.a2p_status_at || null, a2p_reason: r.a2p_reason || '',
         a2p_approved_at: r.a2p_registered_at || null, site_rebuild_requested_at: r.site_rebuild_requested_at || null,
         has_location_id: !!r.ghl_location_id, has_deploy_hook: !!r.site_deploy_hook,
-        credit_30: !!r.credit_30_earned_at, built_with_basics: !!r.site_final_basics_at, launch_checklist: r.launch_checklist || [],
+        credit_30: !!r.credit_30_earned_at, setup_credit: r.setup_credit_amount || (r.credit_30_earned_at ? 30 : 0), setup_credit_applied: !!r.setup_credit_applied_at, setup_done_at: r.setup_done_at || null, built_with_basics: !!r.site_final_basics_at, launch_checklist: r.launch_checklist || [],
         // For the launch deck on the dashboard
         logo_url: a.logo_url || '', site_domain: r.site_domain || '', site_built: !!r.site_created_at, goals: a.sales_notes || a.goals || '',
         services: Array.isArray(a.services) ? a.services : [], areas: Array.isArray(a.areas) ? a.areas : [],

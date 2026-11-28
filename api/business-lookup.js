@@ -5,6 +5,8 @@
 //
 // GET /api/business-lookup?q=Smith+Plumbing+Miami
 //   Returns up to 5 matching businesses with name, address, phone, hours, rating, reviews.
+// GET /api/business-lookup?address=1420+SW+8th+St+Miami+FL
+//   Checks that a texting registration address is a real street address and not a mailbox.
 //
 // No auth required (public form calls this). Rate-limited by keeping it simple.
 // Needs: GOOGLE_PLACES_KEY in Vercel.
@@ -125,6 +127,36 @@ async function lookupByPhone(phone) {
   return cleanResult(await placeDetails(found[0].place_id, key));
 }
 
+// Checks that a texting registration address is a real street address. The carriers turn down P.O. boxes
+// and rented mailboxes, so those are refused before Google is even asked.
+// Returns { ok, formatted, checked, reason }. When Google cannot be asked, the address passes unchecked
+// so a client is never stuck on this step.
+const MAILBOX = /\b(p\.?\s*o\.?\s*box|post\s+office\s+box|pmb|private\s+mail\s*box|mail\s*stop)\b/i;
+const REAL_PLACE = ['street_address', 'premise', 'subpremise', 'establishment', 'point_of_interest'];
+
+async function checkAddress(address) {
+  const text = String(address || '').trim().slice(0, 300);
+  if (text.length < 8 || !/\d/.test(text)) return { ok: false, reason: 'too_short' };
+  if (MAILBOX.test(text)) return { ok: false, reason: 'mailbox' };
+  const key = (process.env.GOOGLE_PLACES_KEY || '').trim();
+  if (!key) return { ok: true, checked: false, formatted: text };
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(text)}&inputtype=textquery&fields=formatted_address,types&key=${key}`;
+    const res = await fetch(url);
+    const data = res.ok ? await res.json() : null;
+    if (!data || (data.status !== 'OK' && data.status !== 'ZERO_RESULTS')) return { ok: true, checked: false, formatted: text };
+    const hit = (data.candidates || [])[0];
+    if (!hit) return { ok: false, reason: 'not_found' };
+    const types = hit.types || [];
+    if (types.includes('post_office') || types.includes('post_box')) return { ok: false, reason: 'mailbox' };
+    if (!types.some((t) => REAL_PLACE.includes(t))) return { ok: false, reason: 'not_specific' };
+    const formatted = String(hit.formatted_address || text).replace(/,\s*(USA|United States)$/i, '');
+    return { ok: true, checked: true, formatted };
+  } catch (e) {
+    return { ok: true, checked: false, formatted: text };
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   // CORS for the form page
@@ -132,6 +164,11 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
+
+  // GET /api/business-lookup?address=... checks a texting registration address.
+  if (req.query && req.query.address !== undefined) {
+    return res.status(200).json(await checkAddress(req.query.address));
+  }
 
   const key = (process.env.GOOGLE_PLACES_KEY || '').trim();
   if (!key) {
@@ -184,3 +221,4 @@ module.exports = async function handler(req, res) {
   }
 };
 module.exports.lookupByPhone = lookupByPhone;
+module.exports.checkAddress = checkAddress;

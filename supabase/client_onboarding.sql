@@ -4,7 +4,7 @@ create table if not exists public.client_onboarding (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Za-z0-9_-]{12,64}$'),  -- the private part of the client's link
   owner_first_name text,
-  tier text,                      -- 'website', 'all_in_one' or 'ads'. Website clients are not asked for texting registration details
+  tier text,                      -- 'essentials', 'all_in_one' or 'dominance'. 'website' is the old website-only plan, the one plan with no texting registration
   billing_cycle text,             -- 'monthly', 'quarterly', 'six_month' or 'annual'. Everyone but monthly sees the Google updates note
   launch_call_at text,            -- shown as written, for example 'Thursday at 2:00 PM'
   launch_call_start timestamptz,  -- the real date and time, used for the add-to-calendar buttons
@@ -78,16 +78,24 @@ alter table public.client_onboarding
   add column if not exists nudges_sent jsonb not null default '{}'::jsonb,
   add column if not exists ghl_phone_number text,
   add column if not exists ghl_review_widget_id text,
-  add column if not exists credit_30_earned_at timestamptz,   -- form and Google step done inside 24 hours: take $30 off their next bill
+  add column if not exists credit_30_earned_at timestamptz,   -- the old $30 credit, kept for clients who earned it before the $50 and $20 credit replaced it
   add column if not exists site_final_basics_at timestamptz,  -- no form after 72 hours, so the site was built from their Google profile
   add column if not exists site_rebuilt_at timestamptz,       -- the form came in after a basics build and the site was built again
-  add column if not exists launch_checklist jsonb;            -- what the launch call still has to cover
+  add column if not exists launch_checklist jsonb,            -- what the launch call still has to cover
+  add column if not exists dob_private text,                  -- the owner's date of birth, for texting registration only. Never sent back to the page
+  add column if not exists welcome_done_at timestamptz,       -- they finished the page they land on after paying
+  add column if not exists setup_done_at timestamptz,         -- the day setup was finished: form, Google step and EIN all in
+  add column if not exists setup_credit_amount integer,       -- 50 for finishing on the day they paid, 20 for the next day, 0 for later
+  add column if not exists setup_credit_earned_at timestamptz,
+  add column if not exists setup_credit_applied_at timestamptz, -- when the credit went onto their Stripe balance
+  add column if not exists setup_credit_stripe_id text;       -- the Stripe balance transaction, so it can be found again
 
--- The EIN is deleted the moment a2p_registered_at is filled in, so it never outlives the registration.
+-- The EIN and the date of birth are deleted the moment a2p_registered_at is filled in, so they never outlive the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
 begin
-  if new.a2p_registered_at is not null and new.ein_private is not null then
+  if new.a2p_registered_at is not null and (new.ein_private is not null or new.dob_private is not null) then
     new.ein_private := null;
+    new.dob_private := null;
     new.ein_deleted_at := now();
   end if;
   return new;
