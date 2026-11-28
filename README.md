@@ -98,3 +98,15 @@ npx serve dist   # or any static server with clean URLs
 ## Still connected to GoHighLevel
 
 Forms are read by GHL's external tracking script; the chat widget, booking calendars, payment links, demo webhooks and images all come from GHL and work on any domain.
+
+## Competitor section on demo sites
+
+Add `comp` (the competitor's name) and `compkw` (up to four searches, separated by `|`) to any demo link and a section appears under the hero naming that competitor and the searches they show up for. Leave either one off and the section stays hidden. Only use searches that were checked for that prospect's town.
+
+```
+/demo?biz=Dave%27s%20Pressure%20Washing&city=Hialeah&comp=Ruiz%20Pressure%20Cleaning&compkw=pressure%20washing%20hialeah|driveway%20cleaning%20near%20me
+```
+
+## Add-on on the setup page
+
+`/start/<code>` offers Google Business Profile optimization ($349, one time) to clients on the website plan. It stays hidden until a Stripe payment link is set in `GBP_ADDON_LINK` at the top of the add-on block in `assets/js/start.js` (or in one client's `options.gbp_addon_link`). The payment link needs the tag `addon` = `gbp_optimization`. The page adds the client's code to the link, and `/api/stripe-webhook` saves the payment in the `addons` column and texts Maddie. Run the latest `supabase/client_onboarding.sql` once to add that column.

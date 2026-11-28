@@ -156,6 +156,8 @@ module.exports = async function handler(req, res) {
         // The setup credit: $50 for finishing on the day they paid, $20 for the next day.
         credit: creditInfo(row),
         options: row.options || {},
+        // Names of the add-ons this client has already paid for, so the page does not offer them again.
+        addons_paid: Object.keys(row.addons || {}).filter((k) => row.addons[k] && row.addons[k].paid_at),
         // What we pulled from Google first, then anything the client has confirmed or changed on top.
         answers: { ...(row.prefill || {}), ...(row.answers || {}) },
       });

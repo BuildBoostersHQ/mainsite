@@ -217,3 +217,37 @@ function bubble(){var f=document.querySelector('form#estimate')||document.queryS
  f.addEventListener('submit',function(){t.remove()},{once:true});b.addEventListener('click',function(){t.remove()},{once:true});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bubble);else bubble();
 })();
+
+/* ---- competitor teardown: a section under the hero naming a nearby competitor and the Google searches
+   they show up for. Only appears when the demo link carries both comp (the competitor's name) and compkw
+   (the searches, separated by |). Example: ?comp=Ruiz%20Roofing&compkw=roof%20repair%20miami|roof%20leak%20repair ---- */
+(function(){
+if(!/^\/(demo|preview)/.test(location.pathname))return;
+var Q=new URLSearchParams(window.BB_QS||location.search);
+var comp=(Q.get('comp')||'').trim().slice(0,60);
+var kws=(Q.get('compkw')||'').split('|').map(function(k){return k.trim().slice(0,60)}).filter(Boolean).slice(0,4);
+if(!comp||!kws.length)return;
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function build(){
+  var hero=document.getElementById('top');if(!hero||document.getElementById('bb-comp'))return !!hero;
+  var b=document.querySelector('.strip [data-f="biz"]');var biz=(b&&b.textContent.trim())||Q.get('biz')||'your business';
+  var city=(Q.get('city')||'').trim();
+  var st=document.createElement('style');
+  st.textContent='#bb-comp{background:#0b2440;color:#fff;padding:44px 20px;font-family:inherit}'+
+  '#bb-comp .in{max-width:980px;margin:0 auto;display:grid;gap:22px}'+
+  '#bb-comp h2{margin:0;font-size:clamp(22px,3.4vw,32px);line-height:1.2;font-weight:800;letter-spacing:-.01em;color:#fff}'+
+  '#bb-comp h2 em{font-style:normal;color:#f2a20c}'+
+  '#bb-comp p{margin:0;font-size:16px;line-height:1.55;color:rgba(255,255,255,.86);max-width:680px}'+
+  '#bb-comp ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}'+
+  '#bb-comp li{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:13px 15px;font-weight:700;font-size:15px}'+
+  '#bb-comp li span{display:block;margin-top:4px;font-weight:500;font-size:13px;color:rgba(255,255,255,.7)}';
+  document.head.appendChild(st);
+  var s=document.createElement('section');s.id='bb-comp';
+  s.innerHTML='<div class="in"><h2>Right now, <em>'+esc(comp)+'</em> shows up for these searches and '+esc(biz)+' does not.</h2>'+
+  '<p>When a homeowner'+(city?' in '+esc(city):'')+' types one of these into Google, '+esc(comp)+' is who she finds. This preview gives '+esc(biz)+' a page built for each one, so the next search has a chance of landing on you.</p>'+
+  '<ul>'+kws.map(function(k){return '<li>'+esc(k)+'<span>'+esc(comp)+' shows up</span></li>'}).join('')+'</ul></div>';
+  hero.parentNode.insertBefore(s,hero.nextSibling);
+  try{window.clarity&&clarity('set','demo_competitor','yes')}catch(e){}
+  return true}
+if(!build()){var n=0,t=setInterval(function(){if(build()||++n>40)clearInterval(t)},150)}
+})();

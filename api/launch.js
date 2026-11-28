@@ -5,8 +5,10 @@
 //   { action: 'approve', id }      mark a client's texting registration approved by hand (same effect as the email)
 //   { action: 'dismiss', event }   clear a "needs a look" email once it has been dealt with
 //   { action: 'sales_notes', id, text }  save the client's goals from the sales call
+//   { action: 'upsell_seo', id }   text the client an offer of monthly SEO work, once
 // Internal only: needs BB_INTERNAL_SECRET in the x-bb-secret header. Never returns an EIN.
 const { sb, allowed, configured } = require('./_sb');
+const { textClient } = require('./_text');
 const UUID = /^[0-9a-f-]{36}$/i;
 const DAY = 86400000, HOUR = 3600000;
 const cleanDomain = (raw) => String(raw || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/[/?#].*$/, '');
@@ -83,6 +85,15 @@ function statusNote(r, now = Date.now()) {
   return { status_note: 'Everything is done and they are ready for a launch call, and no call time is saved yet.', needs_attention: true };
 }
 
+// The one text the "Upsell SEO" button sends. It asks a question and carries no link, because an
+// existing client moves plans through Maddie and never through a new payment link.
+function seoOfferText(first, business, city) {
+  const hi = first ? `Hey ${first}, it's Maddie from Build Boosters.` : `Hey, it's Maddie from Build Boosters.`;
+  const who = business || 'your business';
+  const where = city ? ` in ${city}` : '';
+  return `${hi} I can get ${who} showing up for more Google searches${where} with monthly SEO work on your site. Want me to send over what that would look like?`;
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!configured() || !process.env.BB_INTERNAL_SECRET) return res.status(500).json({ error: 'not_configured' });
@@ -107,6 +118,26 @@ module.exports = async function handler(req, res) {
         await sb(`client_onboarding?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ prefill }) });
         return res.status(200).json({ ok: true });
       }
+      // The "Upsell SEO" button on the dashboard. Sends one text asking whether they want to hear about
+      // monthly SEO work, and stamps the time so the button cannot send it twice.
+      if (b.action === 'upsell_seo' && UUID.test(String(b.id))) {
+        const found = await sb(`client_onboarding?id=eq.${b.id}&select=owner_first_name,prefill,answers,addons&limit=1`);
+        if (!found.length) return res.status(404).json({ error: 'not_found' });
+        const r = found[0];
+        const addons = r.addons || {};
+        if (addons.seo_upsell_sent_at) return res.status(200).json({ ok: true, already_sent: addons.seo_upsell_sent_at });
+        const a = { ...(r.prefill || {}), ...(r.answers || {}) };
+        const phone = a.cell || a.business_phone || '';
+        const message = seoOfferText(r.owner_first_name, a.business_name, a.primary_city || a.city);
+        // Stamp first: if the addons column is missing this fails before any text goes out.
+        await sb(`client_onboarding?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ addons: { ...addons, seo_upsell_sent_at: new Date().toISOString() } }) });
+        const sent = await textClient(phone, message, r.owner_first_name || 'Client');
+        if (!sent.sent) {
+          await sb(`client_onboarding?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ addons }) });
+          return res.status(502).json({ error: 'text_not_sent', reason: sent.reason });
+        }
+        return res.status(200).json({ ok: true, sent: true });
+      }
       return res.status(400).json({ error: 'bad_request' });
     }
     if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
@@ -118,7 +149,8 @@ module.exports = async function handler(req, res) {
       const a = { ...(r.prefill || {}), ...(r.answers || {}) };
       return {
         id: r.id, code: r.code, first_name: r.owner_first_name || '', business: a.business_name || '', trade: a.trade || '',
-        tier: r.tier || '', created_at: r.created_at, launch_call_start: r.launch_call_start || null,
+        tier: r.tier || '', created_at: r.created_at, seo_upsell_sent_at: (r.addons || {}).seo_upsell_sent_at || null,
+        addons_paid: Object.keys(r.addons || {}).filter((k) => r.addons[k] && r.addons[k].paid_at), launch_call_start: r.launch_call_start || null,
         form_done: !!r.submitted_at, google_requested: !!r.google_requested_at, google_approved: !!r.google_approved_at,
         photo_count: r.photo_count || 0, sms_consent: !!r.sms_consent_at, ein_on_file: !!r.ein_private,
         a2p_status: r.a2p_status || '', a2p_status_at: r.a2p_status_at || null, a2p_reason: r.a2p_reason || '',
@@ -140,3 +172,4 @@ module.exports = async function handler(req, res) {
   }
 };
 module.exports.statusNote = statusNote;
+module.exports.seoOfferText = seoOfferText;

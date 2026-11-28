@@ -88,7 +88,8 @@ alter table public.client_onboarding
   add column if not exists setup_credit_amount integer,       -- 50 for finishing on the day they paid, 20 for the next day, 0 for later
   add column if not exists setup_credit_earned_at timestamptz,
   add column if not exists setup_credit_applied_at timestamptz, -- when the credit went onto their Stripe balance
-  add column if not exists setup_credit_stripe_id text;       -- the Stripe balance transaction, so it can be found again
+  add column if not exists setup_credit_stripe_id text,       -- the Stripe balance transaction, so it can be found again
+  add column if not exists addons jsonb not null default '{}'::jsonb;  -- paid add-ons and offers: { gbp_optimization: { paid_at, session_id, amount }, seo_upsell_sent_at }
 
 -- The EIN and the date of birth are deleted the moment a2p_registered_at is filled in, so they never outlive the registration.
 create or replace function public.client_onboarding_wipe_ein() returns trigger language plpgsql as $$
