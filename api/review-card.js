@@ -130,10 +130,12 @@ function cardHtml({ business, reviewUrl, style, brandColor, phone, domain, logo,
     ${lockup('small')}
     <h2>How did we do?</h2>
     <p>Your feedback helps our small business grow.</p>
+</div>
+  <div class="side">
     <p class="scan">Scan to review us on Google.</p>
-    ${prettyPhone(phone) ? `<p class="call">Questions or concerns? Call us at <b>${esc(prettyPhone(phone))}</b>.</p>` : ''}
+    <div class="code">${qr}</div>
+    ${prettyPhone(phone) ? `<p class="call">Questions or concerns?<br>Call us at <b>${esc(prettyPhone(phone))}</b>.</p>` : ''}
   </div>
-  <div class="code">${qr}</div>
 </div>`;
 
   return `<!DOCTYPE html>
@@ -153,10 +155,10 @@ body { font-family: ${look.body}; -webkit-print-color-adjust: exact; print-color
 
 .logo { display: flex; align-items: center; min-width: 0; }
 .logo .mark { flex: none; color: ${look.accent}; }
-.logo b { ${look.wm} line-height: 1; min-width: 0; overflow-wrap: break-word; }
-.logo.small { gap: 0.08in; margin-bottom: 0.12in; color: ${dark ? look.fg : main}; }
-.logo.small .mark { width: 0.3in; height: 0.3in; }
-.logo.small b { font-size: ${(14.5 * look.wmScale * long).toFixed(1)}pt; }
+.logo b { ${look.wm} line-height: 1; min-width: 0; }
+.logo.small { gap: 0.08in; margin-bottom: 0.17in; color: ${dark ? look.fg : main}; }
+.logo.small .mark { width: 0.25in; height: 0.25in; }
+.logo.small b { font-size: ${(12.5 * look.wmScale * long).toFixed(1)}pt; }
 .logo.small img { max-height: 0.4in; max-width: 1.8in; display: block; }
 .logo.big { justify-content: center; gap: 0.13in; color: #fff; }
 .logo.big .mark { width: 0.44in; height: 0.44in; }
@@ -166,14 +168,16 @@ body { font-family: ${look.body}; -webkit-print-color-adjust: exact; print-color
 .front { background: ${main}; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0.22in; outline-color: rgba(255,255,255,.35); }
 .front .contact { margin-top: 0.15in; font-size: 8.8pt; font-weight: 600; opacity: .92; }
 
-.back { display: flex; align-items: center; gap: 0.2in; padding: 0.2in 0.24in; background: ${dark ? look.bg : '#ffffff'}; color: ${look.fg}; }
+.back { display: flex; align-items: center; gap: 0.12in; padding: 0.18in 0.18in 0.18in 0.24in; background: ${dark ? look.bg : '#ffffff'}; color: ${look.fg}; }
 .words { flex: 1; min-width: 0; }
 .back h2 { font-family: ${look.head}; font-weight: ${look.headWeight}; font-size: ${look.upper ? 18 : 15}pt; line-height: 1.05; white-space: nowrap; ${look.upper ? 'text-transform: uppercase; letter-spacing: .01em;' : 'letter-spacing: -.015em;'} margin-bottom: 0.07in; }
-.back p { font-size: 8.6pt; line-height: 1.4; font-weight: 500; color: ${look.muted}; max-width: 1.5in; }
-.back p.scan { margin-top: 0.1in; max-width: none; font-weight: 700; color: ${dark ? look.accent : main}; white-space: nowrap; }
-.back p.call { margin-top: 0.1in; max-width: none; font-size: 7.4pt; white-space: nowrap; }
+.back p { font-size: 9pt; line-height: 1.4; font-weight: 500; color: ${look.muted}; max-width: 1.55in; }
+.side { flex: none; width: 1.3in; text-align: center; }
+.back .side p { max-width: none; white-space: nowrap; }
+.back p.scan { font-size: 7.3pt; font-weight: 700; color: ${dark ? look.accent : main}; margin-bottom: 0.06in; }
+.back p.call { font-size: 7.2pt; line-height: 1.35; margin-top: 0.06in; }
 .back p.call b { font-weight: 700; color: ${look.fg}; }
-.code { flex: none; width: 1.14in; height: 1.14in; background: #fff; }
+.code { width: 1.02in; height: 1.02in; margin: 0 auto; background: #fff; }
 .code svg { display: block; width: 100%; height: 100%; }
 @media screen { body { background: #e9edf2; } .sheet { background: #fff; margin: 0.25in auto; box-shadow: 0 6px 30px rgba(0,0,0,.12); } }
 </style>
