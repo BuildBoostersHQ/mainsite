@@ -225,8 +225,6 @@
     answers = d.answers || {};
     var first = d.first_name || answers.preferred_name || '';
     if (first) root.querySelectorAll('[data-fill="first_name"]').forEach(function (el) { el.textContent = first; });
-    /* The old website-only plan has no texting number, so it goes straight to the setup page. */
-    if (/^website/i.test(String(d.tier || '').trim()) && !demo) { location.replace('/start/' + code); return; }
     var credit = window.bbCredit ? window.bbCredit(d) : null;
     if (credit && !credit.earned) { $('wl-credit-title').textContent = credit.title; $('wl-credit-text').textContent = credit.text; $('wl-credit').hidden = false; }
     registration(d); google();
