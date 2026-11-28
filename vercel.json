@@ -50,6 +50,10 @@
     {
       "path": "/api/weekly-update",
       "schedule": "0 20 * * 5"
+    },
+    {
+      "path": "/api/review-inbox",
+      "schedule": "10 * * * *"
     }
   ]
 }
