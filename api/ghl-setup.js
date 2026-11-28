@@ -14,7 +14,7 @@
 // What still needs manual work after this runs (~3 minutes):
 //   - Configure call forwarding on the phone number (no API for this)
 //   - Connect GMB through Settings > Integrations (OAuth flow, no API)
-//   - Update GMB phone to the toll-free number (through GHL's GBP tab)
+//   - Update GMB phone to the new local number (through GHL's GBP tab)
 //   Reputation management auto-responses come pre-set in the snapshot.
 //
 // Needs: GHL_AGENCY_API_KEY, GHL_COMPANY_ID, GHL_SNAPSHOT_ID,

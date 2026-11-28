@@ -62,6 +62,14 @@
     {
       "path": "/api/review-inbox",
       "schedule": "10 * * * *"
+    },
+    {
+      "path": "/api/send-asks",
+      "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/photo-reminders",
+      "schedule": "0 16 * * *"
     }
   ]
 }

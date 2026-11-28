@@ -76,6 +76,18 @@ So nobody who already left a review gets asked again.
 - `assets/js/address-lookup.js` is the address picker, shared with `/start`. It calls `/api/address`, which looks the address up through Google Maps with the same `GOOGLE_PLACES_KEY` as the business lookup, and turns away P.O. boxes. Switch on the Address Validation API for that key in Google Cloud to also catch rented mailboxes; the picker works without it.
 - The address is saved in the client's answers as `a2p_address`, `a2p_street`, `a2p_unit`, `a2p_city`, `a2p_state`, `a2p_zip` and `a2p_address_check` (`ok`, `mailbox_store` or `typed`).
 
+## After a job is finished
+
+`/api/jobber-webhook`, `/api/hcp-webhook` and `/api/job-done` write each finished job to `job_events`. `/api/send-asks` runs every hour and, from 10 AM up to 5 PM Eastern, hands each due job to the client's HighLevel sub-account by putting the tag `job-done` on the customer. That tag is what starts the client's own review request and "Photo Request After Job" workflows, so the texts come from the contractor's number. A job waits while the client's texting registration is pending, and a customer who was handed over in the last 30 days is skipped. `POST /api/send-asks` with `{ "dry_run": true }` shows what it would do.
+
+`/api/photo-reminders` runs once a day and texts each client who is due for the recurring photo ask (weekly for the first month, then monthly) from the Build Boosters line. `POST` with no body lists who is due and sends nothing.
+
+Both need the two new columns blocks at the end of the `job_events` section in `supabase/client_onboarding.sql` run once in the Supabase SQL editor.
+
+## Review cards
+
+`/api/review-card?code=...&format=html` is the printable sheet of QR code review cards: 8 fronts on page 1, 8 backs on page 2, each 3.5 x 2 inches. Print from Chrome to PDF with margins "None" and background graphics on, double-sided on the long edge. The QR code is drawn by `api/_qr.js` with no outside script. It points at the client's `google_review_link` when their answers have one, otherwise at `/review-us` on their domain, and `&link=` overrides both for one print run.
+
 ## Preview locally
 
 ```
