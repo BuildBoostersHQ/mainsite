@@ -160,7 +160,9 @@ function buildClientJson(row) {
     slug: slugify(a.business_name || 'client') + '-' + slugify(primaryCity || 'site'),
     domain: a.domain_own || a.domain_choice || '',
     style: a.style || 'classic',
-    mode: 'auto',
+    // A website-only plan has no texting registration to wait for, so its full site goes live right away.
+    // Every other plan shows the thin site on the live domain until texting is approved.
+    mode: /^website/i.test(String(row.tier || '').trim()) ? 'full' : 'auto',
 
     business: {
       name: a.business_name || '',

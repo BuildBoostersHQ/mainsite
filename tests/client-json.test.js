@@ -54,6 +54,12 @@ test('mode defaults to auto', () => {
   eq(c.mode, 'auto');
 });
 
+test('a website-only plan gets the full site right away', () => {
+  eq(buildClientJson({ ...FAKE_ROW, tier: 'website' }).client_json.mode, 'full');
+  eq(buildClientJson({ ...FAKE_ROW, tier: 'all_in_one' }).client_json.mode, 'auto');
+  eq(buildClientJson({ ...FAKE_ROW, tier: 'dominance' }).client_json.mode, 'auto');
+});
+
 test('style from answers', () => {
   eq(c.style, 'fresh');
 });
